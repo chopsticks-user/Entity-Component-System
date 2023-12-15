@@ -54,8 +54,9 @@ public:
   u64 size() const noexcept { return this->mData.size(); }
 
   auto begin() noexcept { return this->mData.begin(); }
-
   auto end() noexcept { return this->mData.end(); }
+  auto cbegin() const noexcept { return this->mData.cbegin(); }
+  auto cend() const noexcept { return this->mData.cend(); }
 
   DataType &at(u64 id) {
     if (!this->exists(id)) {
@@ -66,13 +67,15 @@ public:
 
   DataType &operator[](u64 id) { return this->at(id); }
 
-  DataType &operator[](u64 id) const {
-    if (!this->exists(id)) {
-      throw std::runtime_error("SparseVector::operator[]: unknown ID");
-    }
-    auto index = this->mIDToIndex.at(id);
-    return this->mData[index];
-  }
+  DataType &operator[](u64 id) const { return this->at(id); }
+
+  // DataType &operator[](u64 id) {
+  //   if (!this->exists(id)) {
+  //     throw std::runtime_error("SparseVector::operator[]: unknown ID");
+  //   }
+  //   auto index = this->mIDToIndex.at(id);
+  //   return this->mData[index];
+  // }
 
   void add(u64 id, DataType value) {
     if (!this->exists(id)) {

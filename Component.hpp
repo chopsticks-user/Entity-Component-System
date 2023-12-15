@@ -51,6 +51,13 @@ public:
     this->getArray<ComponentType>()->add(entity.getID(), std::move(component));
   }
 
+  template <typename ComponentType> //
+  void add(u64 entityID, ComponentType component = {})
+    requires CValidComponent<ComponentType>
+  {
+    this->getArray<ComponentType>()->add(entityID, std::move(component));
+  }
+
   template <typename ComponentType, typename EntityType> //
   void remove(const EntityType &entity)
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
@@ -58,12 +65,25 @@ public:
     this->getArray<ComponentType>()->remove(entity.getID());
   }
 
+  template <typename ComponentType> //
+  void remove(u64 entityID)
+    requires CValidComponent<ComponentType>
+  {
+    this->getArray<ComponentType>()->remove(entityID);
+  }
+
   template <typename EntityType> //
   void remove(const EntityType &entity)
     requires CValidEntity<EntityType>
   {
-    for (auto &pair : this->mComponentData) {
-      pair.second->remove(entity.getID());
+    for (auto &p : this->mComponentData) {
+      p.second->remove(entity.getID());
+    }
+  }
+
+  void remove(u64 entityID) {
+    for (auto &p : this->mComponentData) {
+      p.second->remove(entityID);
     }
   }
 
@@ -85,6 +105,13 @@ public:
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
     return this->getArray<ComponentType>()->at(entity.getID());
+  }
+
+  template <typename ComponentType> //
+  ComponentType &get(u64 entityID)
+    requires CValidComponent<ComponentType>
+  {
+    return this->getArray<ComponentType>()->at(entityID);
   }
 
   void clear() { this->mComponentData.clear(); }

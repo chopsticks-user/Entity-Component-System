@@ -2,18 +2,29 @@
 
 #include <glm/glm.hpp>
 
-class Motion : public ecs::Component {
+struct Motion : public ecs::Component {
   glm::vec3 position;
   glm::vec3 velocity;
   glm::vec3 acceleration;
 };
 
-class Mesh : public ecs::Component {
+struct Mesh : public ecs::Component {
   glm::vec4 color;
 };
 
 DECLARE_SIMPLE_ENTITY(NPC);
 DECLARE_SIMPLE_ENTITY(Player);
+
+struct Renderable : public ecs::System {
+  void function(ecs::World &world) {
+    for (auto entityID : entityIDs) {
+      auto &motion = world.get<Motion>(entityID);
+      auto &mesh = world.get<Mesh>(entityID);
+      motion.position = {3, 0, 5};
+      mesh.color = {1, 1, 1, 1};
+    }
+  }
+};
 
 int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   using namespace ecs;
@@ -24,10 +35,14 @@ int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 
   scence.mEntityManager->setNComponents(
       scence.mComponentTable->getNComponents());
-  auto e = scence.mEntityManager->createEntity<NPC>(scence);
-  scence.mComponentTable->add<Motion>(e);
-  scence.mEntityManager->setSignature(e, 1, true);
-  scence.mEntityManager->destroyEntity(e);
+
+  auto npc1 = scence.mEntityManager->createEntity<NPC>(scence);
+  scence.mComponentTable->add<Motion>(npc1);
+  scence.mEntityManager->setSignature(npc1, 1, true);
+  scence.mEntityManager->destroyEntity(npc1);
+
+  Renderable sRender1;
+  // sRender1.function(5);
 
   return EXIT_SUCCESS;
 }
