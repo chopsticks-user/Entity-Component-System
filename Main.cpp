@@ -38,6 +38,9 @@ public:
   Entity &operator=(Entity &&) = default;
 
   virtual u64 getID() const noexcept final { return this->mID; }
+  virtual const std::vector<bool> &getSignature() const noexcept final {
+    return this->mSignature;
+  }
 
 protected:
   Entity(const World &world, u64 id, std::vector<bool> signature = {})
@@ -170,9 +173,14 @@ private:
   // std::queue<u64> mRecycledIDs = {};
 };
 
-class ISparseVector {};
+class ISparseVector {
+public:
+  virtual ~ISparseVector() = default;
+  virtual void remove(u64) = 0;
+};
 
-template <typename DataType, typename IDType = u64> //
+// template <typename DataType, typename IDType = u64> //
+template <typename DataType> //
 class SparseVector : public ISparseVector {
 public:
   u64 size() const noexcept { return this->mData.size(); }
@@ -181,23 +189,24 @@ public:
 
   auto end() noexcept { return this->mData.end(); }
 
-  DataType &at(const IDType &id) {
+  DataType &at(u64 id) {
     if (!this->exists(id)) {
       throw std::runtime_error("SparseVector::operator[]: unknown ID");
     }
     return this->mData[this->mIDToIndex[id]];
   }
 
-  DataType &operator[](const IDType &id) { return this->at(id); }
+  DataType &operator[](u64 id) { return this->at(id); }
 
-  DataType &operator[](const IDType &id) const {
+  DataType &operator[](u64 id) const {
     if (!this->exists(id)) {
       throw std::runtime_error("SparseVector::operator[]: unknown ID");
     }
-    return this->mData[this->mIDToIndex[id]];
+    auto index = this->mIDToIndex.at(id);
+    return this->mData[index];
   }
 
-  SparseVector &add(const IDType &id, DataType value) {
+  void add(u64 id, DataType value) {
     if (!this->exists(id)) {
       this->mData.emplace_back(value);
       this->mIDToIndex[id] = this->mData.size() - 1;
@@ -205,12 +214,11 @@ public:
     } else {
       this->mData[this->mIDToIndex[id]] = std::move(value);
     }
-    return *this;
   }
 
-  SparseVector &remove(const IDType &id) {
+  void remove(u64 id) override {
     if (!this->exists(id)) {
-      throw std::runtime_error("SparseVector::remove: unknown ID");
+      return;
     }
 
     auto lastElementIndex = this->mData.size() - 1;
@@ -224,16 +232,14 @@ public:
     this->mIndexToID.erase(lastElementIndex);
     this->mIDToIndex.erase(id);
     this->mData.pop_back();
-
-    return *this;
   }
 
 private:
-  std::unordered_map<IDType, u64> mIDToIndex = {};
-  std::unordered_map<u64, IDType> mIndexToID = {};
+  std::unordered_map<u64, u64> mIDToIndex = {};
+  std::unordered_map<u64, u64> mIndexToID = {};
   std::vector<DataType> mData = {};
 
-  bool exists(const IDType &id) {
+  bool exists(const u64 &id) {
     return this->mIDToIndex.find(id) != this->mIDToIndex.end();
   }
 };
@@ -250,7 +256,7 @@ public:
   u64 getNComponents() const noexcept { return this->mComponentData.size(); }
 
   template <typename ComponentType> //
-  ComponentTable &reg()
+  void reg()
     requires CValidComponent<ComponentType>
   {
     this->mComponentData.try_emplace(
@@ -266,21 +272,27 @@ public:
   // }
 
   template <typename ComponentType, typename EntityType> //
-  ComponentTable &add(const EntityType &entity, ComponentType component = {})
+  void add(const EntityType &entity, ComponentType component = {})
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
     this->getArray<ComponentType>()->add(entity.getID(), std::move(component));
   }
 
   template <typename ComponentType, typename EntityType> //
-  ComponentTable &remove(const EntityType &entity)
+  void remove(const EntityType &entity)
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
-  {}
+  {
+    this->getArray<ComponentType>()->remove(entity.getID());
+  }
 
   template <typename EntityType> //
-  ComponentTable &remove(const EntityType &entity)
+  void remove(const EntityType &entity)
     requires CValidEntity<EntityType>
-  {}
+  {
+    for (auto &pair : this->mComponentData) {
+      pair.second->remove(entity.getID());
+    }
+  }
 
   template <typename ComponentType> //
   std::shared_ptr<SparseVector<ComponentType>> getArray()
@@ -302,7 +314,7 @@ public:
     return this->getArray<ComponentType>()->at(entity.getID());
   }
 
-  ComponentTable &clear() { this->mComponentData.clear(); }
+  void clear() { this->mComponentData.clear(); }
 
 private:
   std::unordered_map<cString, std::shared_ptr<ISparseVector>> mComponentData =
