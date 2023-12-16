@@ -19,6 +19,7 @@
 #include <type_traits>
 #include <typeinfo>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace ecs {
@@ -47,11 +48,6 @@ void iterateTuple(std::tuple<Args...> &tp, auto func) {
 }
 
 typedef std::vector<bool> DynamicBitset;
-
-// template <typename DataType>
-// using PolymorphicVector = std::vector<std::unique_ptr<DataType>>;
-
-class DBitset {};
 
 class ScopedTimer {
 public:

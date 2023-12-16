@@ -1,3 +1,0 @@
-No optimizations enabled:
-    Using std::vector<bool>: n = 80,000 -> 1s, 0.1s (-O3)
-    Using DynamicBitset: n = 80,000 -> 

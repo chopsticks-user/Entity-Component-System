@@ -74,19 +74,6 @@ public:
     this->removeComponentFromEntity<ComponentType>(entity.getID());
   }
 
-  // void removeComponentFromEntity(u64 entityID) {
-  //   //* entity must exist
-  //   this->mEntityManager->setSignature(entityID, {});
-  //   this->mComponentTable->remove(entityID);
-  // }
-
-  // template <typename EntityType> //
-  // void removeComponentFromEntity(const EntityType &entity)
-  //   requires CValidEntity<EntityType>
-  // {
-  //   this->removeComponentFromEntity(entity.getID());
-  // }
-
   //* =============================== Entity ==================================
 
   template <typename EntityType> //
@@ -191,6 +178,13 @@ public:
   // void removeEntityFromSystem(SystemType &entity) {
   //   this->removeEntityFromSystem(entity.getID());
   // }
+
+  template <typename SystemType> //
+  void execute()
+    requires CValidSystem<SystemType>
+  {
+    this->mSystemManager->execute<SystemType>(*this);
+  }
 
 private:
   template <typename SystemType> //

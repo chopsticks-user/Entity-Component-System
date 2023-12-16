@@ -18,15 +18,14 @@ public:
   System &operator=(const System &) = delete;
   System &operator=(System &&) = default;
 
-  // void function(...) const {
-  //   throw std::runtime_error("System::function: null functionality system");
-  // }
+  virtual void function(ecs::World &world,
+                        const ecs::SparseVector<ecs::u64> &entityIDs) = 0;
 
 protected:
   System() = default;
 
 private:
-  // TODO: Move all dara members to SystemManager
+  // TODO: Move all data members to SystemManager
   SparseVector<u64> mEntityIDs = {};
   DynamicBitset mQualifications = {};
 };
@@ -135,6 +134,7 @@ public:
 
   void remove(u64 entityID) {
     for (auto &p : this->mSystems) {
+      // p.second->mEntityIDs.erase(entityID);
       p.second->mEntityIDs.remove(entityID);
     }
   }
@@ -147,17 +147,23 @@ public:
   }
 
   void update(u64 entityID, const DynamicBitset &newEntitySignature) {
-    // TODO: need a more efficient bitset
     for (auto &p : this->mSystems) {
       const auto &requiredSignature = p.second->mQualifications;
-      for (u64 i = 0; i < requiredSignature.size(); ++i) {
+
+      u64 i = 0;
+      for (; i < requiredSignature.size(); ++i) {
         if (requiredSignature[i] == true && newEntitySignature[i] == false) {
+          // p.second->mEntityIDs.erase(entityID);
           p.second->mEntityIDs.remove(entityID);
           break;
         }
       }
+
+      if (i == requiredSignature.size()) {
+        // p.second->mEntityIDs.insert(entityID);
+        p.second->mEntityIDs.add(entityID, entityID);
+      }
     }
-    // this->remove(entityID);
   }
 
   template <typename EntityType> //
@@ -169,7 +175,20 @@ public:
 
   void clear() { this->mSystems.clear(); }
 
-  void execute() {}
+  template <typename SystemType> //
+  void execute(World &world)
+    requires CValidSystem<SystemType>
+  {
+    // Todo: avoid getting raw pointer from std::unique_ptr
+    try {
+      SystemType *pSystem;
+      pSystem = static_cast<SystemType *>(
+          this->mSystems.at(typenameStr<SystemType>()).get());
+      pSystem->function(world, pSystem->mEntityIDs);
+    } catch (std::out_of_range &e) {
+      throw std::runtime_error("SystemManager::execute: unregistered system");
+    }
+  }
 
 private:
   std::unordered_map<cString, std::unique_ptr<System>> mSystems = {};
