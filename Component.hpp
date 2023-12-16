@@ -32,6 +32,7 @@ public:
   void reg()
     requires CValidComponent<ComponentType>
   {
+    //* Ignore the second registration
     auto result = this->mComponentData.try_emplace(
         typenameStr<ComponentType>(),
         std::make_shared<SparseVector<ComponentType>>());
@@ -108,7 +109,12 @@ public:
   ComponentType &get(const EntityType &entity)
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
-    return this->getArray<ComponentType>()->at(entity.getID());
+    try {
+      return this->getArray<ComponentType>()->at(entity.getID());
+    } catch (std::out_of_range &e) {
+      std::runtime_error("ComponentTable::get: entity does not exist or does "
+                         "not contain the component");
+    }
   }
 
   template <typename ComponentType> //

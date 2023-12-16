@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
+#include <chrono>
 #include <cmath>
 #include <concepts>
 #include <iostream>
@@ -26,10 +27,6 @@ typedef uint64_t u64;
 typedef double f64;
 typedef const char *cString;
 
-typedef std::vector<bool> DynamicBitset;
-template <typename DataType>
-using PolymorphicVector = std::vector<std::unique_ptr<DataType>>;
-
 void runtimeAssert(bool condition, const char *exceptionMessage) {
   if (!condition) {
     throw std::runtime_error(exceptionMessage);
@@ -49,6 +46,29 @@ void iterateTuple(std::tuple<Args...> &tp, auto func) {
   }
 }
 
+typedef std::vector<bool> DynamicBitset;
+
+// template <typename DataType>
+// using PolymorphicVector = std::vector<std::unique_ptr<DataType>>;
+
+class DBitset {};
+
+class ScopedTimer {
+public:
+  ScopedTimer() = default;
+
+  ~ScopedTimer() noexcept {
+    std::cout << "Time elapsed: "
+              << std::chrono::duration<double, std::milli>(
+                     std::chrono::high_resolution_clock::now() - mStart)
+              << "\n";
+  }
+
+private:
+  const decltype(std::chrono::high_resolution_clock::now()) mStart =
+      std::chrono::high_resolution_clock::now();
+};
+
 class ISparseVector {
 public:
   virtual ~ISparseVector() = default;
@@ -61,10 +81,10 @@ class SparseVector : public ISparseVector {
 public:
   u64 size() const noexcept { return this->mData.size(); }
 
-  auto begin() noexcept { return this->mData.begin(); }
-  auto end() noexcept { return this->mData.end(); }
-  auto cbegin() const noexcept { return this->mData.cbegin(); }
-  auto cend() const noexcept { return this->mData.cend(); }
+  auto begin() const noexcept { return this->mData.cbegin(); }
+  auto end() const noexcept { return this->mData.cend(); }
+  // auto cbegin() const noexcept { return this->mData.cbegin(); }
+  // auto cend() const noexcept { return this->mData.cend(); }
 
   DataType &at(u64 id) {
     if (!this->exists(id)) {

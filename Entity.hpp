@@ -118,6 +118,7 @@ public:
   }
 
   void setSignature(u64 entityID, u64 index, bool value = true) {
+    //! Debug
     if (index >= this->mNComponents) {
       throw std::runtime_error(
           "EntityManager::setSignature: index out of range");
@@ -155,6 +156,7 @@ public:
     //   entity");
     // }
 
+    //! Debug
     if (newSignature.size() != this->mNComponents) {
       throw std::runtime_error(
           "EntityManager::setSignature: incorrect nComponents");

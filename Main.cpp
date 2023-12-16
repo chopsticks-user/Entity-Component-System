@@ -23,11 +23,14 @@ DECLARE_SIMPLE_ENTITY(Tree);
 DECLARE_SIMPLE_ENTITY(Enemy);
 
 struct Renderable : public ecs::System {
-  void function(ecs::World &world) {
+  using ecs::System::System;
+
+  void function(ecs::World &world,
+                const ecs::SparseVector<ecs::u64> &entityIDs) {
     for (auto entityID : entityIDs) {
       // auto &motion = world.get<Motion>(entityID);
-      auto &mesh = world.get<Mesh>(entityID);
-      auto &texture = world.get<Texture>(entityID);
+      auto &mesh = world.getComponent<Mesh>(entityID);
+      auto &texture = world.getComponent<Texture>(entityID);
       // motion.position = {3, 0, 5};
       mesh.color = {1, 1, 1, 1};
       texture.color = {};
@@ -38,23 +41,28 @@ struct Renderable : public ecs::System {
 int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   using namespace ecs;
 
-  World scence;
+  ScopedTimer timer;
 
-  //* Add 3 components
-  scence.registr<Motion>();
-  scence.registr<Mesh>();
-  scence.registr<Texture>();
+  int n = 80000;
+  while (n--) {
+    World scence;
 
-  //* Add 1 system
-  scence.registr<Renderable, Mesh, Texture>();
+    //* Add 3 components
+    scence.registerComponent<Motion>();
+    scence.registerComponent<Mesh>();
+    scence.registerComponent<Texture>();
 
-  //* Add 4 entities
-  NPC npc = scence.add<NPC>();
-  Player player = scence.add<Player>();
-  Tree tree = scence.add<Tree>();
-  Enemy enemy = scence.add<Enemy>();
+    //* Add 1 system
+    scence.registerSystem<Renderable, Mesh, Texture>();
 
-  //* Assign some components to each entity
+    //* Add 4 entities
+    NPC npc = scence.addEntity<NPC>();
+    Player player = scence.addEntity<Player>();
+    Tree tree = scence.addEntity<Tree>();
+    Enemy enemy = scence.addEntity<Enemy>();
+
+    //* Assign some components to each entity
+  }
 
   return EXIT_SUCCESS;
 }

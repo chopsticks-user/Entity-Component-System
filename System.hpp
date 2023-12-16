@@ -9,28 +9,30 @@ namespace ecs {
 class World;
 
 class System {
-public:
   friend class SystemManager;
 
-  System() = default;
+public:
   virtual ~System() = default;
-  //   System(const System &) = delete;
-  //   System(System &&) = default;
-  //   System &operator=(const System &) = delete;
-  //   System &operator=(System &&) = default;
+  System(const System &) = delete;
+  System(System &&) = default;
+  System &operator=(const System &) = delete;
+  System &operator=(System &&) = default;
 
-  void function(...) const {
-    throw std::runtime_error("System::function: null functionality system");
-  }
+  // void function(...) const {
+  //   throw std::runtime_error("System::function: null functionality system");
+  // }
 
-  SparseVector<u64> entityIDs = {};
+protected:
+  System() = default;
 
 private:
+  // TODO: Move all dara members to SystemManager
+  SparseVector<u64> mEntityIDs = {};
   DynamicBitset mQualifications = {};
 };
 
 template <typename SystemType>
-concept CValidSystem = std::copy_constructible<SystemType> &&
+concept CValidSystem = std::move_constructible<SystemType> &&
                        std::derived_from<SystemType, System> &&
                        !std::is_same_v<SystemType, System>;
 
@@ -49,9 +51,18 @@ public:
   void reg(DynamicBitset qualifications = {})
     requires CValidSystem<SystemType>
   {
-    auto pSystem = std::make_shared<SystemType>();
-    pSystem->mQualifications = std::move(qualifications);
-    this->mSystems[typenameStr<SystemType>()] = pSystem;
+    auto typeStr = typenameStr<SystemType>();
+
+    //* System must be static, that is, the qualified condition does not change.
+    //* Also, a system cannot be registered more than once.
+    if (this->mSystems.find(typeStr) != this->mSystems.end()) {
+      return; // already registered
+    }
+
+    System *pSystemBase = new SystemType();
+    pSystemBase->mQualifications = std::move(qualifications);
+    this->mSystems[typenameStr<SystemType>()] =
+        std::unique_ptr<System>(std::move(pSystemBase));
   }
 
   // template <typename SystemType> //
@@ -62,7 +73,7 @@ public:
   // }
 
   template <typename SystemType> //
-  std::shared_ptr<SystemType> get() const
+  std::unique_ptr<SystemType> get() const
     requires CValidSystem<SystemType>
   {
     try {
@@ -115,17 +126,17 @@ public:
     this->get<SystemType>()->mQualifiedEntitiesIDs.remove(entityID);
   }
 
-  void remove(u64 entityID) {
-    for (auto &p : this->mSystems) {
-      p.second->entityIDs.remove(entityID);
-    }
-  }
-
   template <typename SystemType, typename EntityType> //
   void remove(const EntityType &entity)
     requires CValidSystem<SystemType> && CValidEntity<EntityType>
   {
     this->remove<SystemType>(entity.getID());
+  }
+
+  void remove(u64 entityID) {
+    for (auto &p : this->mSystems) {
+      p.second->mEntityIDs.remove(entityID);
+    }
   }
 
   template <typename EntityType> //
@@ -135,10 +146,33 @@ public:
     this->remove(entity.getID());
   }
 
+  void update(u64 entityID, const DynamicBitset &newEntitySignature) {
+    // TODO: need a more efficient bitset
+    for (auto &p : this->mSystems) {
+      const auto &requiredSignature = p.second->mQualifications;
+      for (u64 i = 0; i < requiredSignature.size(); ++i) {
+        if (requiredSignature[i] == true && newEntitySignature[i] == false) {
+          p.second->mEntityIDs.remove(entityID);
+          break;
+        }
+      }
+    }
+    // this->remove(entityID);
+  }
+
+  template <typename EntityType> //
+  void update(const EntityType &entity)
+    requires CValidEntity<EntityType>
+  {
+    this->update(entity.getID());
+  }
+
   void clear() { this->mSystems.clear(); }
 
+  void execute() {}
+
 private:
-  std::unordered_map<cString, std::shared_ptr<System>> mSystems = {};
+  std::unordered_map<cString, std::unique_ptr<System>> mSystems = {};
 };
 
 } // namespace ecs
