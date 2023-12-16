@@ -32,9 +32,13 @@ public:
   void reg()
     requires CValidComponent<ComponentType>
   {
-    this->mComponentData.try_emplace(
+    auto result = this->mComponentData.try_emplace(
         typenameStr<ComponentType>(),
         std::make_shared<SparseVector<ComponentType>>());
+    if (result.second == true) {
+      this->mCNameToIndex[typenameStr<ComponentType>()] =
+          this->mCNameToIndex.size();
+    }
   }
 
   // template <typename ComponentType> //
@@ -114,9 +118,35 @@ public:
     return this->getArray<ComponentType>()->at(entityID);
   }
 
-  void clear() { this->mComponentData.clear(); }
+  template <typename ComponentType> //
+  u64 getIndex()
+    requires CValidComponent<ComponentType>
+  {
+    try {
+      return this->mCNameToIndex.at(typenameStr<ComponentType>());
+    } catch (std::out_of_range &e) {
+      throw std::runtime_error(
+          "ComponentTable::getIndex: unregistered component");
+    }
+  }
+
+  template <typename... ComponentTypes> //
+  DynamicBitset querySignature() {
+    DynamicBitset signature(this->mCNameToIndex.size());
+    auto argTuple = std::tuple<ComponentTypes...>();
+    iterateTuple<0, ComponentTypes...>(argTuple, [&](auto arg) {
+      signature[this->getIndex<decltype(arg)>()] = true;
+    });
+    return signature;
+  }
+
+  void clear() {
+    this->mComponentData.clear();
+    this->mCNameToIndex.clear();
+  }
 
 private:
+  std::unordered_map<cString, u64> mCNameToIndex = {};
   std::unordered_map<cString, std::shared_ptr<ISparseVector>> mComponentData =
       {};
 };

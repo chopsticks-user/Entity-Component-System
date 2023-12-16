@@ -21,19 +21,13 @@ public:
 
   virtual u64 getID() const noexcept final { return this->mID; }
 
-  virtual const DynamicBitset &getSignature() const noexcept final {
-    return this->mSignature;
-  }
-
 protected:
 private:
-  Entity(const World &world, u64 id, DynamicBitset signature = {})
-      : mRefWorld{world}, mID{id}, mSignature{std::move(signature)} {}
+  Entity(u64 id) : mID{id} {}
 
 private:
-  const World &mRefWorld;
+  // const World &mRefWorld;
   u64 mID;
-  DynamicBitset mSignature;
 };
 
 template <typename EntityType>
@@ -68,7 +62,18 @@ public:
   }
 
   template <typename EntityType> //
-  EntityType createEntity(const World &world)
+  EntityType get(u64 entityID) const
+    requires CValidEntity<EntityType>
+  {
+    try {
+      return EntityType{entityID};
+    } catch (std::out_of_range &e) {
+      throw std::runtime_error("EntityManager::get: unknown entity");
+    }
+  }
+
+  template <typename EntityType> //
+  EntityType add()
     requires CValidEntity<EntityType>
   {
     u64 newEntityId;
@@ -80,11 +85,16 @@ public:
     // }
     newEntityId = this->mCurrentID++;
     this->mEntityInfos[newEntityId] = {};
-    return EntityType{world, newEntityId, {}};
+    return EntityType{newEntityId};
+  }
+
+  void remove(u64 entityID) {
+    this->mEntityInfos.erase(entityID);
+    // this->mRecycledIDs.push(entityBase.mID);
   }
 
   template <typename EntityType> //
-  void destroyEntity(EntityType &entity)
+  void remove(EntityType &entity)
     requires CValidEntity<EntityType>
   {
     Entity *entityBase = &entity;
@@ -95,39 +105,77 @@ public:
 
     // this->mRecycledIDs.push(entityBase.mID);
     entityBase->mID = 0;
-    entityBase->mSignature.clear();
+
+    this->remove(entityBase->getID());
   }
 
-  template <typename EntityType> //
-  void setSignature(EntityType &entity, u64 index, bool value = true) const
-    requires CValidEntity<EntityType>
-  {
+  const DynamicBitset &getSignature(u64 entityID) const {
+    try {
+      return this->mEntityInfos.at(entityID);
+    } catch (std::out_of_range &e) {
+      throw std::runtime_error("EntityManager::getSignature: unknown entity");
+    }
+  }
+
+  void setSignature(u64 entityID, u64 index, bool value = true) {
     if (index >= this->mNComponents) {
       throw std::runtime_error(
           "EntityManager::setSignature: index out of range");
     }
 
-    Entity *entityBase = &entity;
-    if (entityBase->mSignature.size() != this->mNComponents) {
-      entityBase->mSignature.resize(this->mNComponents);
+    try {
+      DynamicBitset &refSignature = this->mEntityInfos.at(entityID);
+      if (refSignature.size() != this->mNComponents) {
+        refSignature.resize(this->mNComponents);
+      }
+      refSignature[index] = value;
+    } catch (std::out_of_range &e) {
+      throw std::runtime_error("EntityManager::setSignature: unknown entity");
     }
-    entityBase->mSignature[index] = value;
   }
 
-  template <typename EntityType> //
-  void setSignature(EntityType &entity, DynamicBitset newSignature) const
-    requires CValidEntity<EntityType>
-  {
+  // template <typename EntityType> //
+  // void setSignature(EntityType &entity, u64 index, bool value = true) const
+  //   requires CValidEntity<EntityType>
+  // {
+  //   if (!this->isKnownEntity(entity)) {
+  //     throw std::runtime_error("EntityManager::setSignature: unknown
+  //     entity");
+  //   }
+
+  //   this->setSignature(entity.getID(), index, value);
+  //   const DynamicBitset &signature = this->mEntityInfos[entity.getID()];
+  //   std::copy(signature.begin(), signature.end(), entity.mSignature.begin());
+  //   // std::copy(entity.mSignature, this->mEntityInfos[entity.getID()]);
+  // }
+
+  void setSignature(u64 entityID, DynamicBitset newSignature) {
+    // if (!this->isKnownEntity(entity)) {
+    //   throw std::runtime_error("EntityManager::setSignature: unknown
+    //   entity");
+    // }
+
     if (newSignature.size() != this->mNComponents) {
       throw std::runtime_error(
           "EntityManager::setSignature: incorrect nComponents");
     }
 
-    Entity *entityBase = &entity;
-    entityBase->mSignature = std::move(newSignature);
+    try {
+      this->mEntityInfos.at(entityID) = std::move(newSignature);
+    } catch (std::out_of_range &e) {
+      throw std::runtime_error("EntityManager::setSignature: unknown entity");
+    }
   }
 
+  // template <typename EntityType> //
+  // void setSignature(EntityType &entity, DynamicBitset newSignature) const
+  //   requires CValidEntity<EntityType>
+  // {
+  //   this->setSignature(entity.getID(), std::move(newSignature));
+  // }
+
 private:
+  // const World &mRefWorld;
   std::unordered_map<u64, DynamicBitset> mEntityInfos;
   u64 mCurrentID = 1;
   u64 mNComponents = 0;

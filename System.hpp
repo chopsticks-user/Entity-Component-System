@@ -45,80 +45,100 @@ public:
 
   u64 getNSystems() const noexcept { return this->mSystems.size(); }
 
-  template <typename SystemType, typename... ComponentType> //
-  void reg()
+  template <typename SystemType> //
+  void reg(DynamicBitset qualifications = {})
     requires CValidSystem<SystemType>
   {
     auto pSystem = std::make_shared<SystemType>();
+    pSystem->mQualifications = std::move(qualifications);
     this->mSystems[typenameStr<SystemType>()] = pSystem;
   }
 
-  template <typename SystemType> //
-  void dereg()
-    requires CValidSystem<SystemType>
-  {
-    this->mSystems.erase(typenameStr<SystemType>());
-  }
+  // template <typename SystemType> //
+  // void dereg()
+  //   requires CValidSystem<SystemType>
+  // {
+  //   this->mSystems.erase(typenameStr<SystemType>());
+  // }
 
   template <typename SystemType> //
-  const DynamicBitset &getQualification() const
-    requires CValidSystem<SystemType>
-  {
-    return this->getSystem<SystemType>()->mQualifications;
-  }
-
-  template <typename SystemType, typename EntityType> //
-  void add(const EntityType &entity)
-    requires CValidSystem<SystemType> && CValidEntity<EntityType>
-  {
-    const DynamicBitset &signature = entity.getSignature();
-    if (!std::equal(signature.begin(), signature.end(),
-                    this->getQualification<SystemType>().begin())) {
-      throw std::runtime_error("SystemManaged::add: unqualified entity");
-    }
-  }
-
-  template <typename SystemType, typename EntityType> //
-  void remove(const EntityType &entity)
-    requires CValidSystem<SystemType> && CValidEntity<EntityType>
-  {
-    this->getSystem<SystemType>()->mQualifiedEntitiesIDs.remove(entity.getID());
-  }
-
-  template <typename EntityType> //
-  void remove(const EntityType &entity)
-    requires CValidEntity<EntityType>
-  {
-    for (auto &p : this->mSystems) {
-      p.second->entityIDs.remove(entity.getID());
-    }
-  }
-
-  void clear() { this->mSystems.clear(); }
-
-private:
-  std::unordered_map<cString, std::shared_ptr<System>> mSystems = {};
-
-  template <typename SystemType> //
-  std::shared_ptr<SystemType> getSystem() const
+  std::shared_ptr<SystemType> get() const
     requires CValidSystem<SystemType>
   {
     try {
       return std::static_pointer_cast<SystemType>(
           this->mSystems.at(typenameStr<SystemType>()));
     } catch (std::out_of_range &e) {
-      throw std::runtime_error("SystemManaged::getSystem: unregistered system");
+      throw std::runtime_error("SystemManaged::get: unregistered system");
     }
   }
 
-  //   template <typename SystemType, typename EntityType> //
-  //   void removeEntity(const EntityType &entity)
-  //     requires CValidSystem<SystemType> && CValidEntity<EntityType>
-  //   {
-  //     Entity *pEntityBase = *entity;
-  //     System *pSystemBase = &this->getSystem<SystemType>();
-  //     pSystemBase->qualifiedEntitiesIDs.remove(pEntityBase->getID());
+  template <typename SystemType> //
+  const DynamicBitset &getQualifications() const
+    requires CValidSystem<SystemType>
+  {
+    return this->get<SystemType>()->mQualifications;
+  }
+
+  template <typename SystemType> //
+  const DynamicBitset &setQualifications(DynamicBitset qualifications) const
+    requires CValidSystem<SystemType>
+  {
+    return this->get<SystemType>()->mQualifications = std::move(qualifications);
+  }
+
+  template <typename SystemType> //
+  void add(u64 entityID, const DynamicBitset &entitySignature)
+    requires CValidSystem<SystemType>
+  {
+    if (!std::equal(entitySignature.begin(), entitySignature.end(),
+                    this->getQualifications<SystemType>().begin())) {
+      throw std::runtime_error("SystemManaged::add: unqualified entity");
+    }
+  }
+
+  // template <typename SystemType, typename EntityType> //
+  // void add(const EntityType &entity)
+  //   requires CValidSystem<SystemType> && CValidEntity<EntityType>
+  // {
+  //   const DynamicBitset &signature = entity.getSignature();
+  //   if (!std::equal(signature.begin(), signature.end(),
+  //                   this->getQualifications<SystemType>().begin())) {
+  //     throw std::runtime_error("SystemManaged::add: unqualified entity");
   //   }
+  // }
+
+  template <typename SystemType> //
+  void remove(u64 entityID)
+    requires CValidSystem<SystemType>
+  {
+    this->get<SystemType>()->mQualifiedEntitiesIDs.remove(entityID);
+  }
+
+  void remove(u64 entityID) {
+    for (auto &p : this->mSystems) {
+      p.second->entityIDs.remove(entityID);
+    }
+  }
+
+  template <typename SystemType, typename EntityType> //
+  void remove(const EntityType &entity)
+    requires CValidSystem<SystemType> && CValidEntity<EntityType>
+  {
+    this->remove<SystemType>(entity.getID());
+  }
+
+  template <typename EntityType> //
+  void remove(const EntityType &entity)
+    requires CValidEntity<EntityType>
+  {
+    this->remove(entity.getID());
+  }
+
+  void clear() { this->mSystems.clear(); }
+
+private:
+  std::unordered_map<cString, std::shared_ptr<System>> mSystems = {};
 };
 
 } // namespace ecs

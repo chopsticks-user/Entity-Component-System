@@ -12,37 +12,49 @@ struct Mesh : public ecs::Component {
   glm::vec4 color;
 };
 
+struct Texture : public ecs::Component {
+  glm::vec4 coordinates;
+  glm::vec4 color;
+};
+
 DECLARE_SIMPLE_ENTITY(NPC);
 DECLARE_SIMPLE_ENTITY(Player);
+DECLARE_SIMPLE_ENTITY(Tree);
+DECLARE_SIMPLE_ENTITY(Enemy);
 
 struct Renderable : public ecs::System {
   void function(ecs::World &world) {
     for (auto entityID : entityIDs) {
-      auto &motion = world.get<Motion>(entityID);
+      // auto &motion = world.get<Motion>(entityID);
       auto &mesh = world.get<Mesh>(entityID);
-      motion.position = {3, 0, 5};
+      auto &texture = world.get<Texture>(entityID);
+      // motion.position = {3, 0, 5};
       mesh.color = {1, 1, 1, 1};
+      texture.color = {};
     }
   }
 };
 
 int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   using namespace ecs;
+
   World scence;
 
-  scence.mComponentTable->reg<Motion>();
-  scence.mComponentTable->reg<Mesh>();
+  //* Add 3 components
+  scence.registr<Motion>();
+  scence.registr<Mesh>();
+  scence.registr<Texture>();
 
-  scence.mEntityManager->setNComponents(
-      scence.mComponentTable->getNComponents());
+  //* Add 1 system
+  scence.registr<Renderable, Mesh, Texture>();
 
-  auto npc1 = scence.mEntityManager->createEntity<NPC>(scence);
-  scence.mComponentTable->add<Motion>(npc1);
-  scence.mEntityManager->setSignature(npc1, 1, true);
-  scence.mEntityManager->destroyEntity(npc1);
+  //* Add 4 entities
+  NPC npc = scence.add<NPC>();
+  Player player = scence.add<Player>();
+  Tree tree = scence.add<Tree>();
+  Enemy enemy = scence.add<Enemy>();
 
-  Renderable sRender1;
-  // sRender1.function(5);
+  //* Assign some components to each entity
 
   return EXIT_SUCCESS;
 }

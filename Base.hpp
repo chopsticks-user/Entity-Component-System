@@ -41,6 +41,14 @@ cString typenameStr() noexcept {
   return typeid(Type).name();
 }
 
+template <uint64_t Index, typename... Args> //
+void iterateTuple(std::tuple<Args...> &tp, auto func) {
+  func(std::get<Index>(tp));
+  if constexpr (Index + 1 != sizeof...(Args)) {
+    iterateTuple<Index + 1>(tp, func);
+  }
+}
+
 class ISparseVector {
 public:
   virtual ~ISparseVector() = default;
