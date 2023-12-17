@@ -6,11 +6,7 @@
 
 namespace ecs {
 
-class Component {
-public:
-protected:
-  Component() = default;
-};
+struct Component {};
 
 template <typename ComponentType>
 concept CValidComponent = std::copy_constructible<ComponentType> &&

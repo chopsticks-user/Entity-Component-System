@@ -27,15 +27,6 @@ private:
   DynamicBitset mQualifications = {};
 };
 
-// template <typename> //
-// struct First2ArgTypes;
-
-// template <typename FuncType, typename Arg1Type, typename Arg2Type,
-//           typename... Args> //
-// struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
-//   using type = decltype(std::tuple<Arg1Type, Arg2Type>{});
-// };
-
 template <typename SystemType>
 concept CValidSystem = std::move_constructible<SystemType> &&
                        std::derived_from<SystemType, System> &&

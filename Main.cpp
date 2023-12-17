@@ -36,10 +36,10 @@ struct RenderSystem : public ecs::System {
 
 struct PhysicsSystem : public ecs::System {
   static void function(ecs::World &world,
-                       const ecs::SparseVector<ecs::u64> &entityIDs, double x) {
+                       const ecs::SparseVector<ecs::u64> &entityIDs) {
     for (auto entityID : entityIDs) {
       auto &motion = world.getComponent<Motion>(entityID);
-      motion.position = {67, x, -9};
+      motion.position = {67, 8, -9};
     }
   }
 };
@@ -71,27 +71,21 @@ int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   //* Assign some components to each entity
   auto timer2 = new ScopedTimer();
 
-  scence.addComponent<Motion>(npc);
-  scence.addComponent<Mesh>(npc);
-  scence.addComponent<Texture>(npc);
+  // scence.addComponent<Motion>(npc);
+  // scence.addComponent<Mesh>(npc);
+  // scence.addComponent<Texture>(npc);
 
-  scence.addComponent<Motion>(player);
-  scence.addComponent<Mesh>(player);
-  scence.addComponent<Texture>(player);
-
-  scence.addComponent<Mesh>(tree);
-  scence.addComponent<Texture>(tree);
-
-  scence.addComponent<Motion>(enemy);
-  scence.addComponent<Mesh>(enemy);
-  scence.addComponent<Texture>(enemy);
+  scence.addComponent<Motion, Mesh, Texture>(npc, {}, {}, {});
+  scence.addComponent<Motion, Mesh, Texture>(player, {}, {}, {});
+  scence.addComponent<Mesh, Texture>(tree, {}, {});
+  scence.addComponent<Motion, Mesh, Texture>(enemy, {}, {}, {});
 
   scence.removeComponent<Mesh>(player);
 
   int n = 100000;
   while (n--) {
     scence.execute<RenderSystem>();
-    scence.execute<PhysicsSystem>(0.5);
+    scence.execute<PhysicsSystem>();
   }
 
   delete timer2;

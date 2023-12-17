@@ -21,6 +21,8 @@ public:
         this->mComponentTable->getNComponents());
   }
 
+  // TODO: write a function to deregister a component
+
   template <typename ComponentType> //
   ComponentType &getComponent(u64 entityID)
     requires CValidComponent<ComponentType>
@@ -33,6 +35,35 @@ public:
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
     return this->getComponent<ComponentType>(entity.getID());
+  }
+
+  template <typename... ComponentTypes> //
+  void addComponent(u64 entityID, ComponentTypes... components) {
+    auto argTuple = std::make_tuple(std::move(components)...);
+    iterateTuple<0, ComponentTypes...>(argTuple, [&](auto component) {
+      this->mComponentTable->add<decltype(component)>(std::move(component));
+    });
+
+    auto newSignature =
+        this->mComponentTable->querySignature<ComponentTypes...>();
+    this->mSystemManager->update(entityID, std::move(newSignature));
+    this->mEntityManager->setSignature(entityID, newSignature);
+  }
+
+  template <typename... ComponentTypes, typename EntityType> //
+  void addComponent(const EntityType &entity, ComponentTypes... components)
+    requires CValidEntity<EntityType>
+  {
+    auto argTuple = std::make_tuple(std::move(components)...);
+    iterateTuple<0, ComponentTypes...>(argTuple, [&](auto component) {
+      this->mComponentTable->add<decltype(component)>(entity.getID(),
+                                                      std::move(component));
+    });
+
+    auto newSignature =
+        this->mComponentTable->querySignature<ComponentTypes...>();
+    this->mSystemManager->update(entity.getID(), newSignature);
+    this->mEntityManager->setSignature(entity.getID(), std::move(newSignature));
   }
 
   template <typename ComponentType> //
@@ -53,6 +84,9 @@ public:
   {
     this->addComponent(entity.getID(), std::move(component));
   }
+
+  // TODO: write a method to remove multiple components to an entity so that
+  // TODO: SystemManager only update once
 
   template <typename ComponentType> //
   void removeComponent(u64 entityID)
