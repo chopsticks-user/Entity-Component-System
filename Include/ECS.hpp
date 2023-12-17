@@ -36,7 +36,7 @@ public:
   }
 
   template <typename ComponentType> //
-  void addComponentToEntity(u64 entityID, ComponentType component = {})
+  void addComponent(u64 entityID, ComponentType component = {})
     requires CValidComponent<ComponentType>
   {
     //* entity must exist
@@ -48,15 +48,14 @@ public:
   }
 
   template <typename ComponentType, typename EntityType> //
-  void addComponentToEntity(const EntityType &entity,
-                            ComponentType component = {})
+  void addComponent(const EntityType &entity, ComponentType component = {})
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
-    this->addComponentToEntity(entity.getID(), std::move(component));
+    this->addComponent(entity.getID(), std::move(component));
   }
 
   template <typename ComponentType> //
-  void removeComponentFromEntity(u64 entityID)
+  void removeComponent(u64 entityID)
     requires CValidComponent<ComponentType>
   {
     //* entity must exist
@@ -68,10 +67,10 @@ public:
   }
 
   template <typename ComponentType, typename EntityType> //
-  void removeComponentFromEntity(const EntityType &entity)
+  void removeComponent(const EntityType &entity)
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
-    this->removeComponentFromEntity<ComponentType>(entity.getID());
+    this->removeComponent<ComponentType>(entity.getID());
   }
 
   //* =============================== Entity ==================================
@@ -103,17 +102,8 @@ public:
     this->removeEntity(entity.getID());
   }
 
-private:
-  template <typename EntityType> //
-  const DynamicBitset &getEntitySignature(u64 entityID)
-    requires CValidEntity<EntityType>
-  {
-    return this->mEntityManager->getSignature(entityID);
-  }
-
   //* =============================== System ==================================
 
-public:
   template <typename SystemType, typename... RequiredComponentTypes> //
   void registerSystem()
     requires CValidSystem<SystemType>
@@ -122,69 +112,15 @@ public:
         this->mComponentTable->querySignature<RequiredComponentTypes...>()));
   }
 
-  // template <typename SystemType> //
-  // SystemType &get()
-  //   requires CValidSystem<SystemType>
-  // {
-  //   return *(this->mSystemManager->get<SystemType>());
-  // }
-
-  // //* Make the entity qualified for the system
-  // template <typename SystemType> //
-  // void addEntityToSystem(u64 entityID)
-  //   requires CValidSystem<SystemType>
-  // {
-  //   auto qualifications = this->getSystemSignature<SystemType>();
-
-  //   //! A copy of DynamicBitset
-  //   DynamicBitset entitySignature =
-  //       this->mEntityManager->getSignature(entityID);
-  //   for (u64 i = 0; i < qualifications.size(); ++i) {
-  //     if (qualifications[i] == true && entitySignature[i] == false) {
-  //       entitySignature[i] = true;
-  //     }
-  //   }
-  //   this->mEntityManager->setSignature(entityID, std::move(entitySignature));
-
-  //   return this->mSystemManager->add<SystemType>(
-  //       entityID, this->mEntityManager->getSignature(entityID));
-  // }
-
-  // template <typename SystemType, typename EntityType> //
-  // void addEntityToSystem(const EntityType &entity)
-  //   requires CValidSystem<SystemType> && CValidEntity<EntityType>
-  // {
-  //   return this->addEntityToSystem<SystemType>(entity.getID());
-  // }
-
-  // template <typename SystemType> //
-  // void removeEntityFromSystem(u64 entityID)
-  //   requires CValidSystem<SystemType>
-  // {
-  //   this->mSystemManager->remove(entityID);
-  // }
-
-  // template <typename SystemType, typename EntityType> //
-  // void removeEntityFromSystem(EntityType &entity)
-  //   requires CValidSystem<SystemType>
-  // {
-  //   this->removeEntityFromSystem(entity.getID());
-  // }
-
-  // void removeEntityFromSystem(u64 entityID) {
-  //   this->mSystemManager->remove(entityID);
-  // }
-
-  // void removeEntityFromSystem(SystemType &entity) {
-  //   this->removeEntityFromSystem(entity.getID());
-  // }
-
-  template <typename SystemType> //
-  void execute()
+  template <typename SystemType, typename... Args> //
+  void execute(Args &&...args)
     requires CValidSystem<SystemType>
   {
-    this->mSystemManager->execute<SystemType>(*this);
+    this->mSystemManager->execute<SystemType>(*this,
+                                              std::forward<Args>(args)...);
   }
+
+  //* =============================== Overloading =============================
 
 private:
   template <typename SystemType> //
@@ -194,12 +130,12 @@ private:
     return this->mSystemManager->getQualifications<SystemType>();
   }
 
-  // template <typename SystemType> //
-  // const DynamicBitset &setSignature() const
-  //   requires CValidSystem<SystemType>
-  // {
-  //   return this->mSystemManager->getQualifications<SystemType>();
-  // }
+  template <typename EntityType> //
+  const DynamicBitset &getEntitySignature(u64 entityID)
+    requires CValidEntity<EntityType>
+  {
+    return this->mEntityManager->getSignature(entityID);
+  }
 
 private:
   std::unique_ptr<EntityManager> mEntityManager =

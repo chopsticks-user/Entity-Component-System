@@ -18,9 +18,6 @@ public:
   System &operator=(const System &) = delete;
   System &operator=(System &&) = default;
 
-  virtual void function(ecs::World &world,
-                        const ecs::SparseVector<ecs::u64> &entityIDs) = 0;
-
 protected:
   System() = default;
 
@@ -30,10 +27,25 @@ private:
   DynamicBitset mQualifications = {};
 };
 
+// template <typename> //
+// struct First2ArgTypes;
+
+// template <typename FuncType, typename Arg1Type, typename Arg2Type,
+//           typename... Args> //
+// struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
+//   using type = decltype(std::tuple<Arg1Type, Arg2Type>{});
+// };
+
 template <typename SystemType>
 concept CValidSystem = std::move_constructible<SystemType> &&
                        std::derived_from<SystemType, System> &&
                        !std::is_same_v<SystemType, System>;
+
+template <typename FunctionType>
+concept CValidSystemFunction =
+    std::is_same_v<typename First2ArgTypes<FunctionType>::type1, World &> &&
+    std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
+                   const SparseVector<u64> &>;
 
 class SystemManager final {
 public:
@@ -175,18 +187,19 @@ public:
 
   void clear() { this->mSystems.clear(); }
 
-  template <typename SystemType> //
-  void execute(World &world)
-    requires CValidSystem<SystemType>
+  template <typename SystemType, typename... Args> //
+  void execute(World &world, Args &&...args)
+    requires CValidSystem<SystemType> &&
+             CValidSystemFunction<decltype(SystemType::function)>
   {
-    // Todo: avoid getting raw pointer from std::unique_ptr
     try {
-      SystemType *pSystem;
-      pSystem = static_cast<SystemType *>(
-          this->mSystems.at(typenameStr<SystemType>()).get());
-      pSystem->function(world, pSystem->mEntityIDs);
+      SystemType::function(
+          world, this->mSystems.at(typenameStr<SystemType>())->mEntityIDs,
+          std::forward<Args>(args)...);
     } catch (std::out_of_range &e) {
       throw std::runtime_error("SystemManager::execute: unregistered system");
+    } catch (std::exception &e) {
+      throw e;
     }
   }
 

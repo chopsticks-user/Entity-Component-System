@@ -23,10 +23,8 @@ DECLARE_SIMPLE_ENTITY(Tree);
 DECLARE_SIMPLE_ENTITY(Enemy);
 
 struct RenderSystem : public ecs::System {
-  using ecs::System::System;
-
-  void function(ecs::World &world,
-                const ecs::SparseVector<ecs::u64> &entityIDs) override {
+  static void function(ecs::World &world,
+                       const ecs::SparseVector<ecs::u64> &entityIDs) {
     for (auto entityID : entityIDs) {
       auto &mesh = world.getComponent<Mesh>(entityID);
       auto &texture = world.getComponent<Texture>(entityID);
@@ -37,13 +35,11 @@ struct RenderSystem : public ecs::System {
 };
 
 struct PhysicsSystem : public ecs::System {
-  using ecs::System::System;
-
-  void function(ecs::World &world,
-                const ecs::SparseVector<ecs::u64> &entityIDs) override {
+  static void function(ecs::World &world,
+                       const ecs::SparseVector<ecs::u64> &entityIDs, double x) {
     for (auto entityID : entityIDs) {
       auto &motion = world.getComponent<Motion>(entityID);
-      motion.position = {67, 2, -9};
+      motion.position = {67, x, -9};
     }
   }
 };
@@ -75,25 +71,27 @@ int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   //* Assign some components to each entity
   auto timer2 = new ScopedTimer();
 
-  scence.addComponentToEntity<Motion>(npc);
-  scence.addComponentToEntity<Mesh>(npc);
-  scence.addComponentToEntity<Texture>(npc);
+  scence.addComponent<Motion>(npc);
+  scence.addComponent<Mesh>(npc);
+  scence.addComponent<Texture>(npc);
 
-  scence.addComponentToEntity<Motion>(player);
-  scence.addComponentToEntity<Mesh>(player);
-  scence.addComponentToEntity<Texture>(player);
+  scence.addComponent<Motion>(player);
+  scence.addComponent<Mesh>(player);
+  scence.addComponent<Texture>(player);
 
-  scence.addComponentToEntity<Mesh>(tree);
-  scence.addComponentToEntity<Texture>(tree);
+  scence.addComponent<Mesh>(tree);
+  scence.addComponent<Texture>(tree);
 
-  scence.addComponentToEntity<Motion>(enemy);
-  scence.addComponentToEntity<Mesh>(enemy);
-  scence.addComponentToEntity<Texture>(enemy);
+  scence.addComponent<Motion>(enemy);
+  scence.addComponent<Mesh>(enemy);
+  scence.addComponent<Texture>(enemy);
+
+  scence.removeComponent<Mesh>(player);
 
   int n = 100000;
   while (n--) {
     scence.execute<RenderSystem>();
-    scence.execute<PhysicsSystem>();
+    scence.execute<PhysicsSystem>(0.5);
   }
 
   delete timer2;

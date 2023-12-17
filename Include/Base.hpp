@@ -47,6 +47,16 @@ void iterateTuple(std::tuple<Args...> &tp, auto func) {
   }
 }
 
+template <typename> //
+struct First2ArgTypes;
+
+template <typename FuncType, typename Arg1Type, typename Arg2Type,
+          typename... Args> //
+struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
+  using type1 = Arg1Type;
+  using type2 = Arg2Type;
+};
+
 typedef std::vector<bool> DynamicBitset;
 
 class ScopedTimer {
