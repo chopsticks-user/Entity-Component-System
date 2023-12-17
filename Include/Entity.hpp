@@ -176,6 +176,12 @@ public:
   //   this->setSignature(entity.getID(), std::move(newSignature));
   // }
 
+  void clear() noexcept {
+    this->mEntityInfos.clear();
+    this->mCurrentID = 1;
+    this->mNComponents = 0;
+  }
+
 private:
   // const World &mRefWorld;
   std::unordered_map<u64, DynamicBitset> mEntityInfos;

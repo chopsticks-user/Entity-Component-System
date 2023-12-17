@@ -134,8 +134,6 @@ public:
     return this->mEntityManager->get<EntityType>(entityID);
   }
 
-  // TODO: add multiple entities in one call
-
   template <typename EntityType> //
   EntityType addEntity()
     requires CValidEntity<EntityType>
@@ -143,7 +141,7 @@ public:
     return this->mEntityManager->add<EntityType>();
   }
 
-  // TODO: remove multiple entities in one call
+  // TODO: add multiple entities in one call
 
   void removeEntity(u64 entityID) {
     this->mEntityManager->remove(entityID);
@@ -157,6 +155,8 @@ public:
   {
     this->removeEntity(entity.getID());
   }
+
+  // TODO: remove multiple entities in one call
 
   //* =============================== System ==================================
 
@@ -176,7 +176,13 @@ public:
                                               std::forward<Args>(args)...);
   }
 
-  //* =============================== Overloading =============================
+  //* =========================================================================
+
+  void clear() {
+    this->mEntityManager->clear();
+    this->mComponentTable->clear();
+    this->mSystemManager->clear();
+  }
 
 private:
   template <typename SystemType> //

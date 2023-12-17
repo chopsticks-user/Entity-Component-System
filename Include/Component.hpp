@@ -142,7 +142,7 @@ public:
     return signature;
   }
 
-  void clear() {
+  void clear() noexcept {
     this->mComponentData.clear();
     this->mCNameToIndex.clear();
   }

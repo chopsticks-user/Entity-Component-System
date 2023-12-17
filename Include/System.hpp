@@ -176,7 +176,7 @@ public:
     this->update(entity.getID());
   }
 
-  void clear() { this->mSystems.clear(); }
+  void clear() noexcept { this->mSystems.clear(); }
 
   template <typename SystemType, typename... Args> //
   void execute(World &world, Args &&...args)
