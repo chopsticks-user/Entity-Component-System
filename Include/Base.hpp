@@ -2,21 +2,12 @@
 #define ECS_BASE_HPP
 
 #include <algorithm>
-#include <array>
-#include <bitset>
-#include <chrono>
-#include <cmath>
 #include <concepts>
-#include <iostream>
-#include <map>
 #include <memory>
 #include <numeric>
-#include <queue>
 #include <set>
-#include <stack>
 #include <string>
 #include <tuple>
-#include <type_traits>
 #include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
@@ -24,13 +15,28 @@
 
 namespace ecs {
 
+typedef int8_t i8;
+typedef int16_t i16;
+typedef int32_t i32;
+typedef int64_t i64;
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
 typedef uint64_t u64;
+
+typedef float f32;
 typedef double f64;
+
+typedef bool b8;
+typedef uint32_t b32;
+
 typedef const char *cString;
 
-void runtimeAssert(bool condition, const char *exceptionMessage) {
+template <typename ExceptionType = std::runtime_error>
+void expect(bool condition, cString exceptionMessage) {
   if (!condition) {
-    throw std::runtime_error(exceptionMessage);
+    throw ExceptionType(exceptionMessage);
   }
 }
 
@@ -39,7 +45,7 @@ cString typenameStr() noexcept {
   return typeid(Type).name();
 }
 
-template <uint64_t Index, typename... Args> //
+template <u64 Index, typename... Args> //
 void iterateTuple(std::tuple<Args...> &tp, auto func) {
   func(std::get<Index>(tp));
   if constexpr (Index + 1 != sizeof...(Args)) {
@@ -59,21 +65,21 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
 
 typedef std::vector<bool> DynamicBitset;
 
-class ScopedTimer {
-public:
-  ScopedTimer() = default;
+// class ScopedTimer {
+// public:
+//   ScopedTimer() = default;
 
-  ~ScopedTimer() noexcept {
-    std::cout << "Time elapsed: "
-              << std::chrono::duration<double, std::milli>(
-                     std::chrono::high_resolution_clock::now() - mStart)
-              << "\n";
-  }
+//   ~ScopedTimer() noexcept {
+//     std::cout << "Time elapsed: "
+//               << std::chrono::duration<double, std::milli>(
+//                      std::chrono::high_resolution_clock::now() - mStart)
+//               << "\n";
+//   }
 
-private:
-  const decltype(std::chrono::high_resolution_clock::now()) mStart =
-      std::chrono::high_resolution_clock::now();
-};
+// private:
+//   const decltype(std::chrono::high_resolution_clock::now()) mStart =
+//       std::chrono::high_resolution_clock::now();
+// };
 
 class ISparseVector {
 public:
@@ -89,27 +95,15 @@ public:
 
   auto begin() const noexcept { return this->mData.cbegin(); }
   auto end() const noexcept { return this->mData.cend(); }
-  // auto cbegin() const noexcept { return this->mData.cbegin(); }
-  // auto cend() const noexcept { return this->mData.cend(); }
 
   DataType &at(u64 id) {
-    if (!this->exists(id)) {
-      throw std::runtime_error("SparseVector::operator[]: unknown ID");
-    }
+    expect(this->exists(id), "SparseVector::operator[]: unknown ID");
     return this->mData[this->mIDToIndex[id]];
   }
 
   DataType &operator[](u64 id) { return this->at(id); }
 
   DataType &operator[](u64 id) const { return this->at(id); }
-
-  // DataType &operator[](u64 id) {
-  //   if (!this->exists(id)) {
-  //     throw std::runtime_error("SparseVector::operator[]: unknown ID");
-  //   }
-  //   auto index = this->mIDToIndex.at(id);
-  //   return this->mData[index];
-  // }
 
   void add(u64 id, DataType value) {
     if (!this->exists(id)) {
@@ -121,7 +115,7 @@ public:
     }
   }
 
-  void remove(u64 id) override {
+  void remove(u64 id) noexcept override {
     if (!this->exists(id)) {
       return;
     }
@@ -144,10 +138,12 @@ private:
   std::unordered_map<u64, u64> mIndexToID = {};
   std::vector<DataType> mData = {};
 
-  bool exists(const u64 &id) {
+  bool exists(const u64 &id) const noexcept {
     return this->mIDToIndex.find(id) != this->mIDToIndex.end();
   }
 };
+
+typedef SparseVector<u64> UniqueIDContainer;
 
 } // namespace ecs
 

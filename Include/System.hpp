@@ -14,16 +14,16 @@ class System {
 public:
   virtual ~System() = default;
   System(const System &) = delete;
-  System(System &&) = default;
+  System(System &&) noexcept = default;
   System &operator=(const System &) = delete;
-  System &operator=(System &&) = default;
+  System &operator=(System &&) noexcept = default;
 
 protected:
   System() = default;
 
 private:
   // TODO: Move all data members to SystemManager
-  SparseVector<u64> mEntityIDs = {};
+  UniqueIDContainer mEntityIDs = {};
   DynamicBitset mQualifications = {};
 };
 
@@ -36,16 +36,16 @@ template <typename FunctionType>
 concept CValidSystemFunction =
     std::is_same_v<typename First2ArgTypes<FunctionType>::type1, World &> &&
     std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
-                   const SparseVector<u64> &>;
+                   const UniqueIDContainer &>;
 
 class SystemManager final {
 public:
   SystemManager() = default;
   ~SystemManager() = default;
   SystemManager(const SystemManager &) = delete;
-  SystemManager(SystemManager &&) = default;
+  SystemManager(SystemManager &&) noexcept = default;
   SystemManager &operator=(const SystemManager &) = delete;
-  SystemManager &operator=(SystemManager &&) = default;
+  SystemManager &operator=(SystemManager &&) noexcept = default;
 
   u64 getNSystems() const noexcept { return this->mSystems.size(); }
 
@@ -109,17 +109,6 @@ public:
       throw std::runtime_error("SystemManaged::add: unqualified entity");
     }
   }
-
-  // template <typename SystemType, typename EntityType> //
-  // void add(const EntityType &entity)
-  //   requires CValidSystem<SystemType> && CValidEntity<EntityType>
-  // {
-  //   const DynamicBitset &signature = entity.getSignature();
-  //   if (!std::equal(signature.begin(), signature.end(),
-  //                   this->getQualifications<SystemType>().begin())) {
-  //     throw std::runtime_error("SystemManaged::add: unqualified entity");
-  //   }
-  // }
 
   template <typename SystemType> //
   void remove(u64 entityID)
@@ -190,6 +179,7 @@ public:
     } catch (std::out_of_range &e) {
       throw std::runtime_error("SystemManager::execute: unregistered system");
     } catch (std::exception &e) {
+      // Exception from SystemType::function (if any)
       throw e;
     }
   }

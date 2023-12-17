@@ -18,9 +18,9 @@ public:
   ComponentTable() = default;
   ~ComponentTable() = default;
   ComponentTable(const ComponentTable &) = delete;
-  ComponentTable(ComponentTable &&) = default;
+  ComponentTable(ComponentTable &&) noexcept = default;
   ComponentTable &operator=(const ComponentTable &) = delete;
-  ComponentTable &operator=(ComponentTable &&) = default;
+  ComponentTable &operator=(ComponentTable &&) noexcept = default;
 
   u64 getNComponents() const noexcept { return this->mComponentData.size(); }
 
@@ -60,14 +60,14 @@ public:
   }
 
   template <typename ComponentType, typename EntityType> //
-  void remove(const EntityType &entity)
+  void remove(const EntityType &entity) noexcept
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
     this->getArray<ComponentType>()->remove(entity.getID());
   }
 
   template <typename ComponentType> //
-  void remove(u64 entityID)
+  void remove(u64 entityID) noexcept
     requires CValidComponent<ComponentType>
   {
     this->getArray<ComponentType>()->remove(entityID);
@@ -85,19 +85,6 @@ public:
   void remove(u64 entityID) {
     for (auto &p : this->mComponentData) {
       p.second->remove(entityID);
-    }
-  }
-
-  template <typename ComponentType> //
-  std::shared_ptr<SparseVector<ComponentType>> getArray()
-    requires CValidComponent<ComponentType>
-  {
-    try {
-      return std::static_pointer_cast<SparseVector<ComponentType>>(
-          this->mComponentData.at(typenameStr<ComponentType>()));
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error(
-          "ComponentTable::getArray: unregistered component");
     }
   }
 
@@ -121,7 +108,7 @@ public:
   }
 
   template <typename ComponentType> //
-  u64 getIndex()
+  u64 getIndex() const
     requires CValidComponent<ComponentType>
   {
     try {
@@ -133,7 +120,7 @@ public:
   }
 
   template <typename... ComponentTypes> //
-  DynamicBitset querySignature() {
+  DynamicBitset querySignature() const {
     DynamicBitset signature(this->mCNameToIndex.size());
     auto argTuple = std::tuple<ComponentTypes...>();
     iterateTuple<0, ComponentTypes...>(argTuple, [&](auto arg) {
@@ -145,6 +132,20 @@ public:
   void clear() noexcept {
     this->mComponentData.clear();
     this->mCNameToIndex.clear();
+  }
+
+private:
+  template <typename ComponentType> //
+  std::shared_ptr<SparseVector<ComponentType>> getArray()
+    requires CValidComponent<ComponentType>
+  {
+    try {
+      return std::static_pointer_cast<SparseVector<ComponentType>>(
+          this->mComponentData.at(typenameStr<ComponentType>()));
+    } catch (std::out_of_range &e) {
+      throw std::runtime_error(
+          "ComponentTable::getArray: unregistered component");
+    }
   }
 
 private:

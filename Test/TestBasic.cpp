@@ -2,6 +2,25 @@
 
 #include <glm/glm.hpp>
 
+#include <chrono>
+#include <iostream>
+
+class ScopedTimer {
+public:
+  ScopedTimer() = default;
+
+  ~ScopedTimer() noexcept {
+    std::cout << "Time elapsed: "
+              << std::chrono::duration<double, std::milli>(
+                     std::chrono::high_resolution_clock::now() - mStart)
+              << "\n";
+  }
+
+private:
+  const decltype(std::chrono::high_resolution_clock::now()) mStart =
+      std::chrono::high_resolution_clock::now();
+};
+
 struct Motion : public ecs::Component {
   glm::vec3 position;
   glm::vec3 velocity;
@@ -17,16 +36,14 @@ struct Texture : public ecs::Component {
   glm::vec4 color;
 };
 
-DECLARE_SIMPLE_ENTITY(NPC);
-DECLARE_SIMPLE_ENTITY(Player);
-DECLARE_SIMPLE_ENTITY(Tree);
-DECLARE_SIMPLE_ENTITY(Enemy);
+ECS_SIMPLE_ENTITY_CLASS(NPC);
+ECS_SIMPLE_ENTITY_CLASS(Player);
+ECS_SIMPLE_ENTITY_CLASS(Tree);
+ECS_SIMPLE_ENTITY_CLASS(Enemy);
 
 struct RenderSystem : public ecs::System {
-  using ecs::System::System;
-
-  void function(ecs::World &world,
-                const ecs::SparseVector<ecs::u64> &entityIDs) override {
+  static void function(ecs::World &world,
+                       const ecs::UniqueIDContainer &entityIDs) {
     for (auto entityID : entityIDs) {
       auto &mesh = world.getComponent<Mesh>(entityID);
       auto &texture = world.getComponent<Texture>(entityID);
@@ -37,13 +54,11 @@ struct RenderSystem : public ecs::System {
 };
 
 struct PhysicsSystem : public ecs::System {
-  using ecs::System::System;
-
-  void function(ecs::World &world,
-                const ecs::SparseVector<ecs::u64> &entityIDs) override {
+  static void function(ecs::World &world,
+                       const ecs::UniqueIDContainer &entityIDs) {
     for (auto entityID : entityIDs) {
       auto &motion = world.getComponent<Motion>(entityID);
-      motion.position = {67, 2, -9};
+      motion.position = {67, 8, -9};
     }
   }
 };
@@ -75,20 +90,12 @@ int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   //* Assign some components to each entity
   auto timer2 = new ScopedTimer();
 
-  scence.addComponentToEntity<Motion>(npc);
-  scence.addComponentToEntity<Mesh>(npc);
-  scence.addComponentToEntity<Texture>(npc);
+  scence.addComponents<Motion, Mesh, Texture>(npc, {}, {}, {});
+  scence.addComponents<Motion, Mesh, Texture>(player, {}, {}, {});
+  scence.addComponents<Mesh, Texture>(tree, {}, {});
+  scence.addComponents<Motion, Mesh, Texture>(enemy, {}, {}, {});
 
-  scence.addComponentToEntity<Motion>(player);
-  scence.addComponentToEntity<Mesh>(player);
-  scence.addComponentToEntity<Texture>(player);
-
-  scence.addComponentToEntity<Mesh>(tree);
-  scence.addComponentToEntity<Texture>(tree);
-
-  scence.addComponentToEntity<Motion>(enemy);
-  scence.addComponentToEntity<Mesh>(enemy);
-  scence.addComponentToEntity<Texture>(enemy);
+  scence.removeComponents<Mesh, Motion>(player);
 
   int n = 100000;
   while (n--) {

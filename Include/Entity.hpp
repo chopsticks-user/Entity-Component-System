@@ -12,12 +12,12 @@ class Entity {
   friend class EntityManager;
 
 public:
-  Entity() = delete;
+  Entity() noexcept = delete;
   virtual ~Entity() = default;
   Entity(const Entity &) = delete;
+  Entity(Entity &&) noexcept = default;
   Entity &operator=(const Entity &) = delete;
-  Entity(Entity &&) = default;
-  Entity &operator=(Entity &&) = default;
+  Entity &operator=(Entity &&) noexcept = default;
 
   virtual u64 getID() const noexcept final { return this->mID; }
 
@@ -26,7 +26,6 @@ private:
   Entity(u64 id) : mID{id} {}
 
 private:
-  // const World &mRefWorld;
   u64 mID;
 };
 
@@ -40,22 +39,9 @@ public:
   EntityManager() = default;
   ~EntityManager() = default;
   EntityManager(const EntityManager &) = delete;
-  EntityManager(EntityManager &&) = default;
+  EntityManager(EntityManager &&) noexcept = default;
   EntityManager &operator=(const EntityManager &) = delete;
-  EntityManager &operator=(EntityManager &&) = default;
-
-  bool isFull() const noexcept {
-    return this->mCurrentID > std::numeric_limits<u64>::max();
-  }
-
-  // template <typename EntityType> //
-  // bool isKnownEntity(const EntityType &entity) const noexcept
-  //   requires CValidEntity<EntityType>
-  // {
-  //   const Entity *entityBase = &entity;
-  //   return entityBase->mID != 0 && std::addressof(entityBase->mRefWorld) ==
-  //                                      std::addressof(this->mRefWorld);
-  // }
+  EntityManager &operator=(EntityManager &&) noexcept = default;
 
   void setNComponents(u64 nComponents) noexcept {
     this->mNComponents = nComponents;
@@ -65,11 +51,8 @@ public:
   EntityType get(u64 entityID) const
     requires CValidEntity<EntityType>
   {
-    try {
-      return EntityType{entityID};
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error("EntityManager::get: unknown entity");
-    }
+    expect(this->exists(entityID), "EntityManager::get: unknown entity");
+    return EntityType{entityID};
   }
 
   template <typename EntityType> //
@@ -88,13 +71,13 @@ public:
     return EntityType{newEntityId};
   }
 
-  void remove(u64 entityID) {
+  void remove(u64 entityID) noexcept {
     this->mEntityInfos.erase(entityID);
     // this->mRecycledIDs.push(entityBase.mID);
   }
 
   template <typename EntityType> //
-  void remove(EntityType &entity)
+  void remove(EntityType &entity) noexcept
     requires CValidEntity<EntityType>
   {
     Entity *entityBase = &entity;
@@ -135,32 +118,11 @@ public:
     }
   }
 
-  // template <typename EntityType> //
-  // void setSignature(EntityType &entity, u64 index, bool value = true) const
-  //   requires CValidEntity<EntityType>
-  // {
-  //   if (!this->isKnownEntity(entity)) {
-  //     throw std::runtime_error("EntityManager::setSignature: unknown
-  //     entity");
-  //   }
-
-  //   this->setSignature(entity.getID(), index, value);
-  //   const DynamicBitset &signature = this->mEntityInfos[entity.getID()];
-  //   std::copy(signature.begin(), signature.end(), entity.mSignature.begin());
-  //   // std::copy(entity.mSignature, this->mEntityInfos[entity.getID()]);
-  // }
-
   void setSignature(u64 entityID, DynamicBitset newSignature) {
-    // if (!this->isKnownEntity(entity)) {
-    //   throw std::runtime_error("EntityManager::setSignature: unknown
-    //   entity");
-    // }
 
     //! Debug
-    if (newSignature.size() != this->mNComponents) {
-      throw std::runtime_error(
-          "EntityManager::setSignature: incorrect nComponents");
-    }
+    expect(newSignature.size() == this->mNComponents,
+           "EntityManager::setSignature: incorrect nComponents");
 
     try {
       this->mEntityInfos.at(entityID) = std::move(newSignature);
@@ -169,17 +131,15 @@ public:
     }
   }
 
-  // template <typename EntityType> //
-  // void setSignature(EntityType &entity, DynamicBitset newSignature) const
-  //   requires CValidEntity<EntityType>
-  // {
-  //   this->setSignature(entity.getID(), std::move(newSignature));
-  // }
-
   void clear() noexcept {
     this->mEntityInfos.clear();
     this->mCurrentID = 1;
     this->mNComponents = 0;
+  }
+
+private:
+  bool exists(const u64 entityID) const noexcept {
+    return this->mEntityInfos.find(entityID) != this->mEntityInfos.end();
   }
 
 private:
@@ -190,7 +150,7 @@ private:
   // std::queue<u64> mRecycledIDs = {};
 };
 
-#define DECLARE_SIMPLE_ENTITY(EntityTypename)                                  \
+#define ECS_SIMPLE_ENTITY_CLASS(EntityTypename)                                \
   class EntityTypename : public ecs::Entity {                                  \
     using Entity::Entity;                                                      \
   }
