@@ -1,0 +1,30 @@
+==2677149== Cachegrind, a cache and branch-prediction profiler
+==2677149== Copyright (C) 2002-2017, and GNU GPL'd, by Nicholas Nethercote et al.
+==2677149== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==2677149== Command: ./Build/UserControlledShape
+==2677149== 
+--2677149-- warning: L3 cache found, using its data for the LL simulation.
+--2677149-- warning: specified LL cache: line_size 64  assoc 16  total_size 12,582,912
+--2677149-- warning: simulated LL cache: line_size 64  assoc 24  total_size 12,582,912
+==2677149== Warning: noted but unhandled ioctl 0x6444 with no size/direction hints.
+==2677149==    This could cause spurious value errors to appear.
+==2677149==    See README_MISSING_SYSCALL_OR_IOCTL for guidance on writing a proper wrapper.
+==2677149== brk segment overflow in thread #1: can't grow to 0x483a000
+==2677149== (see section Limitations in user manual)
+==2677149== NOTE: further instances of this message will not be shown
+==2677149== 
+==2677149== I   refs:      2,840,064,552
+==2677149== I1  misses:      112,707,252
+==2677149== LLi misses:           26,640
+==2677149== I1  miss rate:          3.97%
+==2677149== LLi miss rate:          0.00%
+==2677149== 
+==2677149== D   refs:      1,183,965,641  (774,654,004 rd   + 409,311,637 wr)
+==2677149== D1  misses:       33,612,460  ( 24,788,812 rd   +   8,823,648 wr)
+==2677149== LLd misses:          315,089  (    107,126 rd   +     207,963 wr)
+==2677149== D1  miss rate:           2.8% (        3.2%     +         2.2%  )
+==2677149== LLd miss rate:           0.0% (        0.0%     +         0.1%  )
+==2677149== 
+==2677149== LL refs:         146,319,712  (137,496,064 rd   +   8,823,648 wr)
+==2677149== LL misses:           341,729  (    133,766 rd   +     207,963 wr)
+==2677149== LL miss rate:            0.0% (        0.0%     +         0.1%  )

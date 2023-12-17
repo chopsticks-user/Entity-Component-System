@@ -21,7 +21,7 @@ public:
         this->mComponentTable->getNComponents());
   }
 
-  // TODO: write a function to deregister a component
+  // TODO: might need a method to deregister a component
 
   template <typename ComponentType> //
   ComponentType &getComponent(u64 entityID)
@@ -168,6 +168,8 @@ public:
         this->mComponentTable->querySignature<RequiredComponentTypes...>()));
   }
 
+  // TODO: might need a method to deregister a system
+
   template <typename SystemType, typename... Args> //
   void execute(Args &&...args)
     requires CValidSystem<SystemType>
@@ -175,6 +177,8 @@ public:
     this->mSystemManager->execute<SystemType>(*this,
                                               std::forward<Args>(args)...);
   }
+
+  // TODO: change signature of a registered system
 
   //* =========================================================================
 

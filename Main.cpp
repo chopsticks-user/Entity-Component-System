@@ -21,13 +21,13 @@ private:
       std::chrono::high_resolution_clock::now();
 };
 
-struct Motion : public ecs::Component {
+struct CMotion : public ecs::Component {
   glm::vec3 position;
   glm::vec3 velocity;
   glm::vec3 acceleration;
 };
 
-struct Mesh : public ecs::Component {
+struct CMesh : public ecs::Component {
   glm::vec4 color;
 };
 
@@ -45,7 +45,7 @@ struct RenderSystem : public ecs::System {
   static void function(ecs::World &world,
                        const ecs::UniqueIDContainer &entityIDs) {
     for (auto entityID : entityIDs) {
-      auto &mesh = world.getComponent<Mesh>(entityID);
+      auto &mesh = world.getComponent<CMesh>(entityID);
       auto &texture = world.getComponent<Texture>(entityID);
       mesh.color = {5, -6, 2, 3};
       texture.color = {2, -3, 5, 1};
@@ -57,7 +57,7 @@ struct PhysicsSystem : public ecs::System {
   static void function(ecs::World &world,
                        const ecs::UniqueIDContainer &entityIDs) {
     for (auto entityID : entityIDs) {
-      auto &motion = world.getComponent<Motion>(entityID);
+      auto &motion = world.getComponent<CMotion>(entityID);
       motion.position = {67, 8, -9};
     }
   }
@@ -71,13 +71,13 @@ int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   World scence;
 
   //* Add 3 components
-  scence.registerComponent<Motion>();
-  scence.registerComponent<Mesh>();
+  scence.registerComponent<CMotion>();
+  scence.registerComponent<CMesh>();
   scence.registerComponent<Texture>();
 
   //* Add 2 systems
-  scence.registerSystem<RenderSystem, Mesh, Texture>();
-  scence.registerSystem<PhysicsSystem, Motion>();
+  scence.registerSystem<RenderSystem, CMesh, Texture>();
+  scence.registerSystem<PhysicsSystem, CMotion>();
 
   //* Add 4 entities
   NPC npc = scence.addEntity<NPC>();
@@ -90,12 +90,12 @@ int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   //* Assign some components to each entity
   auto timer2 = new ScopedTimer();
 
-  scence.addComponents<Motion, Mesh, Texture>(npc, {}, {}, {});
-  scence.addComponents<Motion, Mesh, Texture>(player, {}, {}, {});
-  scence.addComponents<Mesh, Texture>(tree, {}, {});
-  scence.addComponents<Motion, Mesh, Texture>(enemy, {}, {}, {});
+  scence.addComponents<CMotion, CMesh, Texture>(npc, {}, {}, {});
+  scence.addComponents<CMotion, CMesh, Texture>(player, {}, {}, {});
+  scence.addComponents<CMesh, Texture>(tree, {}, {});
+  scence.addComponents<CMotion, CMesh, Texture>(enemy, {}, {}, {});
 
-  scence.removeComponents<Mesh, Motion>(player);
+  scence.removeComponents<CMesh, CMotion>(player);
 
   int n = 100000;
   while (n--) {
