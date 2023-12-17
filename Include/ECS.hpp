@@ -38,7 +38,7 @@ public:
   }
 
   template <typename... ComponentTypes> //
-  void addComponent(u64 entityID, ComponentTypes... components) {
+  void addComponents(u64 entityID, ComponentTypes... components) {
     auto argTuple = std::make_tuple(std::move(components)...);
     iterateTuple<0, ComponentTypes...>(argTuple, [&](auto component) {
       this->mComponentTable->add<decltype(component)>(std::move(component));
@@ -51,7 +51,7 @@ public:
   }
 
   template <typename... ComponentTypes, typename EntityType> //
-  void addComponent(const EntityType &entity, ComponentTypes... components)
+  void addComponents(const EntityType &entity, ComponentTypes... components)
     requires CValidEntity<EntityType>
   {
     auto argTuple = std::make_tuple(std::move(components)...);
@@ -85,9 +85,6 @@ public:
     this->addComponent(entity.getID(), std::move(component));
   }
 
-  // TODO: write a method to remove multiple components to an entity so that
-  // TODO: SystemManager only update once
-
   template <typename ComponentType> //
   void removeComponent(u64 entityID)
     requires CValidComponent<ComponentType>
@@ -107,6 +104,27 @@ public:
     this->removeComponent<ComponentType>(entity.getID());
   }
 
+  template <typename... ComponentTypes> //
+  void removeComponents(u64 entityID) {
+    auto argTuple = std::tuple<ComponentTypes...>();
+    iterateTuple<0, ComponentTypes...>(argTuple, [&](auto component) {
+      this->mComponentTable->remove<decltype(component)>(entityID);
+      this->mEntityManager->setSignature(
+          entityID, this->mComponentTable->getIndex<decltype(component)>(),
+          false);
+    });
+
+    this->mSystemManager->update(entityID,
+                                 this->mEntityManager->getSignature(entityID));
+  }
+
+  template <typename... ComponentTypes, typename EntityType> //
+  void removeComponents(const EntityType &entity)
+    requires CValidEntity<EntityType>
+  {
+    this->removeComponents<ComponentTypes...>(entity.getID());
+  }
+
   //* =============================== Entity ==================================
 
   template <typename EntityType> //
@@ -116,12 +134,16 @@ public:
     return this->mEntityManager->get<EntityType>(entityID);
   }
 
+  // TODO: add multiple entities in one call
+
   template <typename EntityType> //
   EntityType addEntity()
     requires CValidEntity<EntityType>
   {
     return this->mEntityManager->add<EntityType>();
   }
+
+  // TODO: remove multiple entities in one call
 
   void removeEntity(u64 entityID) {
     this->mEntityManager->remove(entityID);
@@ -164,10 +186,7 @@ private:
     return this->mSystemManager->getQualifications<SystemType>();
   }
 
-  template <typename EntityType> //
-  const DynamicBitset &getEntitySignature(u64 entityID)
-    requires CValidEntity<EntityType>
-  {
+  const DynamicBitset &getEntitySignature(u64 entityID) {
     return this->mEntityManager->getSignature(entityID);
   }
 

@@ -71,16 +71,12 @@ int protected_main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   //* Assign some components to each entity
   auto timer2 = new ScopedTimer();
 
-  // scence.addComponent<Motion>(npc);
-  // scence.addComponent<Mesh>(npc);
-  // scence.addComponent<Texture>(npc);
+  scence.addComponents<Motion, Mesh, Texture>(npc, {}, {}, {});
+  scence.addComponents<Motion, Mesh, Texture>(player, {}, {}, {});
+  scence.addComponents<Mesh, Texture>(tree, {}, {});
+  scence.addComponents<Motion, Mesh, Texture>(enemy, {}, {}, {});
 
-  scence.addComponent<Motion, Mesh, Texture>(npc, {}, {}, {});
-  scence.addComponent<Motion, Mesh, Texture>(player, {}, {}, {});
-  scence.addComponent<Mesh, Texture>(tree, {}, {});
-  scence.addComponent<Motion, Mesh, Texture>(enemy, {}, {}, {});
-
-  scence.removeComponent<Mesh>(player);
+  scence.removeComponents<Mesh, Motion>(player);
 
   int n = 100000;
   while (n--) {
