@@ -38,7 +38,7 @@ concept CValidSystemFunction =
     std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
                    const UniqueIDContainer &>;
 
-class SystemManager final {
+class SystemManager {
 public:
   SystemManager() = default;
   ~SystemManager() = default;

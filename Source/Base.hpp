@@ -6,6 +6,7 @@
 #include <memory>
 #include <numeric>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <typeinfo>

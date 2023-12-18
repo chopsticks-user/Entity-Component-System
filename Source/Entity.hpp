@@ -34,7 +34,7 @@ concept CValidEntity = std::move_constructible<EntityType> &&
                        std::derived_from<EntityType, Entity> &&
                        !std::is_same_v<EntityType, Entity>;
 
-class EntityManager final {
+class EntityManager {
 public:
   EntityManager() = default;
   ~EntityManager() = default;
@@ -42,6 +42,8 @@ public:
   EntityManager(EntityManager &&) noexcept = default;
   EntityManager &operator=(const EntityManager &) = delete;
   EntityManager &operator=(EntityManager &&) noexcept = default;
+
+  u64 nEntities() const noexcept { return this->mEntityInfos.size(); }
 
   void setNComponents(u64 nComponents) noexcept {
     this->mNComponents = nComponents;
