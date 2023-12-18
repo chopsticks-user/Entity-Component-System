@@ -1,5 +1,5 @@
-#ifndef ECS_BASE_HPP
-#define ECS_BASE_HPP
+#ifndef ECS_SOURCE_BASE_HPP
+#define ECS_SOURCE_BASE_HPP
 
 #include <algorithm>
 #include <concepts>
@@ -147,4 +147,4 @@ typedef SparseVector<u64> UniqueIDContainer;
 
 } // namespace ecs
 
-#endif // ECS_BASE_HPP
+#endif // ECS_SOURCE_BASE_HPP

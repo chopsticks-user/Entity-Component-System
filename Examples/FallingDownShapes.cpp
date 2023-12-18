@@ -1,4 +1,4 @@
-#include "../Include/ECS.hpp"
+#include "../Include/ECS/ECS.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -141,10 +141,10 @@ void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   ecs::u64 nObjects = 1000;
   ecs::f32 downwardAccel = 1e-5f;
-  if (argc == 2) {
+  if (argc > 1) {
     nObjects = std::stoi(argv[1]);
   }
-  if (argc == 3) {
+  if (argc > 2) {
     downwardAccel = std::stof(argv[2]);
   }
   mainLoop(nObjects, downwardAccel);
