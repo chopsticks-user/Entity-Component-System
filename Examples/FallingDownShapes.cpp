@@ -1,7 +1,6 @@
-#include "../Include/ECS/ECS.hpp"
+#include <ECS/ECS.hpp>
 
 #include <SFML/Graphics.hpp>
-
 #include <iostream>
 
 static constexpr ecs::u64 nVertices = 4;

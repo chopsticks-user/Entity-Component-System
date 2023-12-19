@@ -1,4 +1,4 @@
-#include "../Include/ECS/ECS.hpp"
+#include <ECS/ECS.hpp>
 
 #include <SFML/Graphics.hpp>
 
