@@ -38,13 +38,6 @@ public:
     }
   }
 
-  // template <typename ComponentType> //
-  // ComponentTable &dereg()
-  //   requires CValidComponent<ComponentType>
-  // {
-  //   componentTable.erase(typenameStr<ComponentType>());
-  // }
-
   template <typename ComponentType, typename EntityType> //
   void add(const EntityType &entity, ComponentType component = {})
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
@@ -74,7 +67,7 @@ public:
   }
 
   template <typename EntityType> //
-  void remove(const EntityType &entity)
+  void remove(const EntityType &entity) noexcept
     requires CValidEntity<EntityType>
   {
     for (auto &p : this->mComponentData) {
@@ -82,45 +75,53 @@ public:
     }
   }
 
-  void remove(u64 entityID) {
+  void remove(u64 entityID) noexcept {
     for (auto &p : this->mComponentData) {
       p.second->remove(entityID);
     }
   }
 
   template <typename ComponentType, typename EntityType> //
-  ComponentType &get(const EntityType &entity)
+  ComponentType &get(const EntityType &entity) ECS_NOEXCEPT
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
-    try {
+    if constexpr (allowExceptions) {
+      try {
+        return this->getArray<ComponentType>()->at(entity.getID());
+      } catch (std::out_of_range &e) {
+        std::runtime_error("ComponentTable::get: entity does not exist or does "
+                           "not contain the component");
+      }
+    } else {
       return this->getArray<ComponentType>()->at(entity.getID());
-    } catch (std::out_of_range &e) {
-      std::runtime_error("ComponentTable::get: entity does not exist or does "
-                         "not contain the component");
     }
   }
 
   template <typename ComponentType> //
-  ComponentType &get(u64 entityID)
+  ComponentType &get(u64 entityID) ECS_NOEXCEPT
     requires CValidComponent<ComponentType>
   {
     return this->getArray<ComponentType>()->at(entityID);
   }
 
   template <typename ComponentType> //
-  u64 getIndex() const
+  u64 getIndex() const ECS_NOEXCEPT
     requires CValidComponent<ComponentType>
   {
-    try {
+    if constexpr (allowExceptions) {
+      try {
+        return this->mCNameToIndex.at(typenameStr<ComponentType>());
+      } catch (std::out_of_range &e) {
+        throw std::runtime_error(
+            "ComponentTable::getIndex: unregistered component");
+      }
+    } else {
       return this->mCNameToIndex.at(typenameStr<ComponentType>());
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error(
-          "ComponentTable::getIndex: unregistered component");
     }
   }
 
   template <typename... ComponentTypes> //
-  DynamicBitset querySignature() const {
+  DynamicBitset querySignature() const ECS_NOEXCEPT {
     DynamicBitset signature(this->mCNameToIndex.size());
     auto argTuple = std::tuple<ComponentTypes...>();
     iterateTuple<0, ComponentTypes...>(argTuple, [&](auto arg) {
@@ -136,15 +137,20 @@ public:
 
 private:
   template <typename ComponentType> //
-  std::shared_ptr<SparseVector<ComponentType>> getArray()
+  std::shared_ptr<SparseVector<ComponentType>> getArray() ECS_NOEXCEPT
     requires CValidComponent<ComponentType>
   {
-    try {
+    if constexpr (allowExceptions) {
+      try {
+        return std::static_pointer_cast<SparseVector<ComponentType>>(
+            this->mComponentData.at(typenameStr<ComponentType>()));
+      } catch (std::out_of_range &e) {
+        throw std::runtime_error(
+            "ComponentTable::getArray: unregistered component");
+      }
+    } else {
       return std::static_pointer_cast<SparseVector<ComponentType>>(
           this->mComponentData.at(typenameStr<ComponentType>()));
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error(
-          "ComponentTable::getArray: unregistered component");
     }
   }
 

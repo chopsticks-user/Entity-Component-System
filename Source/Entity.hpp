@@ -50,10 +50,12 @@ public:
   }
 
   template <typename EntityType> //
-  EntityType get(u64 entityID) const
+  EntityType get(u64 entityID) const ECS_NOEXCEPT
     requires CValidEntity<EntityType>
   {
-    expect(this->exists(entityID), "EntityManager::get: unknown entity");
+    if constexpr (allowExceptions) {
+      expect(this->exists(entityID), "EntityManager::get: unknown entity");
+    }
     return EntityType{entityID};
   }
 
@@ -62,21 +64,12 @@ public:
     requires CValidEntity<EntityType>
   {
     u64 newEntityId;
-    // if (!mRecycledIDs.empty()) {
-    //   newEntityId = this->mRecycledIDs.front();
-    //   this->mRecycledIDs.pop();
-    // } else {
-    //   newEntityId = this->mCurrentID++;
-    // }
     newEntityId = this->mCurrentID++;
     this->mEntityInfos[newEntityId] = {};
     return EntityType{newEntityId};
   }
 
-  void remove(u64 entityID) noexcept {
-    this->mEntityInfos.erase(entityID);
-    // this->mRecycledIDs.push(entityBase.mID);
-  }
+  void remove(u64 entityID) noexcept { this->mEntityInfos.erase(entityID); }
 
   template <typename EntityType> //
   void remove(EntityType &entity) noexcept
@@ -88,48 +81,62 @@ public:
       return;
     }
 
-    // this->mRecycledIDs.push(entityBase.mID);
     entityBase->mID = 0;
 
     this->remove(entityBase->getID());
   }
 
-  const DynamicBitset &getSignature(u64 entityID) const {
-    try {
-      return this->mEntityInfos.at(entityID);
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error("EntityManager::getSignature: unknown entity");
+  const DynamicBitset &getSignature(u64 entityID) const ECS_NOEXCEPT {
+    if constexpr (allowExceptions) {
+      try {
+        return this->mEntityInfos.at(entityID);
+      } catch (std::out_of_range &e) {
+        throw std::runtime_error("EntityManager::getSignature: unknown entity");
+      }
+    } else {
+      this->mEntityInfos.at(entityID);
     }
   }
 
-  void setSignature(u64 entityID, u64 index, bool value = true) {
-    //! Debug
-    if (index >= this->mNComponents) {
-      throw std::runtime_error(
-          "EntityManager::setSignature: index out of range");
-    }
+  void setSignature(u64 entityID, u64 index, bool value = true) ECS_NOEXCEPT {
+    if constexpr (allowExceptions) {
+      //! Debug
+      if (index >= this->mNComponents) {
+        throw std::runtime_error(
+            "EntityManager::setSignature: index out of range");
+      }
 
-    try {
+      try {
+        DynamicBitset &refSignature = this->mEntityInfos.at(entityID);
+        if (refSignature.size() != this->mNComponents) {
+          refSignature.resize(this->mNComponents);
+        }
+        refSignature[index] = value;
+      } catch (std::out_of_range &e) {
+        throw std::runtime_error("EntityManager::setSignature: unknown entity");
+      }
+    } else {
       DynamicBitset &refSignature = this->mEntityInfos.at(entityID);
       if (refSignature.size() != this->mNComponents) {
         refSignature.resize(this->mNComponents);
       }
       refSignature[index] = value;
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error("EntityManager::setSignature: unknown entity");
     }
   }
 
-  void setSignature(u64 entityID, DynamicBitset newSignature) {
+  void setSignature(u64 entityID, DynamicBitset newSignature) ECS_NOEXCEPT {
+    if constexpr (allowExceptions) {
+      //! Debug
+      expect(newSignature.size() == this->mNComponents,
+             "EntityManager::setSignature: incorrect nComponents");
 
-    //! Debug
-    expect(newSignature.size() == this->mNComponents,
-           "EntityManager::setSignature: incorrect nComponents");
-
-    try {
+      try {
+        this->mEntityInfos.at(entityID) = std::move(newSignature);
+      } catch (std::out_of_range &e) {
+        throw std::runtime_error("EntityManager::setSignature: unknown entity");
+      }
+    } else {
       this->mEntityInfos.at(entityID) = std::move(newSignature);
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error("EntityManager::setSignature: unknown entity");
     }
   }
 

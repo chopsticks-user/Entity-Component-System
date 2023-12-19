@@ -34,6 +34,14 @@ typedef uint32_t b32;
 
 typedef const char *cString;
 
+#ifndef ECS_ALLOW_EXCEPTIONS // Debug mode
+constexpr bool allowExceptions = true;
+#else  // Release mode
+constexpr bool allowExceptions = false;
+#endif // ECS_ALLOW_EXCEPTIONS
+
+#define ECS_NOEXCEPT noexcept(!allowExceptions)
+
 template <typename ExceptionType = std::runtime_error>
 void expect(bool condition, cString exceptionMessage) {
   if (!condition) {
@@ -66,22 +74,6 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
 
 typedef std::vector<bool> DynamicBitset;
 
-// class ScopedTimer {
-// public:
-//   ScopedTimer() = default;
-
-//   ~ScopedTimer() noexcept {
-//     std::cout << "Time elapsed: "
-//               << std::chrono::duration<double, std::milli>(
-//                      std::chrono::high_resolution_clock::now() - mStart)
-//               << "\n";
-//   }
-
-// private:
-//   const decltype(std::chrono::high_resolution_clock::now()) mStart =
-//       std::chrono::high_resolution_clock::now();
-// };
-
 class ISparseVector {
 public:
   virtual ~ISparseVector() = default;
@@ -97,14 +89,16 @@ public:
   auto begin() const noexcept { return this->mData.cbegin(); }
   auto end() const noexcept { return this->mData.cend(); }
 
-  DataType &at(u64 id) {
-    expect(this->exists(id), "SparseVector::operator[]: unknown ID");
+  DataType &at(u64 id) ECS_NOEXCEPT {
+    if constexpr (allowExceptions) {
+      expect(this->exists(id), "SparseVector::operator[]: unknown ID");
+    }
     return this->mData[this->mIDToIndex[id]];
   }
 
-  DataType &operator[](u64 id) { return this->at(id); }
+  DataType &operator[](u64 id) ECS_NOEXCEPT { return this->at(id); }
 
-  DataType &operator[](u64 id) const { return this->at(id); }
+  DataType &operator[](u64 id) const ECS_NOEXCEPT { return this->at(id); }
 
   void add(u64 id, DataType value) {
     if (!this->exists(id)) {

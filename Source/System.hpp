@@ -67,34 +67,33 @@ public:
         std::unique_ptr<System>(std::move(pSystemBase));
   }
 
-  // template <typename SystemType> //
-  // void dereg()
-  //   requires CValidSystem<SystemType>
-  // {
-  //   this->mSystems.erase(typenameStr<SystemType>());
-  // }
-
   template <typename SystemType> //
-  std::unique_ptr<SystemType> get() const
+  std::unique_ptr<SystemType> get() const ECS_NOEXCEPT
     requires CValidSystem<SystemType>
   {
-    try {
+    if constexpr (allowExceptions) {
+      try {
+        return std::static_pointer_cast<SystemType>(
+            this->mSystems.at(typenameStr<SystemType>()));
+      } catch (std::out_of_range &e) {
+        throw std::runtime_error("SystemManaged::get: unregistered system");
+      }
+    } else {
       return std::static_pointer_cast<SystemType>(
           this->mSystems.at(typenameStr<SystemType>()));
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error("SystemManaged::get: unregistered system");
     }
   }
 
   template <typename SystemType> //
-  const DynamicBitset &getQualifications() const
+  const DynamicBitset &getQualifications() const ECS_NOEXCEPT
     requires CValidSystem<SystemType>
   {
     return this->get<SystemType>()->mQualifications;
   }
 
   template <typename SystemType> //
-  const DynamicBitset &setQualifications(DynamicBitset qualifications) const
+  const DynamicBitset &
+  setQualifications(DynamicBitset qualifications) const ECS_NOEXCEPT
     requires CValidSystem<SystemType>
   {
     return this->get<SystemType>()->mQualifications = std::move(qualifications);
@@ -111,20 +110,20 @@ public:
   }
 
   template <typename SystemType> //
-  void remove(u64 entityID)
+  void remove(u64 entityID) ECS_NOEXCEPT
     requires CValidSystem<SystemType>
   {
     this->get<SystemType>()->mQualifiedEntitiesIDs.remove(entityID);
   }
 
   template <typename SystemType, typename EntityType> //
-  void remove(const EntityType &entity)
+  void remove(const EntityType &entity) ECS_NOEXCEPT
     requires CValidSystem<SystemType> && CValidEntity<EntityType>
   {
     this->remove<SystemType>(entity.getID());
   }
 
-  void remove(u64 entityID) {
+  void remove(u64 entityID) ECS_NOEXCEPT {
     for (auto &p : this->mSystems) {
       // p.second->mEntityIDs.erase(entityID);
       p.second->mEntityIDs.remove(entityID);
@@ -132,7 +131,7 @@ public:
   }
 
   template <typename EntityType> //
-  void remove(const EntityType &entity)
+  void remove(const EntityType &entity) ECS_NOEXCEPT
     requires CValidEntity<EntityType>
   {
     this->remove(entity.getID());
@@ -168,19 +167,25 @@ public:
   void clear() noexcept { this->mSystems.clear(); }
 
   template <typename SystemType, typename... Args> //
-  void execute(World &world, Args &&...args)
+  void execute(World &world, Args &&...args) ECS_NOEXCEPT
     requires CValidSystem<SystemType> &&
              CValidSystemFunction<decltype(SystemType::function)>
   {
-    try {
+    if constexpr (allowExceptions) {
+      try {
+        SystemType::function(
+            world, this->mSystems.at(typenameStr<SystemType>())->mEntityIDs,
+            std::forward<Args>(args)...);
+      } catch (std::out_of_range &e) {
+        throw std::runtime_error("SystemManager::execute: unregistered system");
+      } catch (std::exception &e) {
+        // Exception from SystemType::function (if any)
+        throw e;
+      }
+    } else {
       SystemType::function(
           world, this->mSystems.at(typenameStr<SystemType>())->mEntityIDs,
           std::forward<Args>(args)...);
-    } catch (std::out_of_range &e) {
-      throw std::runtime_error("SystemManager::execute: unregistered system");
-    } catch (std::exception &e) {
-      // Exception from SystemType::function (if any)
-      throw e;
     }
   }
 

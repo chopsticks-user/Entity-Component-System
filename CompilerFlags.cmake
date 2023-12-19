@@ -5,9 +5,14 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-set(gcc_like_cxx_flags -Wall;-Wextra;-pedantic;-Wextra;
+set(ExceptionFlag)
+if(ECS_ALLOW_EXCEPTIONS)
+    set(ExceptionFlag -DECS_ALLOW_EXCEPTIONS)
+endif()
+
+set(gcc_like_cxx_flags ${ExceptionFlag};-Wall;-Wextra;-pedantic;-Wextra;
     -Wshadow;-Wconversion;-Wunreachable-code)
-set(msvc_cxx_flags -W3)
+set(msvc_cxx_flags ${ExceptionFlag};-W3)
 
 message(${gcc_like_cxx_flags})
 

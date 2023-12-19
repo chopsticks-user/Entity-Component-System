@@ -24,14 +24,14 @@ public:
   // TODO: might need a method to deregister a component
 
   template <typename ComponentType> //
-  ComponentType &getComponent(u64 entityID)
+  ComponentType &getComponent(u64 entityID) ECS_NOEXCEPT
     requires CValidComponent<ComponentType>
   {
     return this->mComponentTable->get<ComponentType>(entityID);
   }
 
   template <typename ComponentType, typename EntityType> //
-  ComponentType &getComponent(const EntityType &entity)
+  ComponentType &getComponent(const EntityType &entity) ECS_NOEXCEPT
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
     return this->getComponent<ComponentType>(entity.getID());
@@ -86,7 +86,7 @@ public:
   }
 
   template <typename ComponentType> //
-  void removeComponent(u64 entityID)
+  void removeComponent(u64 entityID) ECS_NOEXCEPT
     requires CValidComponent<ComponentType>
   {
     //* entity must exist
@@ -98,14 +98,14 @@ public:
   }
 
   template <typename ComponentType, typename EntityType> //
-  void removeComponent(const EntityType &entity)
+  void removeComponent(const EntityType &entity) ECS_NOEXCEPT
     requires CValidComponent<ComponentType> && CValidEntity<EntityType>
   {
     this->removeComponent<ComponentType>(entity.getID());
   }
 
   template <typename... ComponentTypes> //
-  void removeComponents(u64 entityID) {
+  void removeComponents(u64 entityID) ECS_NOEXCEPT {
     auto argTuple = std::tuple<ComponentTypes...>();
     iterateTuple<0, ComponentTypes...>(argTuple, [&](auto component) {
       this->mComponentTable->remove<decltype(component)>(entityID);
@@ -119,7 +119,7 @@ public:
   }
 
   template <typename... ComponentTypes, typename EntityType> //
-  void removeComponents(const EntityType &entity)
+  void removeComponents(const EntityType &entity) ECS_NOEXCEPT
     requires CValidEntity<EntityType>
   {
     this->removeComponents<ComponentTypes...>(entity.getID());
@@ -128,7 +128,7 @@ public:
   //* =============================== Entity ==================================
 
   template <typename EntityType> //
-  EntityType getEntity(u64 entityID)
+  EntityType getEntity(u64 entityID) ECS_NOEXCEPT
     requires CValidEntity<EntityType>
   {
     return this->mEntityManager->get<EntityType>(entityID);
@@ -143,14 +143,15 @@ public:
 
   // TODO: add multiple entities in one call
 
-  void removeEntity(u64 entityID) {
+  // TODO: make this->mSystemManager->remove(entityID) noexcept
+  void removeEntity(u64 entityID) ECS_NOEXCEPT {
     this->mEntityManager->remove(entityID);
     this->mComponentTable->remove(entityID);
     this->mSystemManager->remove(entityID);
   }
 
   template <typename EntityType> //
-  void removeEntity(EntityType &entity)
+  void removeEntity(EntityType &entity) ECS_NOEXCEPT
     requires CValidEntity<EntityType>
   {
     this->removeEntity(entity.getID());
@@ -171,7 +172,7 @@ public:
   // TODO: might need a method to deregister a system
 
   template <typename SystemType, typename... Args> //
-  void execute(Args &&...args)
+  void execute(Args &&...args) ECS_NOEXCEPT
     requires CValidSystem<SystemType>
   {
     this->mSystemManager->execute<SystemType>(*this,
@@ -182,7 +183,7 @@ public:
 
   //* =========================================================================
 
-  void clear() {
+  void clear() noexcept {
     this->mEntityManager->clear();
     this->mComponentTable->clear();
     this->mSystemManager->clear();
@@ -190,13 +191,13 @@ public:
 
 private:
   template <typename SystemType> //
-  const DynamicBitset &getSystemSignature() const
+  const DynamicBitset &getSystemSignature() const ECS_NOEXCEPT
     requires CValidSystem<SystemType>
   {
     return this->mSystemManager->getQualifications<SystemType>();
   }
 
-  const DynamicBitset &getEntitySignature(u64 entityID) {
+  const DynamicBitset &getEntitySignature(u64 entityID) const ECS_NOEXCEPT {
     return this->mEntityManager->getSignature(entityID);
   }
 
