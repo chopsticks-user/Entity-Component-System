@@ -37,11 +37,15 @@ concept CValidEntity = std::move_constructible<EntityType> &&
 class EntityManager {
 public:
   EntityManager() = default;
-  ~EntityManager() = default;
+  ~EntityManager() noexcept = default;
   EntityManager(const EntityManager &) = delete;
   EntityManager(EntityManager &&) noexcept = default;
   EntityManager &operator=(const EntityManager &) = delete;
   EntityManager &operator=(EntityManager &&) noexcept = default;
+
+  bool exists(const u64 entityID) const noexcept {
+    return this->mEntityInfos.contains(entityID);
+  }
 
   u64 nEntities() const noexcept { return this->mEntityInfos.size(); }
 
@@ -49,18 +53,26 @@ public:
     this->mNComponents = nComponents;
   }
 
+  /**
+   * @throws std::out_of_range if entityID is not registered.
+   */
   template <typename EntityType> //
-  EntityType get(u64 entityID) const ECS_NOEXCEPT
+  EntityType get(u64 entityID) const noexcept(false)
     requires CValidEntity<EntityType>
   {
-    if constexpr (allowExceptions) {
-      expect(this->exists(entityID), "EntityManager::get: unknown entity");
+    if (!this->exists(entityID)) {
+      throw std::out_of_range("EntityManager::get: unknown entity");
     }
     return EntityType{entityID};
   }
 
+  /**
+   * @throws std::bad_alloc from std::unordered_map.
+   * @throws
+   * TODO: check if this->mCurrentID is overflow
+   */
   template <typename EntityType> //
-  EntityType add()
+  EntityType add() noexcept(false)
     requires CValidEntity<EntityType>
   {
     u64 newEntityId;
@@ -86,69 +98,35 @@ public:
     this->remove(entityBase->getID());
   }
 
-  const DynamicBitset &getSignature(u64 entityID) const ECS_NOEXCEPT {
-    if constexpr (allowExceptions) {
-      try {
-        return this->mEntityInfos.at(entityID);
-      } catch (std::out_of_range &e) {
-        throw std::runtime_error("EntityManager::getSignature: unknown entity");
-      }
-    } else {
-      this->mEntityInfos.at(entityID);
-    }
+  /**
+   * @throws std::out_of_range from std::unordered_map.
+   */
+  const DynamicBitset &getSignature(u64 entityID) const noexcept(false) {
+    return this->mEntityInfos.at(entityID);
   }
 
-  void setSignature(u64 entityID, u64 index, bool value = true) ECS_NOEXCEPT {
-    if constexpr (allowExceptions) {
-      //! Debug
-      if (index >= this->mNComponents) {
-        throw std::runtime_error(
-            "EntityManager::setSignature: index out of range");
-      }
-
-      try {
-        DynamicBitset &refSignature = this->mEntityInfos.at(entityID);
-        if (refSignature.size() != this->mNComponents) {
-          refSignature.resize(this->mNComponents);
-        }
-        refSignature.set(index, value);
-      } catch (std::out_of_range &e) {
-        throw std::runtime_error("EntityManager::setSignature: unknown entity");
-      }
-    } else {
-      DynamicBitset &refSignature = this->mEntityInfos.at(entityID);
-      if (refSignature.size() != this->mNComponents) {
-        refSignature.resize(this->mNComponents);
-      }
-      refSignature.set(index, value);
+  /**
+   * @throws std::out_of_range from std::unordered_map.
+   */
+  void setSignature(u64 entityID, u64 index, bool value = true) {
+    DynamicBitset &refSignature = this->mEntityInfos.at(entityID);
+    if (refSignature.size() != this->mNComponents) {
+      refSignature.resize(this->mNComponents);
     }
+    refSignature.set(index, value);
   }
 
-  void setSignature(u64 entityID, DynamicBitset newSignature) ECS_NOEXCEPT {
-    if constexpr (allowExceptions) {
-      //! Debug
-      expect(newSignature.size() == this->mNComponents,
-             "EntityManager::setSignature: incorrect nComponents");
-
-      try {
-        this->mEntityInfos.at(entityID) = std::move(newSignature);
-      } catch (std::out_of_range &e) {
-        throw std::runtime_error("EntityManager::setSignature: unknown entity");
-      }
-    } else {
-      this->mEntityInfos.at(entityID) = std::move(newSignature);
-    }
+  /**
+   * @throws std::out_of_range from std::unordered_map.
+   */
+  void setSignature(u64 entityID, DynamicBitset newSignature) {
+    this->mEntityInfos.at(entityID) = std::move(newSignature);
   }
 
   void clear() noexcept {
     this->mEntityInfos.clear();
     this->mCurrentID = 1;
     this->mNComponents = 0;
-  }
-
-private:
-  bool exists(const u64 entityID) const noexcept {
-    return this->mEntityInfos.find(entityID) != this->mEntityInfos.end();
   }
 
 private:

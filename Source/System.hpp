@@ -50,14 +50,28 @@ public:
   u64 getNSystems() const noexcept { return this->mSystems.size(); }
 
   template <typename SystemType> //
-  void reg(DynamicBitset qualifications = {})
+  bool exists() const noexcept
+    requires CValidSystem<SystemType>
+  {
+    return this->mSystems.contains(typenameStr<SystemType>());
+  }
+
+  bool exists(cString typenameStr) const noexcept {
+    return this->mSystems.contains(std::move(typenameStr));
+  }
+
+  /**
+   * @brief System must be static, that is, the qualified condition does not
+   * change. The second registeration of a system type will be ignore.
+   * @throws std::bad_alloc from either std::unique_ptr or std::unordered_map
+   */
+  template <typename SystemType> //
+  void reg(DynamicBitset qualifications = {}) noexcept(false)
     requires CValidSystem<SystemType>
   {
     auto typeStr = typenameStr<SystemType>();
 
-    //* System must be static, that is, the qualified condition does not change.
-    //* Also, a system cannot be registered more than once.
-    if (this->mSystems.find(typeStr) != this->mSystems.end()) {
+    if (this->exists(typeStr)) {
       return; // already registered
     }
 
@@ -67,76 +81,57 @@ public:
         std::unique_ptr<System>(std::move(pSystemBase));
   }
 
+  /**
+   * @throws std::out_of_range from std::unordered_map
+   */
   template <typename SystemType> //
-  std::unique_ptr<SystemType> get() const ECS_NOEXCEPT
+  std::unique_ptr<SystemType> get() const noexcept(false)
     requires CValidSystem<SystemType>
   {
-    if constexpr (allowExceptions) {
-      try {
-        return std::static_pointer_cast<SystemType>(
-            this->mSystems.at(typenameStr<SystemType>()));
-      } catch (std::out_of_range &e) {
-        throw std::runtime_error("SystemManaged::get: unregistered system");
-      }
-    } else {
-      return std::static_pointer_cast<SystemType>(
-          this->mSystems.at(typenameStr<SystemType>()));
-    }
+    return std::static_pointer_cast<SystemType>(
+        this->mSystems.at(typenameStr<SystemType>()));
   }
 
+  /**
+   * @throws std::out_of_range from std::unordered_map
+   */
   template <typename SystemType> //
-  const DynamicBitset &getQualifications() const ECS_NOEXCEPT
+  const DynamicBitset &getQualifications() const noexcept(false)
     requires CValidSystem<SystemType>
   {
     return this->get<SystemType>()->mQualifications;
   }
 
+  /**
+   * @throws std::out_of_range from std::unordered_map
+   */
   template <typename SystemType> //
-  const DynamicBitset &
-  setQualifications(DynamicBitset qualifications) const ECS_NOEXCEPT
+  const DynamicBitset &setQualifications(DynamicBitset qualifications) const
+      noexcept(false)
     requires CValidSystem<SystemType>
   {
     return this->get<SystemType>()->mQualifications = std::move(qualifications);
   }
 
-  template <typename SystemType> //
-  void add(u64 entityID, const DynamicBitset &entitySignature)
-    requires CValidSystem<SystemType>
-  {
-    if (!entitySignature.equals(this->getQualifications<SystemType>())) {
-      throw std::runtime_error("SystemManaged::add: unqualified entity");
-    }
-  }
-
-  template <typename SystemType> //
-  void remove(u64 entityID) ECS_NOEXCEPT
-    requires CValidSystem<SystemType>
-  {
-    this->get<SystemType>()->mQualifiedEntitiesIDs.remove(entityID);
-  }
-
-  template <typename SystemType, typename EntityType> //
-  void remove(const EntityType &entity) ECS_NOEXCEPT
-    requires CValidSystem<SystemType> && CValidEntity<EntityType>
-  {
-    this->remove<SystemType>(entity.getID());
-  }
-
-  void remove(u64 entityID) ECS_NOEXCEPT {
+  void remove(u64 entityID) noexcept {
     for (auto &p : this->mSystems) {
-      // p.second->mEntityIDs.erase(entityID);
       p.second->mEntityIDs.remove(entityID);
     }
   }
 
   template <typename EntityType> //
-  void remove(const EntityType &entity) ECS_NOEXCEPT
+  void remove(const EntityType &entity) noexcept
     requires CValidEntity<EntityType>
   {
     this->remove(entity.getID());
   }
 
-  void update(u64 entityID, const DynamicBitset &newEntitySignature) {
+  /**
+   * @throws std::bad_alloc from either container::DynamicBitset or
+   * container::SparseVector.
+   */
+  void update(u64 entityID,
+              const DynamicBitset &newEntitySignature) noexcept(false) {
     for (auto &p : this->mSystems) {
       const DynamicBitset &requiredSignature = p.second->mQualifications;
 
@@ -146,8 +141,12 @@ public:
     }
   }
 
+  /**
+   * @throws std::bad_alloc from either container::DynamicBitset or
+   * container::SparseVector.
+   */
   template <typename EntityType> //
-  void update(const EntityType &entity)
+  void update(const EntityType &entity) noexcept(false)
     requires CValidEntity<EntityType>
   {
     this->update(entity.getID());
@@ -155,27 +154,18 @@ public:
 
   void clear() noexcept { this->mSystems.clear(); }
 
+  /**
+   * @throws std::out_of_range from std::unordered_map and any exceptions thrown
+   * by user's implementation of System::function.
+   */
   template <typename SystemType, typename... Args> //
-  void execute(World &world, Args &&...args) ECS_NOEXCEPT
+  void execute(World &world, Args &&...args) noexcept(false)
     requires CValidSystem<SystemType> &&
              CValidSystemFunction<decltype(SystemType::function)>
   {
-    if constexpr (allowExceptions) {
-      try {
-        SystemType::function(
-            world, this->mSystems.at(typenameStr<SystemType>())->mEntityIDs,
-            std::forward<Args>(args)...);
-      } catch (std::out_of_range &e) {
-        throw std::runtime_error("SystemManager::execute: unregistered system");
-      } catch (std::exception &e) {
-        // Exception from SystemType::function (if any)
-        throw e;
-      }
-    } else {
-      SystemType::function(
-          world, this->mSystems.at(typenameStr<SystemType>())->mEntityIDs,
-          std::forward<Args>(args)...);
-    }
+    SystemType::function(
+        world, this->mSystems.at(typenameStr<SystemType>())->mEntityIDs,
+        std::forward<Args>(args)...);
   }
 
 private:
