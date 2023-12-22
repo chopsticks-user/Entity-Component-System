@@ -1,0 +1,8 @@
+
+
+
+@PACKAGE_INIT@
+
+# file(MAKE_DIRECTORY @PROJECT_SOURCE_DIR@/Include)
+set_and_check(@PROJECT_NAME@_INCLUDE_DIR "@PROJECT_SOURCE_DIR@/Include")
+check_required_components("@PROJECT_NAME@")

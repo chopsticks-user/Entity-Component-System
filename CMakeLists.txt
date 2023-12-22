@@ -1,15 +1,15 @@
 
 
+
 cmake_minimum_required(VERSION 3.15)
 project(ECS VERSION 1.0.0 LANGUAGES CXX)
 
-include(CompilerFlags.cmake)
+# include(GNUInstallDirs)
+include(CMake/BuildOptions.cmake)
+include(CMake/CompilerFlags.cmake)
 
-add_library(${PROJECT_NAME} INTERFACE)
-include_directories(${PROJECT_SOURCE_DIR}/Source 
-    ${PROJECT_SOURCE_DIR}/Libs/Container/Include
-)
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/Examples)
+add_subdirectory(Include)
+# add_subdirectory(Tests)
+add_subdirectory(Examples)
 
 

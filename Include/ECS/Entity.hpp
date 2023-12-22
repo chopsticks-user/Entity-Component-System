@@ -1,5 +1,5 @@
-#ifndef ECS_SOURCE_ENTITY_HPP
-#define ECS_SOURCE_ENTITY_HPP
+#ifndef ECS_INCLUDE_ECS_ENTITY_HPP
+#define ECS_INCLUDE_ECS_ENTITY_HPP
 
 #include "Base.hpp"
 
@@ -144,4 +144,4 @@ private:
 
 } // namespace ecs
 
-#endif // ECS_SOURCE_ENTITY_HPP
+#endif // ECS_INCLUDE_ECS_ENTITY_HPP

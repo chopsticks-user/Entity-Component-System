@@ -1,5 +1,5 @@
-#ifndef ECS_SOURCE_BASE_HPP
-#define ECS_SOURCE_BASE_HPP
+#ifndef ECS_INCLUDE_ECS_BASE_HPP
+#define ECS_INCLUDE_ECS_BASE_HPP
 
 #include <algorithm>
 #include <concepts>
@@ -67,4 +67,4 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
 
 } // namespace ecs
 
-#endif // ECS_SOURCE_BASE_HPP
+#endif // ECS_INCLUDE_ECS_BASE_HPP

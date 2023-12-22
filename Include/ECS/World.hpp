@@ -1,5 +1,5 @@
-#ifndef ECS_HPP
-#define ECS_HPP
+#ifndef ECS_INCLUDE_ECS_WORLD_HPP
+#define ECS_INCLUDE_ECS_WORLD_HPP
 
 #include "Base.hpp"
 #include "Component.hpp"
@@ -267,4 +267,4 @@ private:
 
 } // namespace ecs
 
-#endif // ECS_HPP
+#endif // ECS_INCLUDE_ECS_WORLD_HPP

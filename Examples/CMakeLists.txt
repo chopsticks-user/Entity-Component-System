@@ -1,5 +1,11 @@
 
 
+
+cmake_minimum_required(VERSION 3.15)
+project(ECSExamples LANGUAGES CXX)
+
+find_package(ECS CONFIG REQUIRED PATHS ${CMAKE_BINARY_DIR})
+
 find_library(SFMLGraphicsLib NAMES sfml-graphics)
 find_library(SFMLWindowLib NAMES sfml-window)
 find_library(SFMLSystemLib NAMES sfml-system)
@@ -12,13 +18,14 @@ endif()
 
 file(GLOB ExamplePaths ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 foreach (ExamplePath ${ExamplePaths})
-    get_filename_component(exampleName ${ExamplePath} NAME_WLE)
-    add_executable(${exampleName} ${ExamplePath})
-    target_include_directories(${exampleName}
-        PUBLIC ${PROJECT_SOURCE_DIR}/Include
+    get_filename_component(ExampleFileName ${ExamplePath} NAME_WLE)
+    add_executable(${ExampleFileName} ${ExamplePath})
+    target_include_directories(${ExampleFileName}
+        PRIVATE ${ECS_INCLUDE_DIR}
     )
-    target_link_libraries(${exampleName}
+    target_link_libraries(${ExampleFileName}
         PRIVATE CompilerFlags
+        PRIVATE ECS
         PRIVATE sfml-graphics
         PRIVATE sfml-window
         PRIVATE sfml-system
