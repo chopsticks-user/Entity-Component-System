@@ -138,30 +138,11 @@ public:
 
   void update(u64 entityID, const DynamicBitset &newEntitySignature) {
     for (auto &p : this->mSystems) {
-      const auto &requiredSignature = p.second->mQualifications;
+      const DynamicBitset &requiredSignature = p.second->mQualifications;
 
-      // requiredSignature.equals(newEntitySignature)
-      //     ? p.second->mEntityIDs.add(entityID, entityID)
-      //     : p.second->mEntityIDs.remove(entityID);
-
-      // if (requiredSignature.equals(newEntitySignature)) {
-      //   p.second->mEntityIDs.add(entityID, entityID);
-      // } else {
-      //   p.second->mEntityIDs.remove(entityID);
-      // }
-
-      u64 i = 0;
-      for (; i < requiredSignature.size(); ++i) {
-        if (requiredSignature.get(i) == true &&
-            newEntitySignature.get(i) == false) {
-          p.second->mEntityIDs.remove(entityID);
-          break;
-        }
-      }
-
-      if (i == requiredSignature.size()) {
-        p.second->mEntityIDs.add(entityID, entityID);
-      }
+      (requiredSignature & newEntitySignature) == requiredSignature
+          ? p.second->mEntityIDs.add(entityID, entityID)
+          : p.second->mEntityIDs.remove(entityID);
     }
   }
 

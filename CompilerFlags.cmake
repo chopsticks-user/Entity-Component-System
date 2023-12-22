@@ -14,10 +14,8 @@ if(ECS_ALLOW_EXCEPTIONS)
 endif()
 
 set(gcc_like_cxx_flags ${ExceptionFlag};-Wall;-Wextra;-pedantic;-Wextra;
-    -Wshadow;-Wconversion;-Wunreachable-code)
+    -Wshadow;-Wconversion;-Wunreachable-code;-Wno-missing-field-initializers)
 set(msvc_cxx_flags ${ExceptionFlag};-W3)
-
-message(${gcc_like_cxx_flags})
 
 add_library(CompilerFlags INTERFACE)
 target_compile_features(CompilerFlags INTERFACE cxx_std_20)

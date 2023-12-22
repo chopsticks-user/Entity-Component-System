@@ -141,10 +141,6 @@ void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
-  if constexpr (ecs::allowExceptions) {
-    std::cout << "Allow exceptions\n";
-  }
-
   ecs::u64 nObjects = 1000;
   ecs::f32 downwardAccel = 1e-5f;
   if (argc > 1) {
