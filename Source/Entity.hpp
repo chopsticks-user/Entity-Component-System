@@ -111,7 +111,7 @@ public:
         if (refSignature.size() != this->mNComponents) {
           refSignature.resize(this->mNComponents);
         }
-        refSignature[index] = value;
+        refSignature.set(index, value);
       } catch (std::out_of_range &e) {
         throw std::runtime_error("EntityManager::setSignature: unknown entity");
       }
@@ -120,7 +120,7 @@ public:
       if (refSignature.size() != this->mNComponents) {
         refSignature.resize(this->mNComponents);
       }
-      refSignature[index] = value;
+      refSignature.set(index, value);
     }
   }
 

@@ -103,8 +103,7 @@ public:
   void add(u64 entityID, const DynamicBitset &entitySignature)
     requires CValidSystem<SystemType>
   {
-    if (!std::equal(entitySignature.begin(), entitySignature.end(),
-                    this->getQualifications<SystemType>().begin())) {
+    if (!entitySignature.equals(this->getQualifications<SystemType>())) {
       throw std::runtime_error("SystemManaged::add: unqualified entity");
     }
   }
@@ -141,17 +140,26 @@ public:
     for (auto &p : this->mSystems) {
       const auto &requiredSignature = p.second->mQualifications;
 
+      // requiredSignature.equals(newEntitySignature)
+      //     ? p.second->mEntityIDs.add(entityID, entityID)
+      //     : p.second->mEntityIDs.remove(entityID);
+
+      // if (requiredSignature.equals(newEntitySignature)) {
+      //   p.second->mEntityIDs.add(entityID, entityID);
+      // } else {
+      //   p.second->mEntityIDs.remove(entityID);
+      // }
+
       u64 i = 0;
       for (; i < requiredSignature.size(); ++i) {
-        if (requiredSignature[i] == true && newEntitySignature[i] == false) {
-          // p.second->mEntityIDs.erase(entityID);
+        if (requiredSignature.get(i) == true &&
+            newEntitySignature.get(i) == false) {
           p.second->mEntityIDs.remove(entityID);
           break;
         }
       }
 
       if (i == requiredSignature.size()) {
-        // p.second->mEntityIDs.insert(entityID);
         p.second->mEntityIDs.add(entityID, entityID);
       }
     }

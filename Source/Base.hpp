@@ -14,6 +14,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include <Container/DynamicBitset.hpp>
+
 namespace ecs {
 
 typedef int8_t i8;
@@ -72,7 +74,8 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
   using type2 = Arg2Type;
 };
 
-typedef std::vector<bool> DynamicBitset;
+// typedef std::vector<bool> DynamicBitset;
+using container::DynamicBitset;
 
 class ISparseVector {
 public:

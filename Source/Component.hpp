@@ -125,7 +125,8 @@ public:
     DynamicBitset signature(this->mCNameToIndex.size());
     auto argTuple = std::tuple<ComponentTypes...>();
     iterateTuple<0, ComponentTypes...>(argTuple, [&](auto arg) {
-      signature[this->getIndex<decltype(arg)>()] = true;
+      // signature[this->getIndex<decltype(arg)>()] = true;
+      signature.set(this->getIndex<decltype(arg)>());
     });
     return signature;
   }

@@ -1,8 +1,11 @@
+
+
+
 set(gcc_like_cxx $<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>)
 set(msvc_cxx $<COMPILE_LANG_AND_ID:CXX,MSVC>)
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(ExceptionFlag)
@@ -15,7 +18,6 @@ set(gcc_like_cxx_flags ${ExceptionFlag};-Wall;-Wextra;-pedantic;-Wextra;
 set(msvc_cxx_flags ${ExceptionFlag};-W3)
 
 message(${gcc_like_cxx_flags})
-
 
 add_library(CompilerFlags INTERFACE)
 target_compile_features(CompilerFlags INTERFACE cxx_std_20)

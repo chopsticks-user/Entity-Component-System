@@ -89,7 +89,7 @@ void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
 
   std::vector<ecs::u64> entityIDs(nObjects);
 
-  std::srand(std::time(nullptr));
+  std::srand(static_cast<ecs::u32>(std::time(nullptr)));
   for (auto &entityID : entityIDs) {
     auto entity = scence.addEntity<ERect>();
     entityID = entity.getID();
@@ -101,7 +101,10 @@ void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
         10.0f + float(std::rand() / ((RAND_MAX + 1u) / (int)screenHeight - 60));
 
     scence.addComponents<CMotion, CMesh<nVertices>>(
-        entity, CMotion{.velocity = {0.0f, 0.0f}},
+        entity,
+        CMotion{
+            .velocity = sf::Vector2f{0.0f, 0.0f},
+        },
         CMesh<nVertices>{
             .position =
                 {
