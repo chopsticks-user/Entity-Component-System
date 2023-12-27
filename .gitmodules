@@ -1,3 +1,6 @@
 [submodule "Libs/Container"]
 	path = Libs/Container
 	url = https://github.com/chopsticks-user/Container-Collection.git
+[submodule "Libs/TPL"]
+	path = Libs/TPL
+	url = https://github.com/chopsticks-user/Thread-Pool-Cpp.git
