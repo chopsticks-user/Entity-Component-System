@@ -15,9 +15,8 @@ set(gcc_like_cxx_flags ${ExceptionFlag};-Wall;-Wextra;-pedantic;-Wextra;
     -Wshadow;-Wconversion;-Wunreachable-code;-Wno-missing-field-initializers)
 set(msvc_cxx_flags ${ExceptionFlag};-W3)
 
-add_library(CompilerFlags INTERFACE)
-# target_compile_features(CompilerFlags INTERFACE cxx_std_20)
-target_compile_options(CompilerFlags INTERFACE
+add_library(${PROJECT_NAME}_CompilerFlags INTERFACE)
+target_compile_options(${PROJECT_NAME}_CompilerFlags INTERFACE
     $<${gcc_like_cxx}: $<BUILD_INTERFACE: ${gcc_like_cxx_flags}>>
     $<${msvc_cxx}: $<BUILD_INTERFACE: ${msvc_cxx_flags}>>
 )

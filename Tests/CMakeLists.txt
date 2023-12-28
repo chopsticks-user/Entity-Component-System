@@ -14,7 +14,7 @@ foreach (TestPath ${TestPaths})
         PRIVATE ${ECS_INCLUDE_DIR}
     )
     target_link_libraries(${TestFileName}
-        PRIVATE CompilerFlags
+        PRIVATE ECSCompilerFlags
         PRIVATE ECS
     )
 endforeach (TestPath ${TestPaths})

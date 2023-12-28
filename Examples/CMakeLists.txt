@@ -24,7 +24,7 @@ foreach (ExamplePath ${ExamplePaths})
         PRIVATE ${ECS_INCLUDE_DIR}
     )
     target_link_libraries(${ExampleFileName}
-        PRIVATE CompilerFlags
+        PRIVATE ECS_CompilerFlags
         PRIVATE ECS
         PRIVATE sfml-graphics
         PRIVATE sfml-window

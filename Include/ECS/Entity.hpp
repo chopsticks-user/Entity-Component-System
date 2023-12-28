@@ -130,11 +130,9 @@ public:
   }
 
 private:
-  // const World &mRefWorld;
   std::unordered_map<u64, DynamicBitset> mEntityInfos;
   u64 mCurrentID = 1;
   u64 mNComponents = 0;
-  // std::queue<u64> mRecycledIDs = {};
 };
 
 #define ECS_SIMPLE_ENTITY_CLASS(EntityTypename)                                \

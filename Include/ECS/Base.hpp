@@ -1,6 +1,9 @@
 #ifndef ECS_INCLUDE_ECS_BASE_HPP
 #define ECS_INCLUDE_ECS_BASE_HPP
 
+#include <Container/DynamicBitset.hpp>
+#include <Container/SparseVector.hpp>
+
 #include <algorithm>
 #include <concepts>
 #include <memory>
@@ -13,9 +16,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include <Container/DynamicBitset.hpp>
-#include <Container/SparseVector.hpp>
 
 namespace ecs {
 

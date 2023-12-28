@@ -1,11 +1,6 @@
 
 
 
-
-find_package(Container CONFIG REQUIRED 
-    PATHS ${PROJECT_SOURCE_DIR}/Libs/Container/Build
-)
-
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE
     ${PROJECT_SOURCE_DIR}/Include
@@ -23,7 +18,6 @@ install(TARGETS ${PROJECT_NAME}
         PUBLIC_HEADER DESTINATION 
             ${PROJECT_SOURCE_DIR}/Include/${PROJECT_NAME}
 )
-
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${PROJECT_NAME}ConfigVersion.cmake"
                                  VERSION ${PROJECT_VERSION}
