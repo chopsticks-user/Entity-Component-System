@@ -5,9 +5,6 @@
 
 namespace ecs {
 
-class EntityManager;
-class World;
-
 class Entity {
   friend class EntityManager;
 
@@ -28,11 +25,6 @@ private:
 private:
   u64 mID;
 };
-
-template <typename EntityType>
-concept CValidEntity = std::move_constructible<EntityType> &&
-                       std::derived_from<EntityType, Entity> &&
-                       !std::is_same_v<EntityType, Entity>;
 
 class EntityManager {
 public:
@@ -134,11 +126,6 @@ private:
   u64 mCurrentID = 1;
   u64 mNComponents = 0;
 };
-
-#define ECS_SIMPLE_ENTITY_CLASS(EntityTypename)                                \
-  class EntityTypename : public ecs::Entity {                                  \
-    using Entity::Entity;                                                      \
-  }
 
 } // namespace ecs
 

@@ -8,11 +8,6 @@ namespace ecs {
 
 struct Component {};
 
-template <typename ComponentType>
-concept CValidComponent = std::copy_constructible<ComponentType> &&
-                          std::derived_from<ComponentType, Component> &&
-                          !std::is_same_v<ComponentType, Component>;
-
 class ComponentTable {
 public:
   ComponentTable() = default;

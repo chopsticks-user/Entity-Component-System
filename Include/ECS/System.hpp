@@ -6,8 +6,6 @@
 
 namespace ecs {
 
-class World;
-
 class System {
   friend class SystemManager;
 
@@ -26,17 +24,6 @@ private:
   UniqueIDContainer mEntityIDs = {};
   DynamicBitset mQualifications = {};
 };
-
-template <typename SystemType>
-concept CValidSystem = std::move_constructible<SystemType> &&
-                       std::derived_from<SystemType, System> &&
-                       !std::is_same_v<SystemType, System>;
-
-template <typename FunctionType>
-concept CValidSystemFunction =
-    std::is_same_v<typename First2ArgTypes<FunctionType>::type1, World &> &&
-    std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
-                   const UniqueIDContainer &>;
 
 class SystemManager {
 public:

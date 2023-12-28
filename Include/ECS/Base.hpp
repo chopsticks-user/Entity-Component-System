@@ -65,6 +65,42 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
   using type2 = Arg2Type;
 };
 
+class Entity;
+class EntityManager;
+
+class Component;
+class ComponentTable;
+
+class System;
+class SystemManager;
+
+class World;
+
+#define ECS_SIMPLE_ENTITY_CLASS(EntityTypename)                                \
+  class EntityTypename : public ecs::Entity {                                  \
+    using Entity::Entity;                                                      \
+  }
+
+template <typename EntityType>
+concept CValidEntity = std::move_constructible<EntityType> &&
+                       std::derived_from<EntityType, Entity> &&
+                       !std::is_same_v<EntityType, Entity>;
+
+template <typename ComponentType>
+concept CValidComponent = std::copy_constructible<ComponentType> &&
+                          std::derived_from<ComponentType, Component> &&
+                          !std::is_same_v<ComponentType, Component>;
+
+template <typename SystemType>
+concept CValidSystem = std::move_constructible<SystemType> &&
+                       std::derived_from<SystemType, System> &&
+                       !std::is_same_v<SystemType, System>;
+
+template <typename FunctionType>
+concept CValidSystemFunction =
+    std::is_same_v<typename First2ArgTypes<FunctionType>::type1, World &> &&
+    std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
+                   const UniqueIDContainer &>;
 } // namespace ecs
 
 #endif // ECS_INCLUDE_ECS_BASE_HPP
