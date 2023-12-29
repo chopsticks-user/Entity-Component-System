@@ -1,8 +1,9 @@
-#ifndef ECS_INCLUDE_ECS_BASE_HPP
-#define ECS_INCLUDE_ECS_BASE_HPP
+#ifndef TORA_INCLUDE_TORA_BASE_HPP
+#define TORA_INCLUDE_TORA_BASE_HPP
 
-#include <Container/DynamicBitset.hpp>
-#include <Container/SparseVector.hpp>
+#if __cplusplus >= 202002L
+#include <Nezumi/DynamicBitset.hpp>
+#include <Nezumi/SparseVector.hpp>
 
 #include <algorithm>
 #include <concepts>
@@ -17,7 +18,13 @@
 #include <unordered_set>
 #include <vector>
 
-namespace ecs {
+namespace tora {
+
+constexpr bool cppAtLeast14 = __cplusplus >= 201402L;
+constexpr bool cppAtLeast17 = __cplusplus >= 201703L;
+constexpr bool cppAtLeast20 = __cplusplus >= 202002L;
+constexpr bool cpp14 = cppAtLeast14 && !cppAtLeast17;
+constexpr bool cpp17 = cppAtLeast17 && !cppAtLeast20;
 
 typedef int8_t i8;
 typedef int16_t i16;
@@ -37,9 +44,9 @@ typedef uint32_t b32;
 
 typedef const char *cString;
 
-using container::DynamicBitset;
-using container::ISparseVector;
-using container::SparseVector;
+using nezumi::DynamicBitset;
+using nezumi::ISparseVector;
+using nezumi::SparseVector;
 typedef SparseVector<u64> UniqueIDContainer;
 
 template <typename Type> //
@@ -76,8 +83,8 @@ class SystemManager;
 
 class World;
 
-#define ECS_SIMPLE_ENTITY_CLASS(EntityTypename)                                \
-  class EntityTypename : public ecs::Entity {                                  \
+#define TORA_SIMPLE_ENTITY_CLASS(EntityTypename)                               \
+  class EntityTypename : public tora::Entity {                                 \
     using Entity::Entity;                                                      \
   }
 
@@ -101,6 +108,9 @@ concept CValidSystemFunction =
     std::is_same_v<typename First2ArgTypes<FunctionType>::type1, World &> &&
     std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
                    const UniqueIDContainer &>;
-} // namespace ecs
+} // namespace tora
+#else  // C++17 or older
+static_assert(__cplusplus >= 202002L, "Nezumi library requires C++20 or newer");
+#endif // C++20 or newer
 
-#endif // ECS_INCLUDE_ECS_BASE_HPP
+#endif // TORA_INCLUDE_TORA_BASE_HPP

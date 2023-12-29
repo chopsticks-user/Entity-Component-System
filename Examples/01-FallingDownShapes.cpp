@@ -1,32 +1,32 @@
-#include <ECS/ECS.hpp>
+#include <Tora/Tora.hpp>
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
-static constexpr ecs::u64 nVertices = 4;
+static constexpr tora::u64 nVertices = 4;
 
-struct CMotion : public ecs::Component {
+struct CMotion : public tora::Component {
   sf::Vector2f velocity;
 };
 
-template <ecs::u64 nVerts> //
-struct CMesh : public ecs::Component {
+template <tora::u64 nVerts> //
+struct CMesh : public tora::Component {
   sf::Vector2f position[nVerts];
   sf::Color color[nVerts];
   sf::Vector2f texCoords[nVerts];
 };
 
-ECS_SIMPLE_ENTITY_CLASS(ERect);
+TORA_SIMPLE_ENTITY_CLASS(ERect);
 
-struct SReappear : public ecs::System {
-  static void function(ecs::World &world,
-                       const ecs::SparseVector<ecs::u64> &entityIDs,
+struct SReappear : public tora::System {
+  static void function(tora::World &world,
+                       const tora::SparseVector<tora::u64> &entityIDs,
                        float screenHeight) {
     for (auto entityID : entityIDs) {
       auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
 
       if (mesh.position[nVertices - 1].y > screenHeight) {
-        for (ecs::u64 i = 0; i < nVertices; ++i) {
+        for (tora::u64 i = 0; i < nVertices; ++i) {
           mesh.position[i].y -= screenHeight;
         }
       }
@@ -34,9 +34,9 @@ struct SReappear : public ecs::System {
   }
 };
 
-struct SFallDown : public ecs::System {
-  static void function(ecs::World &world,
-                       const ecs::SparseVector<ecs::u64> &entityIDs,
+struct SFallDown : public tora::System {
+  static void function(tora::World &world,
+                       const tora::SparseVector<tora::u64> &entityIDs,
                        float downwardAccel) {
     for (auto entityID : entityIDs) {
       auto &motion = world.getComponent<CMotion>(entityID);
@@ -44,22 +44,22 @@ struct SFallDown : public ecs::System {
 
       motion.velocity.y += downwardAccel;
 
-      for (ecs::u64 i = 0; i < nVertices; ++i) {
+      for (tora::u64 i = 0; i < nVertices; ++i) {
         mesh.position[i] += motion.velocity;
       }
     }
   }
 };
 
-struct SRender : public ecs::System {
-  static void function(ecs::World &world,
-                       const ecs::SparseVector<ecs::u64> &entityIDs,
+struct SRender : public tora::System {
+  static void function(tora::World &world,
+                       const tora::SparseVector<tora::u64> &entityIDs,
                        sf::RenderWindow &renderer) {
     for (auto entityID : entityIDs) {
       auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
       sf::VertexArray shape(sf::TriangleStrip, nVertices);
 
-      for (ecs::u64 i = 0; i < nVertices; ++i) {
+      for (tora::u64 i = 0; i < nVertices; ++i) {
         shape[i].position = mesh.position[i];
         shape[i].color = mesh.color[i];
         shape[i].texCoords = mesh.texCoords[i];
@@ -70,7 +70,7 @@ struct SRender : public ecs::System {
   }
 };
 
-void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
+void mainLoop(tora::u64 nObjects, tora::f32 downwardAccel) {
   const float screenWidth = 1024.0f;
   const float screenHeight = 768.0f;
   const float rectSize = 10.0f;
@@ -78,7 +78,7 @@ void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
   sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight),
                           "Falling down shapes");
 
-  ecs::World scence;
+  tora::World scence;
 
   scence.registerComponent<CMotion>();
   scence.registerComponent<CMesh<nVertices>>();
@@ -87,9 +87,9 @@ void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
   scence.registerSystem<SRender, CMesh<nVertices>>();
   scence.registerSystem<SReappear, CMesh<nVertices>>();
 
-  std::vector<ecs::u64> entityIDs(nObjects);
+  std::vector<tora::u64> entityIDs(nObjects);
 
-  std::srand(static_cast<ecs::u32>(std::time(nullptr)));
+  std::srand(static_cast<tora::u32>(std::time(nullptr)));
   for (auto &entityID : entityIDs) {
     auto entity = scence.addEntity<ERect>();
     entityID = entity.getID();
@@ -141,8 +141,8 @@ void mainLoop(ecs::u64 nObjects, ecs::f32 downwardAccel) {
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
-  ecs::u64 nObjects = 1000;
-  ecs::f32 downwardAccel = 1e-5f;
+  tora::u64 nObjects = 1000;
+  tora::f32 downwardAccel = 1e-5f;
   if (argc > 1) {
     nObjects = std::stoi(argv[1]);
   }

@@ -1,12 +1,13 @@
-#ifndef ECS_INCLUDE_ECS_WORLD_HPP
-#define ECS_INCLUDE_ECS_WORLD_HPP
+#ifndef TORA_INCLUDE_TORA_WORLD_HPP
+#define TORA_INCLUDE_TORA_WORLD_HPP
 
+#if __cplusplus >= 202002L
 #include "Base.hpp"
 #include "Component.hpp"
 #include "Entity.hpp"
 #include "System.hpp"
 
-namespace ecs {
+namespace tora {
 
 class World {
 public:
@@ -265,6 +266,7 @@ private:
       std::make_unique<SystemManager>();
 };
 
-} // namespace ecs
+} // namespace tora
+#endif // C++20 or newer
 
-#endif // ECS_INCLUDE_ECS_WORLD_HPP
+#endif // TORA_INCLUDE_TORA_WORLD_HPP

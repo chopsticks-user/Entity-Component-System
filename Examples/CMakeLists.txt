@@ -2,9 +2,11 @@
 
 
 cmake_minimum_required(VERSION 3.15)
-project(ECSExamples LANGUAGES CXX)
+project(Tora_Examples LANGUAGES CXX)
 
-find_package(ECS CONFIG REQUIRED PATHS ${CMAKE_BINARY_DIR})
+if(${CMAKE_CXX_STANDARD} LESS 20)
+    return()
+endif()
 
 find_library(SFMLGraphicsLib NAMES sfml-graphics)
 find_library(SFMLWindowLib NAMES sfml-window)
@@ -20,12 +22,8 @@ file(GLOB ExamplePaths ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 foreach (ExamplePath ${ExamplePaths})
     get_filename_component(ExampleFileName ${ExamplePath} NAME_WLE)
     add_executable(${ExampleFileName} ${ExamplePath})
-    target_include_directories(${ExampleFileName}
-        PRIVATE ${ECS_INCLUDE_DIR}
-    )
     target_link_libraries(${ExampleFileName}
-        PRIVATE ECS_CompilerFlags
-        PRIVATE ECS
+        PRIVATE Tora
         PRIVATE sfml-graphics
         PRIVATE sfml-window
         PRIVATE sfml-system

@@ -1,10 +1,11 @@
-#ifndef ECS_INCLUDE_ECS_SYSTEM_HPP
-#define ECS_INCLUDE_ECS_SYSTEM_HPP
+#ifndef TORA_INCLUDE_TORA_SYSTEM_HPP
+#define TORA_INCLUDE_TORA_SYSTEM_HPP
 
+#if __cplusplus >= 202002L
 #include "Base.hpp"
 #include "Entity.hpp"
 
-namespace ecs {
+namespace tora {
 
 class System {
   friend class SystemManager;
@@ -159,6 +160,7 @@ private:
   std::unordered_map<cString, std::unique_ptr<System>> mSystems = {};
 };
 
-} // namespace ecs
+} // namespace tora
+#endif // C++20 or newer
 
-#endif // ECS_INCLUDE_ECS_SYSTEM_HPP
+#endif // TORA_INCLUDE_TORA_SYSTEM_HPP

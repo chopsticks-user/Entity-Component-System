@@ -1,6 +1,6 @@
-[submodule "Libs/Container"]
-	path = Libs/Container
-	url = https://github.com/chopsticks-user/Container-Collection.git
-[submodule "Libs/TPL"]
-	path = Libs/TPL
-	url = https://github.com/chopsticks-user/Thread-Pool-Cpp.git
+[submodule "Libs/Nezumi"]
+	path = Libs/Nezumi
+	url = https://github.com/chopsticks-user/Nezumi.git
+[submodule "Libs/Ushi"]
+	path = Libs/Ushi
+	url = https://github.com/chopsticks-user/Ushi.git

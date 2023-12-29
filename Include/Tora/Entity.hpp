@@ -1,9 +1,10 @@
-#ifndef ECS_INCLUDE_ECS_ENTITY_HPP
-#define ECS_INCLUDE_ECS_ENTITY_HPP
+#ifndef TORA_INCLUDE_TORA_ENTITY_HPP
+#define TORA_INCLUDE_TORA_ENTITY_HPP
 
+#if __cplusplus >= 202002L
 #include "Base.hpp"
 
-namespace ecs {
+namespace tora {
 
 class Entity {
   friend class EntityManager;
@@ -127,6 +128,7 @@ private:
   u64 mNComponents = 0;
 };
 
-} // namespace ecs
+} // namespace tora
+#endif // C++20 or newer
 
-#endif // ECS_INCLUDE_ECS_ENTITY_HPP
+#endif // TORA_INCLUDE_TORA_ENTITY_HPP

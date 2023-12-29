@@ -1,35 +1,35 @@
-#include <ECS/ECS.hpp>
+#include <Tora/Tora.hpp>
 
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
 
-static constexpr ecs::u64 nVertices = 4;
+static constexpr tora::u64 nVertices = 4;
 
-struct CInput : public ecs::Component {
+struct CInput : public tora::Component {
   bool arrowLeft = false;
   bool arrowRight = false;
   bool arrowUp = false;
   bool arrowDown = false;
 };
 
-struct CMotion : public ecs::Component {
+struct CMotion : public tora::Component {
   sf::Vector2f velocity;
   sf::Vector2f acceleration;
 };
 
-template <ecs::u64 nVerts> //
-struct CMesh : public ecs::Component {
+template <tora::u64 nVerts> //
+struct CMesh : public tora::Component {
   sf::Vector2f position[nVerts];
   sf::Color color[nVerts];
   sf::Vector2f texCoords[nVerts];
 };
 
-ECS_SIMPLE_ENTITY_CLASS(ERect);
+TORA_SIMPLE_ENTITY_CLASS(ERect);
 
-struct SGetInput : public ecs::System {
-  static void function(ecs::World &world,
-                       const ecs::SparseVector<ecs::u64> &entityIDs) {
+struct SGetInput : public tora::System {
+  static void function(tora::World &world,
+                       const tora::SparseVector<tora::u64> &entityIDs) {
     for (auto entityID : entityIDs) {
       auto &input = world.getComponent<CInput>(entityID);
       input.arrowUp = sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
@@ -40,9 +40,9 @@ struct SGetInput : public ecs::System {
   }
 };
 
-struct SFallDown : public ecs::System {
-  static void function(ecs::World &world,
-                       const ecs::SparseVector<ecs::u64> &entityIDs) {
+struct SFallDown : public tora::System {
+  static void function(tora::World &world,
+                       const tora::SparseVector<tora::u64> &entityIDs) {
     for (auto entityID : entityIDs) {
       auto &motion = world.getComponent<CMotion>(entityID);
       auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
@@ -66,22 +66,22 @@ struct SFallDown : public ecs::System {
         motion.velocity.x += 1e-5f;
       }
 
-      for (ecs::u64 i = 0; i < nVertices; ++i) {
+      for (tora::u64 i = 0; i < nVertices; ++i) {
         mesh.position[i] += motion.velocity;
       }
     }
   }
 };
 
-struct SRender : public ecs::System {
-  static void function(ecs::World &world,
-                       const ecs::SparseVector<ecs::u64> &entityIDs,
+struct SRender : public tora::System {
+  static void function(tora::World &world,
+                       const tora::SparseVector<tora::u64> &entityIDs,
                        sf::RenderWindow &renderer) {
     for (auto entityID : entityIDs) {
       auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
       sf::VertexArray shape(sf::TriangleStrip, nVertices);
 
-      for (ecs::u64 i = 0; i < nVertices; ++i) {
+      for (tora::u64 i = 0; i < nVertices; ++i) {
         shape[i].position = mesh.position[i];
         shape[i].color = mesh.color[i];
         shape[i].texCoords = mesh.texCoords[i];
@@ -95,7 +95,7 @@ struct SRender : public ecs::System {
 void mainLoop() {
   sf::RenderWindow window(sf::VideoMode(1024, 768), "User-controlled Shape");
 
-  ecs::World scence;
+  tora::World scence;
 
   scence.registerComponent<CMotion>();
   scence.registerComponent<CMesh<nVertices>>();

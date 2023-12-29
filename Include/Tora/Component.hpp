@@ -1,10 +1,11 @@
-#ifndef ECS_INCLUDE_ECS_COMPONENT_HPP
-#define ECS_INCLUDE_ECS_COMPONENT_HPP
+#ifndef TORA_INCLUDE_TORA_COMPONENT_HPP
+#define TORA_INCLUDE_TORA_COMPONENT_HPP
 
+#if __cplusplus >= 202002L
 #include "Base.hpp"
 #include "Entity.hpp"
 
-namespace ecs {
+namespace tora {
 
 struct Component {};
 
@@ -151,6 +152,9 @@ private:
       {};
 };
 
-} // namespace ecs
+} // namespace tora
+#else  // C++17 or older
+static_assert(__cplusplus >= 202002L, "Nezumi library requires C++20 or newer");
+#endif // C++20 or newer
 
-#endif // ECS_INCLUDE_ECS_COMPONENT_HPP
+#endif // TORA_INCLUDE_TORA_COMPONENT_HPP
