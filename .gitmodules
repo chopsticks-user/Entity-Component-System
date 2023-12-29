@@ -1,6 +1,3 @@
 [submodule "Libs/Nezumi"]
 	path = Libs/Nezumi
 	url = https://github.com/chopsticks-user/Nezumi.git
-[submodule "Libs/Ushi"]
-	path = Libs/Ushi
-	url = https://github.com/chopsticks-user/Ushi.git
