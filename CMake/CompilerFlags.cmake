@@ -11,8 +11,8 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(gcc_like_cxx_flags -pedantic;-Wall;-Wextra;
-    -Wshadow;-Wconversion;-Wunreachable-code)
+set(gcc_like_cxx_flags -pedantic;-Wall;-Wextra;-Wshadow;-Wconversion;
+    -Wunreachable-code)
 set(msvc_cxx_flags -W3)
 
 add_library(${PROJECT_NAME}_CompilerFlags INTERFACE)
