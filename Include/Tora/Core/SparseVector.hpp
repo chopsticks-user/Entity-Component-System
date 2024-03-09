@@ -8,61 +8,76 @@
 
 namespace tora {
 
-template <typename DataType, typename IndexType = u64> //
-class SparseVector : public SparseVectorBase {
+template <typename TData,
+          template <typename> class TAllocator = std::allocator> //
+class SparseVector {
+  typedef
+      typename std::unordered_map<u64, u64, std::hash<u64>, std::equal_to<u64>,
+                                  TAllocator<std::pair<const u64, u64>>>
+          TMap;
+  typedef typename std::vector<TData, TAllocator<TData>> TStorage;
+
+  // TODO: implement an iterator
+
 public:
-  auto operator[](u64 id) -> DataType & {
-    return this->m_data[this->m_idToIndex.at(id)];
+  auto operator[](u64 id) -> TData & { return m_data[m_idToIndex.at(id)]; }
+
+  auto operator[](u64 id) const -> TData & {
+    return m_data[m_idToIndex.at(id)];
   }
 
-  auto operator[](u64 id) const -> DataType & {
-    return this->m_data[this->m_idToIndex.at(id)];
-  }
-
 public:
-  auto size() const noexcept -> u64 { return this->m_data.size(); }
+  auto size() const noexcept -> u64 { return m_data.size(); }
 
-  auto begin() const noexcept { return this->m_data.cbegin(); }
-  auto end() const noexcept { return this->m_data.cend(); }
+  auto begin() const noexcept { return m_data.cbegin(); }
+  auto end() const noexcept { return m_data.cend(); }
 
   auto exists(const u64 &id) const noexcept -> bool {
-    return this->m_idToIndex.find(id) != this->m_idToIndex.end();
+    return m_idToIndex.find(id) != m_idToIndex.end();
   }
 
-  DataType &at(u64 id) { return (*this)[id]; }
+  auto empty() const noexcept -> bool { return m_data.empty(); }
 
-  void add(u64 id, DataType value) {
-    if (!this->exists(id)) {
-      this->m_data.emplace_back(value);
-      this->m_idToIndex[id] = this->m_data.size() - 1;
-      this->mIndexToID[this->m_data.size() - 1] = id;
+  TData &at(u64 id) { return (*this)[id]; }
+
+  auto add(u64 id, TData value) -> void {
+    if (!exists(id)) {
+      m_data.emplace_back(value);
+      m_idToIndex[id] = m_data.size() - 1;
+      m_indexToID[m_data.size() - 1] = id;
     } else {
-      this->m_data[this->m_idToIndex[id]] = std::move(value);
+      m_data[m_idToIndex[id]] = std::move(value);
     }
   }
 
-  void remove(u64 id) noexcept override {
-    if (!this->exists(id)) {
+  auto remove(u64 id) noexcept -> void {
+    if (!exists(id)) {
       return;
     }
 
-    auto lastElementIndex = this->m_data.size() - 1;
-    auto lastElementID = this->mIndexToID[lastElementIndex];
-    auto removedIndex = this->m_idToIndex[id];
+    auto lastElementIndex = m_data.size() - 1;
+    auto lastElementID = m_indexToID[lastElementIndex];
+    auto removedIndex = m_idToIndex[id];
 
-    this->mIndexToID[removedIndex] = lastElementID;
-    this->m_idToIndex[lastElementID] = removedIndex;
+    m_indexToID[removedIndex] = lastElementID;
+    m_idToIndex[lastElementID] = removedIndex;
 
-    std::swap(this->m_data[removedIndex], this->m_data[lastElementIndex]);
-    this->mIndexToID.erase(lastElementIndex);
-    this->m_idToIndex.erase(id);
-    this->m_data.pop_back();
+    std::swap(m_data[removedIndex], m_data[lastElementIndex]);
+    m_indexToID.erase(lastElementIndex);
+    m_idToIndex.erase(id);
+    m_data.pop_back();
+  }
+
+  auto clear() noexcept -> void {
+    m_data.clear();
+    m_indexToID.clear();
+    m_idToIndex.clear();
   }
 
 private:
-  std::unordered_map<u64, u64> m_idToIndex = {};
-  std::unordered_map<u64, u64> mIndexToID = {};
-  std::vector<DataType> m_data = {};
+  TMap m_idToIndex = {};
+  TMap m_indexToID = {};
+  TStorage m_data = {};
 };
 
 } // namespace tora
