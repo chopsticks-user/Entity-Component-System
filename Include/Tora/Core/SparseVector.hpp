@@ -9,38 +9,42 @@
 namespace tora {
 
 template <typename TData,
-          template <typename> class TAllocator = std::allocator> //
+          template <typename> class TAllocatorClass = std::allocator> //
 class SparseVector {
   typedef
       typename std::unordered_map<u64, u64, std::hash<u64>, std::equal_to<u64>,
-                                  TAllocator<std::pair<const u64, u64>>>
+                                  TAllocatorClass<std::pair<const u64, u64>>>
           TMap;
-  typedef typename std::vector<TData, TAllocator<TData>> TStorage;
+  typedef typename std::vector<TData, TAllocatorClass<TData>> TContainer;
 
   // TODO: implement an iterator
 
 public:
-  auto operator[](u64 id) -> TData & { return m_data[m_idToIndex.at(id)]; }
+  constexpr auto operator[](u64 id) -> TData & {
+    return m_data[m_idToIndex.at(id)];
+  }
 
-  auto operator[](u64 id) const -> TData & {
+  constexpr auto operator[](u64 id) const -> const TData & {
     return m_data[m_idToIndex.at(id)];
   }
 
 public:
-  auto size() const noexcept -> u64 { return m_data.size(); }
+  constexpr auto size() const noexcept -> u64 { return m_data.size(); }
 
-  auto begin() const noexcept { return m_data.cbegin(); }
-  auto end() const noexcept { return m_data.cend(); }
+  constexpr auto begin() const noexcept { return m_data.cbegin(); }
+  constexpr auto end() const noexcept { return m_data.cend(); }
 
-  auto exists(const u64 &id) const noexcept -> bool {
+  constexpr auto exists(const u64 &id) const noexcept -> bool {
     return m_idToIndex.find(id) != m_idToIndex.end();
   }
 
-  auto empty() const noexcept -> bool { return m_data.empty(); }
+  constexpr auto empty() const noexcept -> bool { return m_data.empty(); }
 
-  TData &at(u64 id) { return (*this)[id]; }
+  constexpr auto at(u64 id) -> TData & { return (*this)[id]; }
 
-  auto add(u64 id, TData value) -> void {
+  constexpr auto at(u64 id) const -> const TData & { return (*this)[id]; }
+
+  constexpr auto add(u64 id, TData value) -> void {
     if (!exists(id)) {
       m_data.emplace_back(value);
       m_idToIndex[id] = m_data.size() - 1;
@@ -50,7 +54,7 @@ public:
     }
   }
 
-  auto remove(u64 id) noexcept -> void {
+  constexpr auto remove(u64 id) noexcept -> void {
     if (!exists(id)) {
       return;
     }
@@ -68,7 +72,7 @@ public:
     m_data.pop_back();
   }
 
-  auto clear() noexcept -> void {
+  constexpr auto clear() noexcept -> void {
     m_data.clear();
     m_indexToID.clear();
     m_idToIndex.clear();
@@ -77,7 +81,7 @@ public:
 private:
   TMap m_idToIndex = {};
   TMap m_indexToID = {};
-  TStorage m_data = {};
+  TContainer m_data = {};
 };
 
 } // namespace tora

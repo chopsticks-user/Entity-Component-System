@@ -9,9 +9,8 @@
 #include <vector>
 
 using tora::u64;
-using SparseVector64 = tora::SparseVector<u64>;
 
-SparseVector64 v{};
+tora::SparseVector<u64> v{};
 u64 sizeCounter = 0;
 
 void verifyAdd(u64 id, u64 value, u64 increment) {
@@ -19,18 +18,6 @@ void verifyAdd(u64 id, u64 value, u64 increment) {
   REQUIRE(v.size() == sizeCounter);
   REQUIRE(v.exists(id));
   REQUIRE(v[id] == value);
-}
-
-void verifyRemove(u64 id, u64 decrement, bool empty = false) {
-  sizeCounter -= decrement;
-  if (!empty) {
-    REQUIRE(v.size() == sizeCounter);
-  } else {
-    REQUIRE(v.empty());
-    REQUIRE(v.size() == 0);
-  }
-  REQUIRE_FALSE(v.exists(id));
-  REQUIRE_THROWS_AS(v[id], std::out_of_range);
 }
 
 TEST_CASE("Case #01: SparseVector.add", "[require]") {
@@ -49,6 +36,18 @@ TEST_CASE("Case #01: SparseVector.add", "[require]") {
   v.add(1, 1);
   v.add(1, 5);
   verifyAdd(1, 5, 1);
+}
+
+void verifyRemove(u64 id, u64 decrement, bool empty = false) {
+  sizeCounter -= decrement;
+  if (!empty) {
+    REQUIRE(v.size() == sizeCounter);
+  } else {
+    REQUIRE(v.empty());
+    REQUIRE(v.size() == 0);
+  }
+  REQUIRE_FALSE(v.exists(id));
+  REQUIRE_THROWS_AS(v[id], std::out_of_range);
 }
 
 TEST_CASE("Case #02: SparseVector.remove", "[require]") {
