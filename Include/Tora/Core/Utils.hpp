@@ -4,14 +4,8 @@
 #include "Forward.hpp"
 
 #include <tuple>
-#include <typeinfo>
 
 namespace tora {
-
-template <typename Type> //
-cString typenameStr() noexcept {
-  return typeid(Type).name();
-}
 
 template <u64 Index, typename... Args> //
 void iterateTuple(std::tuple<Args...> &tp, auto func) {
@@ -20,6 +14,16 @@ void iterateTuple(std::tuple<Args...> &tp, auto func) {
     iterateTuple<Index + 1>(tp, func);
   }
 }
+
+struct TupleCatBase {};
+// https://stackoverflow.com/questions/53394100/concatenating-tuples-as-types
+template <class, class> struct TupleCat;
+template <class... First, class... Second>
+struct TupleCat<std::tuple<First...>, std::tuple<Second...>>
+    : public TupleCatBase {
+  using type = std::tuple<First..., Second...>;
+};
+//
 
 template <typename FuncType, typename Arg1Type, typename Arg2Type,
           typename... Args> //

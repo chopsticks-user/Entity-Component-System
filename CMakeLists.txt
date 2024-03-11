@@ -20,6 +20,10 @@ target_link_libraries(${Tora_TARGET_NAME}
     INTERFACE ${PROJECT_NAME}::CompilerFlags
 )
 
+if(${Tora_BUILD_EXAMPLES})
+    add_subdirectory(Examples)
+endif()
 
-add_subdirectory(Test)
-# add_subdirectory(Examples)
+if(${Tora_BUILD_TESTS})
+    add_subdirectory(Test)
+endif()

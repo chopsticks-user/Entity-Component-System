@@ -8,9 +8,16 @@
 
 namespace tora {
 
+struct SparseVectorBase {
+  virtual ~SparseVectorBase() = default;
+  virtual constexpr auto size() const noexcept -> u64 = 0;
+  virtual constexpr auto remove(u64 id) noexcept -> void = 0;
+  virtual constexpr auto clear() noexcept -> void = 0;
+};
+
 template <typename TData,
           template <typename> class TAllocatorClass = std::allocator> //
-class SparseVector {
+class SparseVector : public SparseVectorBase {
   typedef
       typename std::unordered_map<u64, u64, std::hash<u64>, std::equal_to<u64>,
                                   TAllocatorClass<std::pair<const u64, u64>>>
@@ -29,7 +36,7 @@ public:
   }
 
 public:
-  constexpr auto size() const noexcept -> u64 { return m_data.size(); }
+  constexpr auto size() const noexcept -> u64 override { return m_data.size(); }
 
   constexpr auto begin() const noexcept { return m_data.cbegin(); }
   constexpr auto end() const noexcept { return m_data.cend(); }
@@ -54,7 +61,7 @@ public:
     }
   }
 
-  constexpr auto remove(u64 id) noexcept -> void {
+  constexpr auto remove(u64 id) noexcept -> void override {
     if (!exists(id)) {
       return;
     }

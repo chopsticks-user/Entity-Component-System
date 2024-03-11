@@ -4,7 +4,7 @@
 include(GNUInstallDirs)
 
 option(Tora_BUILD_EXAMPLES "Build code examples" OFF)
-option(Tora_BUILD_TESTS "Build tests" OFF)
+option(Tora_BUILD_TESTS "Build tests" ON)
 
 set(Tora_AS_SUBPROJECT OFF)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
