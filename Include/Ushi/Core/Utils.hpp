@@ -1,11 +1,11 @@
-#ifndef TORA_INCLUDE_TORA_CORE_UTILS_HPP
-#define TORA_INCLUDE_TORA_CORE_UTILS_HPP
+#ifndef USHI_INCLUDE_USHI_CORE_UTILS_HPP
+#define USHI_INCLUDE_USHI_CORE_UTILS_HPP
 
 #include "Forward.hpp"
 
 #include <tuple>
 
-namespace tora {
+namespace ushi {
 
 template <u64 Index, typename... Args> //
 void iterateTuple(std::tuple<Args...> &tp, auto func) {
@@ -37,6 +37,6 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
     using Entity::Entity;                                                      \
   }
 
-} // namespace tora
+} // namespace ushi
 
-#endif // TORA_INCLUDE_TORA_CORE_UTILS_HPP
+#endif // USHI_INCLUDE_USHI_CORE_UTILS_HPP

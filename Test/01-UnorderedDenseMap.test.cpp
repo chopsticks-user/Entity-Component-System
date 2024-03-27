@@ -2,15 +2,11 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
-#include <Tora/Core/SparseVector.hpp>
+#include "../Include/Ushi/Container/UnorderedDenseMap.hpp"
 
-#include <ranges>
-#include <stdexcept>
-#include <vector>
+using ushi::u64;
 
-using tora::u64;
-
-tora::SparseVector<u64> v{};
+ushi::UnorderedDenseMap<u64, u64> v{};
 u64 sizeCounter = 0;
 
 void verifyAdd(u64 id, u64 value, u64 increment) {
@@ -20,7 +16,7 @@ void verifyAdd(u64 id, u64 value, u64 increment) {
   REQUIRE(v[id] == value);
 }
 
-TEST_CASE("Case #01: SparseVector.add", "[require]") {
+TEST_CASE("Case #01: UnorderedDenseMap.add", "[require]") {
   REQUIRE(v.size() == sizeCounter);
   REQUIRE(v.empty());
 
@@ -50,7 +46,7 @@ void verifyRemove(u64 id, u64 decrement, bool empty = false) {
   REQUIRE_THROWS_AS(v[id], std::out_of_range);
 }
 
-TEST_CASE("Case #02: SparseVector.remove", "[require]") {
+TEST_CASE("Case #02: UnorderedDenseMap.remove", "[require]") {
   v.remove(5);
   verifyRemove(5, 1);
 

@@ -1,9 +1,9 @@
-#ifndef TORA_INCLUDE_TORA_CORE_FORWARD_HPP
-#define TORA_INCLUDE_TORA_CORE_FORWARD_HPP
+#ifndef USHI_INCLUDE_USHI_CORE_FORWARD_HPP
+#define USHI_INCLUDE_USHI_CORE_FORWARD_HPP
 
 #include <cstdint>
 
-namespace tora {
+namespace ushi {
 
 constexpr bool cppAtLeast14 = __cplusplus >= 201402L;
 constexpr bool cppAtLeast17 = __cplusplus >= 201703L;
@@ -43,6 +43,6 @@ class System;
 class SystemManager;
 class World;
 
-} // namespace tora
+} // namespace ushi
 
-#endif // TORA_INCLUDE_TORA_CORE_FORWARD_HPP
+#endif // USHI_INCLUDE_USHI_CORE_FORWARD_HPP
