@@ -1,7 +1,7 @@
 #ifndef TORA_INCLUDE_TORA_CORE_SPARSE_VECTOR_HPP
 #define TORA_INCLUDE_TORA_CORE_SPARSE_VECTOR_HPP
 
-#include "Forward.hpp"
+#include "../Core/Forward.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -10,19 +10,15 @@ namespace tora {
 
 struct SparseVectorBase {
   virtual ~SparseVectorBase() = default;
-  virtual constexpr auto size() const noexcept -> u64 = 0;
-  virtual constexpr auto remove(u64 id) noexcept -> void = 0;
-  virtual constexpr auto clear() noexcept -> void = 0;
+  virtual auto size() const noexcept -> u64 = 0;
+  virtual auto remove(u64 id) noexcept -> void = 0;
+  virtual auto clear() noexcept -> void = 0;
 };
 
-template <typename TData,
-          template <typename> class TAllocatorClass = std::allocator> //
+template <typename TData> //
 class SparseVector : public SparseVectorBase {
-  typedef
-      typename std::unordered_map<u64, u64, std::hash<u64>, std::equal_to<u64>,
-                                  TAllocatorClass<std::pair<const u64, u64>>>
-          TMap;
-  typedef typename std::vector<TData, TAllocatorClass<TData>> TContainer;
+  using UMapType = std::pmr::unordered_map<u64, u64>;
+  using ContainerType = std::pmr::vector<TData>;
 
   // TODO: implement an iterator
 
@@ -36,7 +32,7 @@ public:
   }
 
 public:
-  constexpr auto size() const noexcept -> u64 override { return m_data.size(); }
+  auto size() const noexcept -> u64 override { return m_data.size(); }
 
   constexpr auto begin() const noexcept { return m_data.cbegin(); }
   constexpr auto end() const noexcept { return m_data.cend(); }
@@ -61,7 +57,7 @@ public:
     }
   }
 
-  constexpr auto remove(u64 id) noexcept -> void override {
+  auto remove(u64 id) noexcept -> void override {
     if (!exists(id)) {
       return;
     }
@@ -79,16 +75,16 @@ public:
     m_data.pop_back();
   }
 
-  constexpr auto clear() noexcept -> void {
+  auto clear() noexcept -> void {
     m_data.clear();
     m_indexToID.clear();
     m_idToIndex.clear();
   }
 
 private:
-  TMap m_idToIndex = {};
-  TMap m_indexToID = {};
-  TContainer m_data = {};
+  UMapType m_idToIndex = {};
+  UMapType m_indexToID = {};
+  ContainerType m_data = {};
 };
 
 } // namespace tora

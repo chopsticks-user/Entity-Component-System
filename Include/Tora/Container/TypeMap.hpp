@@ -6,50 +6,48 @@
 #include "Utils.hpp"
 
 #include <algorithm>
-#include <any>
-#include <functional>
-#include <iostream>
-#include <memory>
-#include <optional>
+#include <memory_resource>
 #include <ranges>
 #include <typeindex>
-#include <typeinfo>
 #include <unordered_map>
 
 namespace tora {
 
-template <template <typename> class TAllocatorClass = std::allocator> //
 class TypeMap {
   // TODO: Raw pointers with custom allocators
   // TODO: Optional exceptions
-  using TTableKey = std::type_index;
-
-  using TTableAllocator =
-      TAllocatorClass<std::pair<const TTableKey, SparseVectorBase *>>;
+  using TableKeyType = std::type_index;
+  using GeneralAllocatorType = std::pmr::polymorphic_allocator<std::byte>;
 
   //* Use raw pointers for direct access
-  using TTable = typename std::unordered_map<
-      TTableKey, SparseVectorBase *, std::hash<std::type_index>,
-      std::equal_to<std::type_index>, TTableAllocator>;
-
-  template <typename TData> //
-  using TSparseVector = SparseVector<TData, TAllocatorClass>;
+  using TableType = std::pmr::unordered_map<TableKeyType, SparseVectorBase *>;
 
 public:
-  constexpr TypeMap() noexcept = default;
-  TypeMap(const TypeMap &) = delete;
-  TypeMap &operator=(const TypeMap &) = delete;
+  TypeMap(GeneralAllocatorType allocator = {})
+      : m_table{}, m_allocator{std::move(allocator)} {}
+
+  constexpr TypeMap(const TypeMap &) = delete;
+
+  TypeMap(TypeMap &&other)
+      : m_table{std::move(other.m_table)},
+        m_allocator{std::move(other.m_allocator)} {}
+
+  TypeMap(TypeMap &&other, GeneralAllocatorType allocator = {})
+      : m_table{std::move(other.m_table)}, m_allocator{std::move(allocator)} {}
+
+  constexpr TypeMap &operator=(const TypeMap &) = delete;
+
   ~TypeMap() noexcept { clear(); }
 
-  constexpr auto nTypes() const noexcept -> u64 { return m_table.size(); }
+  auto nTypes() const noexcept -> u64 { return m_table.size(); }
 
   template <typename T> //
   constexpr auto nElements() const noexcept -> u64 {
-    const TSparseVector<T> *ptr = getSparseVectorPtr<T>();
+    const SparseVector<T> *ptr = getSparseVectorPtr<T>();
     return ptr == nullptr ? 0 : ptr->size();
   }
 
-  constexpr auto nElements() const noexcept -> u64 {
+  auto nElements() const noexcept -> u64 {
     u64 count = 0;
     for (const SparseVectorBase *const ptr : m_table | std::views::values) {
       count += ptr->size();
@@ -57,11 +55,11 @@ public:
     return count;
   }
 
-  constexpr auto empty() const noexcept -> bool { return nTypes() == 0; }
+  auto empty() const noexcept -> bool { return nTypes() == 0; }
 
   template <typename T> //
   constexpr auto empty() const noexcept -> bool {
-    const TSparseVector<T> *ptr = getSparseVectorPtr<T>();
+    const SparseVector<T> *ptr = getSparseVectorPtr<T>();
     return ptr == nullptr ? true : ptr->size() == 0;
   }
 
@@ -72,7 +70,7 @@ public:
 
   template <typename T> //
   constexpr auto exists(u64 id) const noexcept -> bool {
-    const TSparseVector<T> *ptr = getSparseVectorPtr<T>();
+    const SparseVector<T> *ptr = getSparseVectorPtr<T>();
     return ptr == nullptr ? false : ptr->exists(id);
   }
 
@@ -85,25 +83,30 @@ public:
   template <typename T> //
   constexpr auto add(u64 id, T v) noexcept -> void {
     //* This static down cast is safe
-    TSparseVector<T> *ptr =
-        static_cast<TSparseVector<T> *>(tryEmplace<T>()->second);
+    SparseVector<T> *ptr =
+        static_cast<SparseVector<T> *>(tryEmplace<T>()->second);
     ptr->add(id, v);
   }
 
-  // template <typename T> //
-  // constexpr auto get() -> const TSparseVector<T> & {
-  //   return getSparseVectorPtr<T>();
-  // }
-
+  /**
+   * @brief <code>haha</code>
+   *
+   * @tparam T
+   * @param id
+   * @return T&
+   */
   template <typename T> //
   constexpr auto get(u64 id) -> T & {
-    TSparseVector<T> *ptr = getSparseVectorPtr<T>();
+    SparseVector<T> *ptr = getSparseVectorPtr<T>();
     if (ptr == nullptr) {
       throw std::runtime_error("TypeMap::get()");
     }
     return getSparseVectorPtr<T>()->operator[](id);
   }
 
+  /**
+   * {@link #add}
+   */
   template <typename T> //
   constexpr auto remove() noexcept -> void {
     auto it = getEntry<T>();
@@ -116,14 +119,14 @@ public:
 
   template <typename T> //
   constexpr auto remove(u64 id) noexcept -> void {
-    TSparseVector<T> *ptr = getSparseVectorPtr<T>();
+    SparseVector<T> *ptr = getSparseVectorPtr<T>();
     if (ptr == nullptr) {
       return;
     }
     ptr->remove(id);
   }
 
-  constexpr auto clear() noexcept -> void {
+  auto clear() noexcept -> void {
     for (SparseVectorBase *const ptr : m_table | std::views::values) {
       delete ptr;
     }
@@ -132,14 +135,14 @@ public:
 
   template <typename T> //
   constexpr auto clear() noexcept -> void {
-    TSparseVector<T> *ptr = getSparseVectorPtr<T>();
+    SparseVector<T> *ptr = getSparseVectorPtr<T>();
     if (ptr == nullptr) {
       return;
     }
     ptr->clear();
   }
 
-  constexpr auto reset() noexcept -> void {
+  auto reset() noexcept -> void {
     for (SparseVectorBase *const ptr : m_table | std::views::values) {
       ptr->clear();
     }
@@ -147,37 +150,42 @@ public:
 
 private:
   template <typename T> //
-  auto getSparseVectorPtr() noexcept -> TSparseVector<T> * {
+  auto getSparseVectorPtr() noexcept -> SparseVector<T> * {
     auto it = m_table.find(typeid(T));
     if (it == m_table.end()) {
       return nullptr;
     }
     //* This static down cast is safe
-    return static_cast<TSparseVector<T> *>(it->second);
+    return static_cast<SparseVector<T> *>(it->second);
   }
 
   template <typename T> //
-  auto getSparseVectorPtr() const noexcept -> const TSparseVector<T> * {
+  auto getSparseVectorPtr() const noexcept -> const SparseVector<T> * {
     auto it = m_table.find(typeid(T));
     if (it == m_table.end()) {
       return nullptr;
     }
     //* This static down cast is safe
-    return static_cast<TSparseVector<T> *>(it->second);
+    return static_cast<SparseVector<T> *>(it->second);
   }
 
   template <typename T> //
-  auto getEntry() noexcept -> TTable::iterator {
+  auto getEntry() noexcept -> TableType::iterator {
     return m_table.find(typeid(T));
   }
 
   template <typename T> //
-  auto tryEmplace() -> TTable::iterator {
-    return m_table.try_emplace(typeid(T), new TSparseVector<T>{}).first;
+  auto tryEmplace() -> TableType::iterator {
+    auto *pSparseVector =
+        static_cast<SparseVector<T> *>(m_allocator.resource()->allocate(
+            sizeof(SparseVector<T>), alignof(SparseVector<T>)));
+    m_allocator.construct(pSparseVector);
+    return m_table.try_emplace(typeid(T), pSparseVector).first;
   }
 
 private:
-  TTable m_table = {};
+  TableType m_table = {};
+  GeneralAllocatorType m_allocator = {};
 };
 
 } // namespace tora
