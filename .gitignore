@@ -1,4 +1,13 @@
+
+# clangd cache
+.cache
+
+# IDEs
 .vscode
+
+# Build directories
 Build
 build
+
+# Misc
 Data/cmd.txt
