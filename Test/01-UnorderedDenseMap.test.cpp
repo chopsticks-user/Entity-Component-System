@@ -2,7 +2,7 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
-#include "../Include/Ushi/Container/UnorderedDenseMap.hpp"
+#include <Ushi/Container/UnorderedDenseMap.hpp>
 
 using ushi::u64;
 

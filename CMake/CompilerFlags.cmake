@@ -4,6 +4,8 @@
 set(gcc_like_cxx $<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>)
 set(msvc_cxx $<COMPILE_LANG_AND_ID:CXX,MSVC>)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()

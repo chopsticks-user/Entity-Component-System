@@ -25,6 +25,11 @@ file(GLOB TestPaths ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 foreach (TestPath ${TestPaths})
     get_filename_component(TestFileName ${TestPath} NAME_WLE)
     add_executable(${TestFileName} ${TestPath})
+    target_link_options(${TestFileName}
+      PRIVATE -fsanitize=address
+      PRIVATE -fsanitize=leak
+      PRIVATE -fsanitize=undefined
+    )
     target_link_libraries(${TestFileName}
         PRIVATE Tora
         PRIVATE Catch2::Catch2WithMain
