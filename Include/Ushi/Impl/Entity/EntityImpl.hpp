@@ -50,7 +50,9 @@ private:
 // https://stackoverflow.com/questions/71921797/c-concepts-checking-if-derived-from-a-templated-class-with-unknown-template-p
 template <class T_Entity>
 concept IsValidEntity = requires(T_Entity entity) {
-  []<typename T_Config>(Entity<T_Config> &) {}(entity);
+  []<typename T_Config>(Entity<T_Config> &)
+    requires IsValidConfig<T_Config>
+  {}(entity);
 };
 
 } // namespace ushi

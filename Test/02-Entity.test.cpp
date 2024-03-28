@@ -11,10 +11,10 @@ using BitSet = ushi::DefaultConfig::SignatureType;
 
 struct NotEntity : public ushi::EntityBase {};
 
-TEST_CASE("Case #02: EntityIDGenerator", "[require]") {
+TEST_CASE("Case #01: IsValidEntity and IsValidConfig", "[require]") {
   REQUIRE(ushi::IsValidEntity<EPlayer>);
   REQUIRE(ushi::IsValidEntity<EEnemy>);
-  REQUIRE(ushi::IsValidEntity<NotEntity>);
+  REQUIRE_FALSE(ushi::IsValidEntity<NotEntity>);
 }
 
 TEST_CASE("Case #02: EntityIDGenerator", "[require]") {
@@ -43,4 +43,9 @@ TEST_CASE("Case #03: EntityFactory", "[require]") {
   auto player3 = factory.clone<EPlayer>(player2);
   REQUIRE(player3.id() == 3ul);
   REQUIRE(player3.signature() == bitset);
+
+  // Create an Entity using a Config template
+  auto player4 = factory.create<ushi::DefaultConfig>(player3.signature());
+  REQUIRE(player4.id() == 4ul);
+  REQUIRE(player4.signature() == bitset);
 }

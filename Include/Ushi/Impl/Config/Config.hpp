@@ -12,11 +12,11 @@ struct Config {
   using SignatureType = std::bitset<maxComponents>;
 };
 
+struct DefaultConfig : public Config {};
+
 template <typename T_Config>
 concept IsValidConfig =
     std::derived_from<T_Config, Config> && !std::same_as<T_Config, Config>;
-
-struct DefaultConfig : public Config {};
 
 } // namespace ushi
 
