@@ -13,16 +13,33 @@ struct CustomConfig {
   using SignatureType = std::bitset<128>;
 };
 
-TEST_CASE("Case #01: IsValidEntity", "[require]") {}
+struct NotAConfig {
+  using Signature = ushi::u64;
+};
 
-TEST_CASE("Case #01: EntityIDGenerator", "[require]") {
+template <typename T> //
+struct Haha {};
+
+template <typename T> struct Test {
+  T value;
+};
+
+TEST_CASE("Case #01: Concepts", "[require]") {
+  REQUIRE(ushi::IsValidConfig<ushi::DefaultConfig>);
+  REQUIRE(ushi::IsValidConfig<CustomConfig>);
+  REQUIRE(ushi::IsValidEntity<EPlayer>);
+  REQUIRE(ushi::IsValidEntity<ushi::Entity<CustomConfig>>);
+  REQUIRE_FALSE(ushi::IsValidConfig<NotAConfig>);
+}
+
+TEST_CASE("Case #02: EntityIDGenerator", "[require]") {
   ushi::EntityIDGenerator idGenerator;
   REQUIRE(idGenerator() == 0);
   REQUIRE(idGenerator() == 1);
   REQUIRE(idGenerator() == 2);
 }
 
-TEST_CASE("Case #02: EntityFactory", "[require]") {
+TEST_CASE("Case #03: EntityFactory", "[require]") {
   REQUIRE(ushi::IsValidEntity<EPlayer>);
   REQUIRE(ushi::IsValidEntity<EEnemy>);
   REQUIRE(ushi::IsValidEntity<ushi::Entity<CustomConfig>>);
@@ -51,3 +68,5 @@ TEST_CASE("Case #02: EntityFactory", "[require]") {
   REQUIRE(player4.id() == 4ul);
   REQUIRE(player4.maxComponents() == CustomConfig::SignatureType{}.size());
 }
+
+TEST_CASE("Case #04: EntityFactory", "[require]") {}

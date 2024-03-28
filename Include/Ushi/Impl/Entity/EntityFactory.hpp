@@ -9,6 +9,9 @@
 
 namespace ushi {
 
+template <IsValidEntity T_Entity>
+using T_EntitySignature = FirstTemplateArg<T_Entity>::Type::SignatureType;
+
 /**
  * @brief
  *
@@ -22,9 +25,9 @@ public:
    * @param entitySignature
    * @return T_Entity
    */
-  template <class T_Entity>
-    requires IsValidEntity<T_Entity>
-  constexpr auto create(T_Entity::T_Signature entitySignature = {}) noexcept
+  template <IsValidEntity T_Entity>
+  constexpr auto
+  create(T_EntitySignature<T_Entity> entitySignature = {}) noexcept
       -> T_Entity {
     return T_Entity{m_idGenerator(), std::move(entitySignature)};
   }
@@ -36,7 +39,7 @@ public:
    * @param entitySignature
    * @return Entity<T_Config>
    */
-  template <typename T_Config>
+  template <IsValidConfig T_Config>
   constexpr auto create(T_Config::SignatureType entitySignature = {}) noexcept
       -> Entity<T_Config> {
     return Entity<T_Config>{m_idGenerator(), std::move(entitySignature)};
@@ -49,8 +52,7 @@ public:
    * @param other
    * @return T_Entity
    */
-  template <class T_Entity>
-    requires IsValidEntity<T_Entity>
+  template <IsValidEntity T_Entity>
   constexpr auto clone(const T_Entity &other) noexcept -> T_Entity {
     return T_Entity{m_idGenerator(), other.m_signature};
   }

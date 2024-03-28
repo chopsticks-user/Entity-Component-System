@@ -34,10 +34,12 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
   using type2 = Arg2Type;
 };
 
-#define TORA_SIMPLE_ENTITY_CLASS(EntityTypename)                               \
-  class EntityTypename : public tora::Entity {                                 \
-    using Entity::Entity;                                                      \
-  }
+template <typename T> struct FirstTemplateArg;
+
+template <template <typename> typename V, typename T>
+struct FirstTemplateArg<V<T>> {
+  using Type = T;
+};
 
 } // namespace ushi
 

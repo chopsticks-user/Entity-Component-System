@@ -15,13 +15,17 @@ struct DefaultConfig {
   using SignatureType = std::bitset<64>;
 };
 
-// template <typename T_Config>
-// concept IsValidConfig =
-//     std::derived_from<T_Config, Config> && !std::same_as<T_Config, Config>;
-
 // TODO:
-// template <typename T_Signature>
-// concept IsValidSignature = ;
+template <typename T_Signature>
+concept IsValidSignature = requires(T_Signature s1, T_Signature s2) {
+  s1 & s2;
+  s1 | s2;
+  s1 ^ s2;
+};
+
+template <typename T_Config>
+concept IsValidConfig =
+    requires { requires IsValidSignature<typename T_Config::SignatureType>; };
 
 } // namespace ushi
 
