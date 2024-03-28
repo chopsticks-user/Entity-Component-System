@@ -8,7 +8,7 @@
 
 namespace ushi {
 
-class EntityFactory;
+template <IsEIDGenerator> class EntityFactory;
 
 /**
  * Inheriting from this class is currently not supported.
@@ -17,8 +17,9 @@ class EntityFactory;
  */
 template <IsValidConfig T_Config> //
 class Entity final {
-  friend class EntityFactory;
+  friend class EntityFactory<typename T_Config::EIDGeneratorType>;
 
+  using T_ID = FirstTemplateArg<typename T_Config::EIDGeneratorType>::Type;
   using T_Signature = T_Config::SignatureType;
 
 public:
@@ -37,7 +38,7 @@ public:
   virtual ~Entity() noexcept = default;
 
 public:
-  constexpr auto id() const noexcept -> EntityID { return m_id; }
+  constexpr auto id() const noexcept -> T_ID { return m_id; }
 
   constexpr auto signature() const noexcept -> const T_Signature & {
     return m_signature;
@@ -54,7 +55,7 @@ private:
       : m_id{id}, m_signature{std::move(signature)} {}
 
 private:
-  EntityID m_id;
+  T_ID m_id;
   T_Signature m_signature;
 };
 
@@ -64,10 +65,10 @@ concept IsValidEntity =
 
 } // namespace ushi
 
-template <ushi::IsValidEntity T_Entity> struct std::hash<T_Entity> {
-  std::size_t operator()(const ushi::EntityID &entityID) const noexcept {
-    return std::hash<ushi::EntityID>{}(entityID);
-  }
-};
+// template <ushi::IsValidEntity T_Entity> struct std::hash<T_Entity> {
+//   std::size_t operator()(const ushi::EntityID &entityID) const noexcept {
+//     return std::hash<ushi::EntityID>{}(entityID);
+//   }
+// };
 
 #endif // TORA_INCLUDE_TORA_IMPL_ENTITY_IMPL_HPP

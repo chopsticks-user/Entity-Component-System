@@ -8,6 +8,12 @@
 
 namespace ushi {
 
+// https://en.cppreference.com/w/cpp/language/constraints
+template <typename T>
+concept Hashable = requires(T a) {
+  { std::hash<T>{}(a) } -> std::convertible_to<std::size_t>;
+};
+
 // template <typename EntityType>
 // concept CValidEntity = std::move_constructible<EntityType> &&
 //                        std::derived_from<EntityType, Entity> &&

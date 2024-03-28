@@ -9,17 +9,11 @@ using Bitset = ushi::DefaultConfig::SignatureType;
 
 struct CustomConfig {
   using SignatureType = std::bitset<128>;
+  using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
 };
 
 struct NotAConfig {
   using Signature = ushi::u64;
-};
-
-template <typename T> //
-struct Haha {};
-
-template <typename T> struct Test {
-  T value;
 };
 
 TEST_CASE("Case #01: Concepts", "[require]") {
@@ -30,18 +24,18 @@ TEST_CASE("Case #01: Concepts", "[require]") {
   REQUIRE_FALSE(ushi::IsValidConfig<NotAConfig>);
 }
 
-TEST_CASE("Case #02: EntityIDGenerator", "[require]") {
-  ushi::EntityIDGenerator idGenerator;
+TEST_CASE("Case #01: EntityIDGenerator", "[require]") {
+  ushi::EntityIDGenerator<ushi::u64> idGenerator;
   REQUIRE(idGenerator() == 0);
   REQUIRE(idGenerator() == 1);
   REQUIRE(idGenerator() == 2);
 }
 
-TEST_CASE("Case #03: EntityFactory", "[require]") {
+TEST_CASE("Case #02: EntityFactory", "[require]") {
   REQUIRE(ushi::IsValidEntity<Entity>);
   REQUIRE(ushi::IsValidEntity<ushi::Entity<CustomConfig>>);
 
-  ushi::EntityFactory factory;
+  ushi::EntityFactory<ushi::EntityIDGenerator<ushi::u64>> factory;
 
   // Implicitly convertible to ushi::EntityID
   REQUIRE(factory.create<Entity>() == 0ul);
@@ -66,8 +60,8 @@ TEST_CASE("Case #03: EntityFactory", "[require]") {
   REQUIRE(player4.maxComponents() == CustomConfig::SignatureType{}.size());
 }
 
-TEST_CASE("Case #04: EntityManager", "[require]") {
-  ushi::EntityManager<Entity> manager{};
+TEST_CASE("Case #03: EntityManager", "[require]") {
+  ushi::EntityManager<ushi::DefaultConfig> manager{};
 
   auto entity1 = manager.create();
   REQUIRE(manager.contains(entity1));

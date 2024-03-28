@@ -6,6 +6,7 @@
 
 struct CustomConfig {
   using SignatureType = std::bitset<128>;
+  using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
 };
 
 template <typename T1, typename T2> //

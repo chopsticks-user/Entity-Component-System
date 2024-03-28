@@ -3,6 +3,8 @@
 
 #include "Ushi/Core/Core.hpp"
 
+#include "Ushi/Impl/Entity/EntityID.hpp"
+
 #include <bitset>
 
 namespace ushi {
@@ -13,6 +15,7 @@ namespace ushi {
  */
 struct DefaultConfig final {
   using SignatureType = std::bitset<64>;
+  using EIDGeneratorType = EntityIDGenerator<u64>;
 };
 
 // TODO:
@@ -24,8 +27,10 @@ concept IsValidSignature = requires(T_Signature s1, T_Signature s2) {
 };
 
 template <typename T_Config>
-concept IsValidConfig =
-    requires { requires IsValidSignature<typename T_Config::SignatureType>; };
+concept IsValidConfig = requires {
+  requires IsValidSignature<typename T_Config::SignatureType>;
+  requires IsEIDGenerator<typename T_Config::EIDGeneratorType>;
+};
 
 } // namespace ushi
 

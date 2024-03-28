@@ -16,6 +16,7 @@ using T_EntitySignature = FirstTemplateArg<T_Entity>::Type::SignatureType;
  * @brief
  *
  */
+template <IsEIDGenerator T_EIDGenerator> //
 class EntityFactory {
 public:
   /**
@@ -57,6 +58,13 @@ public:
     return T_Entity{m_idGenerator(), other.m_signature};
   }
 
+  /**
+   * @brief Set the Signature object
+   *
+   * @tparam T_Entity
+   * @param entity
+   * @param signature
+   */
   template <IsValidEntity T_Entity>
   constexpr auto setSignature(T_Entity &entity,
                               T_EntitySignature<T_Entity> signature) noexcept
@@ -77,7 +85,7 @@ public:
   }
 
 private:
-  EntityIDGenerator m_idGenerator = {};
+  T_EIDGenerator m_idGenerator = {};
 };
 
 } // namespace ushi

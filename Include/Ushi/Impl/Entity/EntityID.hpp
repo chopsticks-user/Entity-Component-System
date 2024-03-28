@@ -7,22 +7,33 @@
 
 namespace ushi {
 
-// * EntityID must be hashable
 using EntityID = u64;
+
+template <typename T_EID>
+concept IsEID = Hashable<T_EID> && std::is_arithmetic_v<T_EID>;
 
 /**
  * @brief
  *
  */
-class EntityIDGenerator {
+template <IsEID T_EID> //
+class EntityIDGenerator final {
 public:
-  constexpr auto operator()() noexcept -> EntityID {
+  constexpr auto operator()() noexcept -> T_EID {
     return EntityID{m_current++};
   }
 
 private:
-  u64 m_current = 0;
+  T_EID m_current = 0;
 };
+
+template <class T_EIDGenerator>
+concept IsEIDGenerator =
+    IsEID<typename FirstTemplateArg<T_EIDGenerator>::Type> && requires {
+      {
+        T_EIDGenerator{}()
+      } -> std::convertible_to<typename FirstTemplateArg<T_EIDGenerator>::Type>;
+    };
 
 } // namespace ushi
 
