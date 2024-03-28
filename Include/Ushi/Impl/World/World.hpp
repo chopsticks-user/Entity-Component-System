@@ -8,8 +8,7 @@
 namespace ushi {
 
 // TODO: should make this class singleton
-template <typename T_Config = DefaultConfig>
-  requires IsValidConfig<T_Config>
+template <typename T_Config = DefaultConfig> //
 class World {
 public:
   using Config = T_Config;

@@ -10,6 +10,10 @@ namespace ushi {
 // * EntityID must be hashable
 using EntityID = u64;
 
+/**
+ * @brief
+ *
+ */
 class EntityIDGenerator {
 public:
   constexpr auto operator()() noexcept -> EntityID {

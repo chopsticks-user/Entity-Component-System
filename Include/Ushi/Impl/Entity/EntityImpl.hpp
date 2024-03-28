@@ -10,21 +10,16 @@ namespace ushi {
 
 class EntityFactory;
 
-class EntityBase {};
-
 /**
  * Inheriting from this class is currently not supported.
  *
  * @tparam T_Config
  */
-template <typename T_Config>
-  requires IsValidConfig<T_Config>
-class Entity final : public EntityBase {
+template <typename T_Config> //
+class Entity final {
   friend class EntityFactory;
 
-protected:
   using T_Signature = T_Config::SignatureType;
-  using T_Base = Entity;
 
 public:
   virtual ~Entity() noexcept = default;
@@ -34,6 +29,10 @@ public:
 
   constexpr auto signature() const noexcept -> const T_Signature & {
     return m_signature;
+  }
+
+  static constexpr auto maxComponents() noexcept -> u64 {
+    return T_Signature{}.size();
   }
 
   constexpr operator EntityID() const noexcept { return m_id; }
@@ -47,12 +46,13 @@ private:
   T_Signature m_signature;
 };
 
-// https://stackoverflow.com/questions/71921797/c-concepts-checking-if-derived-from-a-templated-class-with-unknown-template-p
+/** https://stackoverflow.com/questions/71921797/c-concepts-checking-if-derived-from-a-templated-class-with-unknown-template-p
+ * requires IsValidConfig<T_Config> is not neccessary since the class
+ * Entity<T_Config> will verify T_Config.
+ */
 template <class T_Entity>
 concept IsValidEntity = requires(T_Entity entity) {
-  []<typename T_Config>(Entity<T_Config> &)
-    requires IsValidConfig<T_Config>
-  {}(entity);
+  []<typename T_Config>(Entity<T_Config> &) {}(entity);
 };
 
 } // namespace ushi

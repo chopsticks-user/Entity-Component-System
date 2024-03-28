@@ -7,16 +7,21 @@
 
 namespace ushi {
 
-struct Config {
-  static constexpr u64 maxComponents = 64;
-  using SignatureType = std::bitset<maxComponents>;
+/**
+ * @brief
+ *
+ */
+struct DefaultConfig {
+  using SignatureType = std::bitset<64>;
 };
 
-struct DefaultConfig : public Config {};
+// template <typename T_Config>
+// concept IsValidConfig =
+//     std::derived_from<T_Config, Config> && !std::same_as<T_Config, Config>;
 
-template <typename T_Config>
-concept IsValidConfig =
-    std::derived_from<T_Config, Config> && !std::same_as<T_Config, Config>;
+// TODO:
+// template <typename T_Signature>
+// concept IsValidSignature = ;
 
 } // namespace ushi
 

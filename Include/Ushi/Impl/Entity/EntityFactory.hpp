@@ -9,6 +9,10 @@
 
 namespace ushi {
 
+/**
+ * @brief
+ *
+ */
 class EntityFactory {
 public:
   /**
@@ -33,7 +37,6 @@ public:
    * @return Entity<T_Config>
    */
   template <typename T_Config>
-    requires IsValidConfig<T_Config>
   constexpr auto create(T_Config::SignatureType entitySignature = {}) noexcept
       -> Entity<T_Config> {
     return Entity<T_Config>{m_idGenerator(), std::move(entitySignature)};
