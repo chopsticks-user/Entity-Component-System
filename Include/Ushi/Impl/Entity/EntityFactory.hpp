@@ -57,6 +57,25 @@ public:
     return T_Entity{m_idGenerator(), other.m_signature};
   }
 
+  template <IsValidEntity T_Entity>
+  constexpr auto setSignature(T_Entity &entity,
+                              T_EntitySignature<T_Entity> signature) noexcept
+      -> void {
+    entity.m_signature = std::move(signature);
+  }
+
+  /**
+   * Undefined if bitIndex >= m_signature.size()
+   *
+   * @param bitIndex
+   * @param bitValue
+   */
+  template <IsValidEntity T_Entity>
+  constexpr auto setSignatureBit(T_Entity &entity, u64 bitIndex,
+                                 bool bitValue) noexcept -> void {
+    entity.m_signature[bitIndex] = bitValue;
+  }
+
 private:
   EntityIDGenerator m_idGenerator = {};
 };

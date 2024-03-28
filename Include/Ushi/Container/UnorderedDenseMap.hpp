@@ -88,8 +88,8 @@ public:
 
 private:
   // If value type is ref or ptr type
-  constexpr static auto
-  m_constructIndexToKeyMap(const T_KeyToIndexMap &from) -> T_IndexToKeyMap {
+  constexpr static auto m_constructIndexToKeyMap(const T_KeyToIndexMap &from)
+      -> T_IndexToKeyMap {
     T_IndexToKeyMap map;
     std::ranges::for_each(
         from, [&](const T_Key &key, const u64 &index) { map[index] = key; });

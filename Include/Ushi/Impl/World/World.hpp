@@ -23,25 +23,23 @@ public:
   constexpr World &operator=(const World &) noexcept = delete;
 
 private:
-  // static std::atomic<World *> worldInstance = nullptr;
-
-private:
   constexpr World() noexcept = default;
 
 private:
 };
 
-// template <IsValidConfig T_Config>
-// std::atomic<World<T_Config> *> worldInstance = nullptr;
-
+/**
+ * @brief
+ *
+ * @tparam T_Config
+ * @return std::shared_ptr<World>
+ */
 template <IsValidConfig T_Config>
 auto World<T_Config>::instance() -> std::shared_ptr<World> {
   static std::atomic<std::shared_ptr<World>> worldInstance = nullptr;
 
   if (worldInstance.load() == nullptr) {
-    // auto pWorld = new World{};
     worldInstance.store(std::shared_ptr<World>(new World{}));
-    // worldInstance.load() = World{};
   }
   return worldInstance.load();
 }

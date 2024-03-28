@@ -15,13 +15,25 @@ class EntityFactory;
  *
  * @tparam T_Config
  */
-template <typename T_Config> //
+template <IsValidConfig T_Config> //
 class Entity final {
   friend class EntityFactory;
 
   using T_Signature = T_Config::SignatureType;
 
 public:
+  constexpr Entity(const Entity &) noexcept = default;
+
+  constexpr Entity(Entity &&) noexcept = default;
+
+  constexpr auto operator=(const Entity &) noexcept -> Entity & = delete;
+
+  constexpr auto operator=(Entity &&other) noexcept -> Entity & {
+    m_id = std::move(other.m_id);
+    m_signature = std::move(other.m_signature);
+    return *this;
+  };
+
   virtual ~Entity() noexcept = default;
 
 public:
@@ -42,7 +54,7 @@ private:
       : m_id{id}, m_signature{std::move(signature)} {}
 
 private:
-  const EntityID m_id;
+  EntityID m_id;
   T_Signature m_signature;
 };
 
@@ -51,5 +63,11 @@ concept IsValidEntity =
     IsValidConfig<typename FirstTemplateArg<T_Entity>::Type>;
 
 } // namespace ushi
+
+template <ushi::IsValidEntity T_Entity> struct std::hash<T_Entity> {
+  std::size_t operator()(const ushi::EntityID &entityID) const noexcept {
+    return std::hash<ushi::EntityID>{}(entityID);
+  }
+};
 
 #endif // TORA_INCLUDE_TORA_IMPL_ENTITY_IMPL_HPP

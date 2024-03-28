@@ -11,7 +11,7 @@ namespace ushi {
  * @brief
  *
  */
-struct DefaultConfig {
+struct DefaultConfig final {
   using SignatureType = std::bitset<64>;
 };
 
