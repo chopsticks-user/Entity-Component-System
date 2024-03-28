@@ -25,6 +25,8 @@ struct TupleCat<std::tuple<First...>, std::tuple<Second...>>
 };
 //
 
+template <typename> struct First2ArgTypes;
+
 template <typename FuncType, typename Arg1Type, typename Arg2Type,
           typename... Args> //
 struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {

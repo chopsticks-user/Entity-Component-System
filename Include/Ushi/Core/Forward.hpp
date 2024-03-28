@@ -33,15 +33,17 @@ typedef const char *cString;
 // using nezumi::ISparseVector;
 // using nezumi::SparseVector;
 // typedef SparseVector<u64> UniqueIDContainer;
-template <typename> struct First2ArgTypes;
+// template <typename> struct First2ArgTypes;
 
-class Entity;
-class EntityManager;
-class Component;
-class ComponentTable;
-class System;
-class SystemManager;
-class World;
+// class Entity;
+// class EntityManager;
+// class Component;
+// class ComponentTable;
+// class System;
+// class SystemManager;
+// class Config;
+// class DefaultConfig;
+// template <typename> class World;
 
 } // namespace ushi
 
