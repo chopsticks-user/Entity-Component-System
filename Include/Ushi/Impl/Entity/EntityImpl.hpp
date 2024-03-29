@@ -15,7 +15,7 @@ template <IsEIDGenerator> class EntityFactory;
  *
  * @tparam T_Config
  */
-template <IsValidConfig T_Config> //
+template <IsConfig T_Config> //
 class Entity final {
   friend class EntityFactory<typename T_Config::EIDGeneratorType>;
 
@@ -60,12 +60,11 @@ private:
 };
 
 template <class T_Entity>
-concept IsValidEntity =
-    IsValidConfig<typename FirstTemplateArg<T_Entity>::Type>;
+concept IsEntity = IsConfig<typename FirstTemplateArg<T_Entity>::Type>;
 
 } // namespace ushi
 
-// template <ushi::IsValidEntity T_Entity> struct std::hash<T_Entity> {
+// template <ushi::IsEntity T_Entity> struct std::hash<T_Entity> {
 //   std::size_t operator()(const ushi::EntityID &entityID) const noexcept {
 //     return std::hash<ushi::EntityID>{}(entityID);
 //   }

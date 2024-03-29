@@ -12,7 +12,7 @@ u64 sizeCounter = 0;
 void verifyAdd(u64 id, u64 value, u64 increment) {
   sizeCounter += increment;
   REQUIRE(v.size() == sizeCounter);
-  REQUIRE(v.exists(id));
+  REQUIRE(v.contains(id));
   REQUIRE(v[id] == value);
 }
 
@@ -42,7 +42,7 @@ void verifyRemove(u64 id, u64 decrement, bool empty = false) {
     REQUIRE(v.empty());
     REQUIRE(v.size() == 0);
   }
-  REQUIRE_FALSE(v.exists(id));
+  REQUIRE_FALSE(v.contains(id));
   REQUIRE_THROWS_AS(v[id], std::out_of_range);
 }
 

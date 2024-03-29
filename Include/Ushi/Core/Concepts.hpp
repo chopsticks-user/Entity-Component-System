@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 
 #include <concepts>
+#include <type_traits>
 
 namespace ushi {
 

@@ -41,7 +41,7 @@ struct FirstTemplateArg<V<T>> {
   using Type = T;
 };
 
-template <typename> struct FirstTemplateArg;
+// template <typename> struct FirstTemplateArg;
 
 template <template <auto> class C, auto V> struct FirstTemplateArg<C<V>> {
   static constexpr auto value = V;

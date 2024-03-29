@@ -7,14 +7,16 @@
 #include "Ushi/Impl/Config/Config.hpp"
 
 #include <typeindex>
+#include <typeinfo>
 
 namespace ushi {
 
-template <IsValidConfig T_Config> //
+template <IsConfig T_Config> //
 class ComponentRecord final {
 public:
-  static constexpr u64 maxComponents =
-      FirstTemplateArg<typename T_Config::DefaultConfig>::value;
+  // static constexpr u64 maxComponents =
+  //     FirstTemplateArg<typename T_Config::DefaultConfig>::value;
+  static constexpr u64 maxComponents = 64;
 
 public:
   constexpr ComponentRecord() noexcept = default;
@@ -37,11 +39,16 @@ public:
     return m_record.size() >= maxComponents;
   }
 
+  /**
+   * @brief
+   *
+   * @tparam T_Component
+   */
   template <IsComponent T_Component> //
   constexpr auto record() -> void {
-    auto tpidx = m_typeindex<T_Component>();
+    auto tpidx = m_getkey<T_Component>();
     // TODO: UnorderedDenseMap.try_emplace
-    if (!m_record.exists(tpidx)) {
+    if (!m_record.contains(tpidx)) {
       m_record.add(tpidx, m_record.size());
     }
   }
@@ -53,8 +60,8 @@ public:
    */
   template <IsComponent T_Component> //
   constexpr auto getIndex() const -> u64 {
-    auto tpidx = m_typeindex<T_Component>();
-    if (!m_record.exists(tpidx)) {
+    auto tpidx = m_getkey<T_Component>();
+    if (!m_record.contains(tpidx)) {
       return maxComponents;
     }
     return m_record[tpidx];
@@ -62,7 +69,7 @@ public:
 
 private:
   template <IsComponent T_Component> //
-  constexpr auto m_typeindex() const noexcept -> std::type_index {
+  constexpr auto m_getkey() const noexcept -> std::type_index {
     return std::type_index{typeid(T_Component)};
   }
 

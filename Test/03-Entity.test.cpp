@@ -17,11 +17,11 @@ struct NotAConfig {
 };
 
 TEST_CASE("Case #01: Concepts", "[require]") {
-  REQUIRE(ushi::IsValidConfig<ushi::DefaultConfig>);
-  REQUIRE(ushi::IsValidConfig<CustomConfig>);
-  REQUIRE(ushi::IsValidEntity<Entity>);
-  REQUIRE(ushi::IsValidEntity<ushi::Entity<CustomConfig>>);
-  REQUIRE_FALSE(ushi::IsValidConfig<NotAConfig>);
+  REQUIRE(ushi::IsConfig<ushi::DefaultConfig>);
+  REQUIRE(ushi::IsConfig<CustomConfig>);
+  REQUIRE(ushi::IsEntity<Entity>);
+  REQUIRE(ushi::IsEntity<ushi::Entity<CustomConfig>>);
+  REQUIRE_FALSE(ushi::IsConfig<NotAConfig>);
 }
 
 TEST_CASE("Case #01: EntityIDGenerator", "[require]") {
@@ -32,8 +32,8 @@ TEST_CASE("Case #01: EntityIDGenerator", "[require]") {
 }
 
 TEST_CASE("Case #02: EntityFactory", "[require]") {
-  REQUIRE(ushi::IsValidEntity<Entity>);
-  REQUIRE(ushi::IsValidEntity<ushi::Entity<CustomConfig>>);
+  REQUIRE(ushi::IsEntity<Entity>);
+  REQUIRE(ushi::IsEntity<ushi::Entity<CustomConfig>>);
 
   ushi::EntityFactory<ushi::EntityIDGenerator<ushi::u64>> factory;
 

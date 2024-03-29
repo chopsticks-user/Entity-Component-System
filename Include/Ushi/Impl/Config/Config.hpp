@@ -20,15 +20,15 @@ struct DefaultConfig final {
 
 // TODO:
 template <typename T_Signature>
-concept IsValidSignature = requires(T_Signature s1, T_Signature s2) {
+concept IsSignature = requires(T_Signature s1, T_Signature s2) {
   s1 & s2;
   s1 | s2;
   s1 ^ s2;
 };
 
 template <typename T_Config>
-concept IsValidConfig = requires {
-  requires IsValidSignature<typename T_Config::SignatureType>;
+concept IsConfig = requires {
+  requires IsSignature<typename T_Config::SignatureType>;
   requires IsEIDGenerator<typename T_Config::EIDGeneratorType>;
 };
 

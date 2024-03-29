@@ -10,7 +10,7 @@
 
 namespace ushi {
 
-template <IsValidConfig T_Config> //
+template <IsConfig T_Config> //
 class EntityManager final {
   using T_Entity = Entity<T_Config>;
   using T_EIDGenerator = T_Config::EIDGeneratorType;
@@ -35,7 +35,7 @@ public:
   }
 
   constexpr auto contains(const EntityID &entityID) const noexcept -> bool {
-    return m_entities.exists(entityID);
+    return m_entities.contains(entityID);
   }
 
   constexpr auto get(const EntityID &entityID) const -> T_Entity {

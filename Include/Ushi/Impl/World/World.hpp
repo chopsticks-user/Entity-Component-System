@@ -6,6 +6,7 @@
 #include "Ushi/Impl/Config/Config.hpp"
 
 #include <atomic>
+#include <memory>
 
 namespace ushi {
 
@@ -14,7 +15,7 @@ namespace ushi {
  *
  * @tparam T_Config
  */
-template <IsValidConfig T_Config = DefaultConfig> //
+template <IsConfig T_Config = DefaultConfig> //
 class World final {
 public:
   static auto instance() -> std::shared_ptr<World>;
@@ -34,7 +35,7 @@ private:
  * @tparam T_Config
  * @return std::shared_ptr<World>
  */
-template <IsValidConfig T_Config>
+template <IsConfig T_Config>
 auto World<T_Config>::instance() -> std::shared_ptr<World> {
   static std::atomic<std::shared_ptr<World>> worldInstance = nullptr;
 

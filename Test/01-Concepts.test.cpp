@@ -16,13 +16,13 @@ struct NotAConfig {
   using Signature = ushi::u64;
 };
 
-TEST_CASE("Case #01: IsValidConfig", "[require]") {
-  REQUIRE(ushi::IsValidConfig<ushi::DefaultConfig>);
-  REQUIRE(ushi::IsValidConfig<CustomConfig>);
-  REQUIRE_FALSE(ushi::IsValidConfig<NotAConfig>);
+TEST_CASE("Case #01: IsConfig", "[require]") {
+  REQUIRE(ushi::IsConfig<ushi::DefaultConfig>);
+  REQUIRE(ushi::IsConfig<CustomConfig>);
+  REQUIRE_FALSE(ushi::IsConfig<NotAConfig>);
 }
 
-TEST_CASE("Case #02: IsValidEntity", "[require]") {
-  REQUIRE(ushi::IsValidEntity<Entity>);
-  REQUIRE(ushi::IsValidEntity<ushi::Entity<CustomConfig>>);
+TEST_CASE("Case #02: IsEntity", "[require]") {
+  REQUIRE(ushi::IsEntity<Entity>);
+  REQUIRE(ushi::IsEntity<ushi::Entity<CustomConfig>>);
 }

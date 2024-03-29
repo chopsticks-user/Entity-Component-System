@@ -8,7 +8,7 @@ namespace ushi {
 using EntityID = u64;
 
 template <typename T_EID>
-concept IsEID = Hashable<T_EID> && std::is_arithmetic_v<T_EID>;
+concept IsEID = Hashable<T_EID>; // compareable, etc
 
 /**
  * @brief

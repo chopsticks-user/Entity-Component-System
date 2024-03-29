@@ -9,7 +9,7 @@
 
 namespace ushi {
 
-template <IsValidEntity T_Entity>
+template <IsEntity T_Entity>
 using T_EntitySignature = FirstTemplateArg<T_Entity>::Type::SignatureType;
 
 /**
@@ -26,7 +26,7 @@ public:
    * @param entitySignature
    * @return T_Entity
    */
-  template <IsValidEntity T_Entity>
+  template <IsEntity T_Entity>
   constexpr auto
   create(T_EntitySignature<T_Entity> entitySignature = {}) noexcept
       -> T_Entity {
@@ -40,7 +40,7 @@ public:
    * @param entitySignature
    * @return Entity<T_Config>
    */
-  template <IsValidConfig T_Config>
+  template <IsConfig T_Config>
   constexpr auto create(T_Config::SignatureType entitySignature = {}) noexcept
       -> Entity<T_Config> {
     return Entity<T_Config>{m_idGenerator(), std::move(entitySignature)};
@@ -53,7 +53,7 @@ public:
    * @param other
    * @return T_Entity
    */
-  template <IsValidEntity T_Entity>
+  template <IsEntity T_Entity>
   constexpr auto clone(const T_Entity &other) noexcept -> T_Entity {
     return T_Entity{m_idGenerator(), other.m_signature};
   }
@@ -65,7 +65,7 @@ public:
    * @param entity
    * @param signature
    */
-  template <IsValidEntity T_Entity>
+  template <IsEntity T_Entity>
   constexpr auto setSignature(T_Entity &entity,
                               T_EntitySignature<T_Entity> signature) noexcept
       -> void {
@@ -78,7 +78,7 @@ public:
    * @param bitIndex
    * @param bitValue
    */
-  template <IsValidEntity T_Entity>
+  template <IsEntity T_Entity>
   constexpr auto setSignatureBit(T_Entity &entity, u64 bitIndex,
                                  bool bitValue) noexcept -> void {
     entity.m_signature[bitIndex] = bitValue;
