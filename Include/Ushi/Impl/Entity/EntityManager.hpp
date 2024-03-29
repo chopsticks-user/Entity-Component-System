@@ -11,7 +11,7 @@
 namespace ushi {
 
 template <IsValidConfig T_Config> //
-class EntityManager {
+class EntityManager final {
   using T_Entity = Entity<T_Config>;
   using T_EIDGenerator = T_Config::EIDGeneratorType;
 

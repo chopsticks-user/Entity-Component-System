@@ -36,9 +36,15 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
 
 template <typename T> struct FirstTemplateArg;
 
-template <template <typename> typename V, typename T>
+template <template <typename> class V, typename T>
 struct FirstTemplateArg<V<T>> {
   using Type = T;
+};
+
+template <typename> struct FirstTemplateArg;
+
+template <template <auto> class C, auto V> struct FirstTemplateArg<C<V>> {
+  static constexpr auto value = V;
 };
 
 } // namespace ushi

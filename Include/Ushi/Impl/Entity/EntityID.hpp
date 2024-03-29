@@ -3,8 +3,6 @@
 
 #include "Ushi/Core/Core.hpp"
 
-#include <utility>
-
 namespace ushi {
 
 using EntityID = u64;
