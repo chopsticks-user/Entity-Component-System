@@ -1,0 +1,8 @@
+#ifndef USHI_INCLUDE_USHI_IMPL_GROUP_PARALLEL_FETCH_HPP
+#define USHI_INCLUDE_USHI_IMPL_GROUP_PARALLEL_FETCH_HPP
+
+#include "Core/Core.hpp"
+
+namespace ushi {} // namespace ushi
+
+#endif // USHI_INCLUDE_USHI_IMPL_GROUP_PARALLEL_FETCH_HPP
