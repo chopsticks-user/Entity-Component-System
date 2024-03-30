@@ -1,13 +1,10 @@
 #ifndef USHI_INCLUDE_USHI_IMPL_COMPONENT_RECORD_HPP
 #define USHI_INCLUDE_USHI_IMPL_COMPONENT_RECORD_HPP
 
-#include "Ushi/Core/Core.hpp"
+#include "Core/Core.hpp"
 
-#include "Ushi/Container/UnorderedDenseMap.hpp"
-#include "Ushi/Impl/Config/Config.hpp"
-
-#include <typeindex>
-#include <typeinfo>
+#include "Config/Config.hpp"
+#include "Container/UnorderedDenseMap.hpp"
 
 namespace ushi {
 

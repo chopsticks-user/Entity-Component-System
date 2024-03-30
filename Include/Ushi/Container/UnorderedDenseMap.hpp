@@ -1,11 +1,7 @@
 #ifndef USHI_INCLUDE_USHI_CONTAINER_UNORDERED_DENSE_MAP_HPP
 #define USHI_INCLUDE_USHI_CONTAINER_UNORDERED_DENSE_MAP_HPP
 
-#include "Ushi/Core/Core.hpp"
-
-#include <algorithm>
-#include <unordered_map>
-#include <vector>
+#include "Core/Core.hpp"
 
 namespace ushi {
 

@@ -1,7 +1,17 @@
-#ifndef USHI_INCLUDE_USHI_CORE_FORWARD_HPP
-#define USHI_INCLUDE_USHI_CORE_FORWARD_HPP
+#ifndef USHI_INCLUDE_USHI_CORE_TYPENAMES_HPP
+#define USHI_INCLUDE_USHI_CORE_TYPENAMES_HPP
 
+#include "Platforms.hpp"
+
+#include <algorithm>
+#include <atomic>
+#include <bitset>
 #include <cstdint>
+#include <memory>
+#include <typeindex>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 namespace ushi {
 
@@ -29,22 +39,6 @@ typedef uint32_t b32;
 
 typedef const char *cString;
 
-// using nezumi::DynamicBitset;
-// using nezumi::ISparseVector;
-// using nezumi::SparseVector;
-// typedef SparseVector<u64> UniqueIDContainer;
-// template <typename> struct First2ArgTypes;
-
-// class Entity;
-// class EntityManager;
-// class Component;
-// class ComponentTable;
-// class System;
-// class SystemManager;
-// class Config;
-// class DefaultConfig;
-// template <typename> class World;
-
 } // namespace ushi
 
-#endif // USHI_INCLUDE_USHI_CORE_FORWARD_HPP
+#endif // USHI_INCLUDE_USHI_CORE_TYPENAMES_HPP

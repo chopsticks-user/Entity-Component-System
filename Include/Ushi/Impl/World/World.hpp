@@ -1,12 +1,9 @@
 #ifndef USHI_INCLUDE_USHI_IMPL_WORLD_HPP
 #define USHI_INCLUDE_USHI_IMPL_WORLD_HPP
 
-#include "Ushi/Core/Core.hpp"
+#include "Core/Core.hpp"
 
-#include "Ushi/Impl/Config/Config.hpp"
-
-#include <atomic>
-#include <memory>
+#include "Config/Config.hpp"
 
 namespace ushi {
 

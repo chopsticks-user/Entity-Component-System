@@ -1,10 +1,10 @@
 #ifndef TORA_INCLUDE_TORA_IMPL_ENTITY_IMPL_HPP
 #define TORA_INCLUDE_TORA_IMPL_ENTITY_IMPL_HPP
 
-#include "Ushi/Core/Core.hpp"
+#include "Core/Core.hpp"
 
+#include "Config/Config.hpp"
 #include "EntityID.hpp"
-#include "Ushi/Impl/Config/Config.hpp"
 
 namespace ushi {
 

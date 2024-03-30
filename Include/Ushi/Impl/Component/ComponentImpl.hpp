@@ -1,7 +1,7 @@
 #ifndef USHI_INCLUDE_USHI_IMPL_COMPONENT_IMPL_HPP
 #define USHI_INCLUDE_USHI_IMPL_COMPONENT_IMPL_HPP
 
-#include "Ushi/Core/Core.hpp"
+#include "Core/Core.hpp"
 
 namespace ushi {
 

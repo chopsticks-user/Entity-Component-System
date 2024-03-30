@@ -1,7 +1,7 @@
 #ifndef USHI_INCLUDE_USHI_CORE_CONCEPTS_HPP
 #define USHI_INCLUDE_USHI_CORE_CONCEPTS_HPP
 
-#include "Forward.hpp"
+#include "Typenames.hpp"
 #include "Utils.hpp"
 
 #include <concepts>

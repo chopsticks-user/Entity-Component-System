@@ -1,11 +1,9 @@
 #ifndef USHI_INCLUDE_USHI_IMPL_CONFIG_HPP
 #define USHI_INCLUDE_USHI_IMPL_CONFIG_HPP
 
-#include "Ushi/Core/Core.hpp"
+#include "Core/Core.hpp"
 
-#include "Ushi/Impl/Entity/EntityID.hpp"
-
-#include <bitset>
+#include "Entity/EntityID.hpp"
 
 namespace ushi {
 

@@ -1,0 +1,6 @@
+#ifndef USHI_INCLUDE_USHI_CORE_PLATFORMS_HPP
+#define USHI_INCLUDE_USHI_CORE_PLATFORMS_HPP
+
+namespace ushi {} // namespace ushi
+
+#endif // USHI_INCLUDE_USHI_CORE_PLATFORMS_HPP

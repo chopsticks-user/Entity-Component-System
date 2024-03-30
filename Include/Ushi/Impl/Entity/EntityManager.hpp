@@ -3,10 +3,8 @@
 
 #include "Ushi/Core/Core.hpp"
 
-#include "Ushi/Container/UnorderedDenseMap.hpp"
-#include "Ushi/Impl/Entity/EntityFactory.hpp"
-
-#include <unordered_set>
+#include "Container/UnorderedDenseMap.hpp"
+#include "EntityFactory.hpp"
 
 namespace ushi {
 

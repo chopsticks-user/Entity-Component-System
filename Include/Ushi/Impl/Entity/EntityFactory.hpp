@@ -3,9 +3,9 @@
 
 #include "Ushi/Core/Core.hpp"
 
+#include "Config/Config.hpp"
 #include "EntityID.hpp"
 #include "EntityImpl.hpp"
-#include "Ushi/Impl/Config/Config.hpp"
 
 namespace ushi {
 
