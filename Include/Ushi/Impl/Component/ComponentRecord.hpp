@@ -14,9 +14,8 @@ namespace ushi {
 template <IsConfig T_Config> //
 class ComponentRecord final {
 public:
-  // static constexpr u64 maxComponents =
-  //     FirstTemplateArg<typename T_Config::DefaultConfig>::value;
-  static constexpr u64 maxComponents = 64;
+  static constexpr u64 maxComponents =
+      FirstTemplateArg<typename T_Config::SignatureType>::value;
 
 public:
   constexpr ComponentRecord() noexcept = default;
@@ -45,11 +44,9 @@ public:
    * @tparam T_Component
    */
   template <IsComponent T_Component> //
-  constexpr auto record() -> void {
-    auto tpidx = m_getkey<T_Component>();
-    // TODO: UnorderedDenseMap.try_emplace
-    if (!m_record.contains(tpidx)) {
-      m_record.add(tpidx, m_record.size());
+  constexpr auto regster() -> void {
+    if (!full()) {
+      m_record.try_emplace(typeid(T_Component), m_record.size());
     }
   }
 
@@ -60,11 +57,11 @@ public:
    */
   template <IsComponent T_Component> //
   constexpr auto getIndex() const -> u64 {
-    auto tpidx = m_getkey<T_Component>();
-    if (!m_record.contains(tpidx)) {
+    auto it = m_record.find(typeid(T_Component));
+    if (it == m_record.end()) {
       return maxComponents;
     }
-    return m_record[tpidx];
+    return it->second;
   }
 
 private:
@@ -74,7 +71,7 @@ private:
   }
 
 private:
-  UnorderedDenseMap<std::type_index, u64> m_record = {};
+  std::unordered_map<std::type_index, u64> m_record = {};
 };
 
 } // namespace ushi

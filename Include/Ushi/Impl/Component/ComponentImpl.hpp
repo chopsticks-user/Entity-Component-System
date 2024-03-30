@@ -10,8 +10,7 @@ struct Component {
 };
 
 template <typename T_Component>
-concept IsComponent = !std::same_as<T_Component, Component> &&
-                      std::derived_from<T_Component, Component>;
+concept IsComponent = IsChildOf<T_Component, Component>;
 
 } // namespace ushi
 
