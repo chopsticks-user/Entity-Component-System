@@ -6,6 +6,7 @@
 
 #include <any>
 #include <functional>
+#include <ranges>
 #include <string>
 #include <variant>
 
@@ -35,10 +36,31 @@ TEST_CASE("Case #01: Group", "[require]") {
   record.regster<Texture>();
   record.regster<Audio>();
 
-  auto factory = ushi::GroupFactory<CustomConfig>{};
+  auto factory = ushi::GroupFactory<CustomConfig>{record};
 
-  auto group1 = factory.create<Motion, Texture, Animation>(record);
+  auto group1 = factory.create<Motion, Texture, Animation>();
   // REQUIRE_NOTHROW(group1)
 }
 
-TEST_CASE("Case #02: ", "[require]") {}
+void for_each_in_a_view(std::ranges::ref_view<std::vector<int>> &&view) {
+  for (auto &element : view) {
+    std::cout << element << ' ';
+  }
+  std::cout << std::endl;
+}
+
+template <std::convertible_to<std::ranges::ref_view<std::vector<int>>>... Args>
+void for_each_in_combined_view(Args &&...views) {
+  (for_each_in_a_view(views), ...);
+}
+
+TEST_CASE("Case #02: ", "[require]") {
+  std::vector<int> v1(5);
+  std::vector<int> v2(10);
+
+  // auto view1 = std::views::all(v1);
+  // auto view2 = std::views::all(v2);
+  // auto combinedView = view1 | std::views::join;
+
+  for_each_in_combined_view(v1, v1);
+}
