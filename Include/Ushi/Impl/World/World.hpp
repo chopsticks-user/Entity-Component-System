@@ -17,9 +17,17 @@ class World final {
 public:
   static auto instance() -> std::shared_ptr<World>;
 
-  constexpr World(const World &) noexcept = delete;
-  constexpr World &operator=(const World &) noexcept = delete;
+  constexpr ~World() noexcept = default;
 
+  constexpr World(const World &) noexcept = delete;
+
+  constexpr World(World &&) noexcept = default;
+
+  constexpr auto operator=(const World &) noexcept -> World & = delete;
+
+  constexpr auto operator=(World &&) noexcept -> World & = default;
+
+public:
 private:
   constexpr World() noexcept = default;
 

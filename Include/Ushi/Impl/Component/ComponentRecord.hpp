@@ -8,6 +8,8 @@
 
 namespace ushi {
 
+using ComponentRecordID = u64;
+
 template <IsConfig T_Config> //
 class ComponentRecord final {
 public:
@@ -29,7 +31,9 @@ public:
   constexpr auto operator=(const ComponentRecord &) noexcept
       -> ComponentRecord & = delete;
 
-  constexpr auto size() const noexcept -> u64 { return m_record.size(); }
+  constexpr auto size() const noexcept -> ComponentRecordID {
+    return m_record.size();
+  }
 
   constexpr auto full() const noexcept -> bool {
     return m_record.size() >= maxComponents;
@@ -50,10 +54,10 @@ public:
   /**
    *
    * @tparam T_Component
-   * @return u64
+   * @return ComponentRecordID
    */
   template <IsComponent T_Component> //
-  constexpr auto getIndex() const -> u64 {
+  constexpr auto getIndex() const noexcept -> ComponentRecordID {
     auto it = m_record.find(typeid(T_Component));
     if (it == m_record.end()) {
       return maxComponents;
@@ -61,14 +65,28 @@ public:
     return it->second;
   }
 
+  template <IsComponent... T_Components> //
+  [[nodiscard]] constexpr auto signature() const noexcept
+      -> T_Config::SignatureType {
+    typename T_Config::SignatureType signature;
+    (m_setSignatureBit<T_Components>(signature, getIndex<T_Components>()), ...);
+    return signature;
+  }
+
 private:
+  template <IsComponent T_Components> //
+  constexpr auto m_setSignatureBit(T_Config::SignatureType &signature,
+                                   u64 index) const noexcept -> void {
+    signature[index] = true;
+  }
+
   template <IsComponent T_Component> //
   constexpr auto m_getkey() const noexcept -> std::type_index {
     return std::type_index{typeid(T_Component)};
   }
 
 private:
-  std::unordered_map<std::type_index, u64> m_record = {};
+  std::unordered_map<std::type_index, ComponentRecordID> m_record = {};
 };
 
 } // namespace ushi
