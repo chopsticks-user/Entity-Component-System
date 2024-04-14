@@ -3,5 +3,6 @@
 
 #include "ComponentImpl.hpp"
 #include "ComponentRecord.hpp"
+#include "ComponentTable.hpp"
 
 #endif // USHI_INCLUDE_USHI_IMPL_COMPONENT_HPP

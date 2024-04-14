@@ -26,15 +26,6 @@ class Group final {
   friend class GroupFactory<T_Config>;
 
 public:
-  constexpr Group(Group &&) noexcept = default;
-
-  Group(const Group &) = delete;
-
-  constexpr auto operator=(Group &&) noexcept -> Group & = default;
-
-  auto operator=(const Group &) -> Group & = delete;
-
-public:
   [[nodiscard]] constexpr auto level() const noexcept -> u64 {
     return m_table.size();
   }

@@ -2,6 +2,7 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
+#include <Group/Group.hpp>
 #include <Ushi/Ushi.hpp>
 
 #include <any>
@@ -39,9 +40,9 @@ TEST_CASE("Case #01: Group", "[require]") {
 
   auto manager = T_EntityManager{};
 
-  auto factory = ushi::GroupFactory<CustomConfig>{record};
+  auto factory = ushi::GroupFactory<CustomConfig>{};
 
-  auto group1 = factory.create<Motion, Texture, Animation>();
+  auto group1 = factory.create<Motion, Texture, Animation>(record);
   (void)group1.qualifiedChildren(CustomConfig::SignatureType{0x982});
   (void)group1.transfer<Motion, Texture, Animation, Audio>(
       record, manager, CustomConfig::SignatureType{0x982});

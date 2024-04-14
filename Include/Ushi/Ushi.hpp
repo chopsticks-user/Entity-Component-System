@@ -5,7 +5,7 @@
 #include "Ushi/Impl/Component/Component.hpp"
 #include "Ushi/Impl/Config/Config.hpp"
 #include "Ushi/Impl/Entity/Entity.hpp"
-#include "Ushi/Impl/Group/Group.hpp"
+// #include "Ushi/Impl/Group/Group.hpp"
 #include "Ushi/Impl/System/System.hpp"
 #include "Ushi/Impl/World/World.hpp"
 

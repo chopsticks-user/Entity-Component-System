@@ -39,11 +39,6 @@ public:
     return m_record.size() >= maxComponents;
   }
 
-  /**
-   * @brief
-   *
-   * @tparam T_Component
-   */
   template <IsComponent T_Component> //
   constexpr auto regster() -> void {
     if (!full()) {
@@ -51,11 +46,6 @@ public:
     }
   }
 
-  /**
-   *
-   * @tparam T_Component
-   * @return ComponentRecordID
-   */
   template <IsComponent T_Component> //
   constexpr auto getIndex() const noexcept -> ComponentRecordID {
     auto it = m_record.find(typeid(T_Component));
@@ -63,6 +53,11 @@ public:
       return maxComponents;
     }
     return it->second;
+  }
+
+  template <IsComponent T_Component> //
+  constexpr auto contains() const noexcept -> bool {
+    return getIndex<T_Component>() < maxComponents;
   }
 
   template <IsComponent... T_Components> //

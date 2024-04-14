@@ -11,6 +11,7 @@ struct CustomConfig {
 
 using T_Record = ushi::ComponentRecord<ushi::DefaultConfig>;
 using T_CustomRecord = ushi::ComponentRecord<CustomConfig>;
+using T_CustomTable = ushi::ComponentTable<CustomConfig>;
 
 struct Motion : public ushi::Component {};
 
@@ -59,4 +60,9 @@ TEST_CASE("Case #03: ComponentRecord", "[require]") {
   record.regster<Audio>();
   REQUIRE(record.size() == 3);
   REQUIRE(record.getIndex<Audio>() == T_CustomRecord::maxComponents);
+}
+
+TEST_CASE("Case #03: ComponentTable", "[require]") {
+  T_CustomTable table{};
+  //
 }

@@ -9,7 +9,7 @@ template <typename T_Key> //
 struct UnorderedDenseMapBase {
   virtual ~UnorderedDenseMapBase() = default;
   virtual auto size() const noexcept -> u64 = 0;
-  // virtual auto remove(const T_Key &id) noexcept -> void = 0;
+  virtual auto remove(const T_Key &id) noexcept -> void = 0;
   virtual auto clear() noexcept -> void = 0;
 };
 
@@ -61,7 +61,7 @@ public:
     }
   }
 
-  auto remove(const T_Key &id) noexcept -> void {
+  auto remove(const T_Key &id) noexcept -> void override {
     if (!contains(id)) {
       return;
     }
