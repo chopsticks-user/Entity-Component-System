@@ -29,7 +29,9 @@ public:
   template <IsComponent... T_Components> //
   [[nodiscard]] constexpr auto create() -> Group<T_Config> {
     Group<T_Config> group;
-    (group.m_table.add(m_record->template getIndex<T_Components>(), {}), ...);
+    (group.m_table.add(m_record->template getIndex<T_Components>(),
+                       std::make_shared<VectorWrapper<T_Components>>()),
+     ...);
     group.m_signature = m_record->template signature<T_Components...>();
     return group;
   }

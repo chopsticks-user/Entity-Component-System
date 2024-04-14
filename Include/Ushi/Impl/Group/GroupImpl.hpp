@@ -44,21 +44,38 @@ public:
     return m_signature;
   }
 
-  constexpr auto qualifiedChildren(const T_Signature &signature) const noexcept
+  template <IsComponent... T_Components> //
+  constexpr auto add(const EntityID &entityID,
+                     std::tuple<T_Components...> components,
+                     const ComponentRecord<T_Config> &componentRecord) -> void {
+    m_entityIDs.push_back(entityID);
+    (std::static_pointer_cast<VectorWrapper<T_Components>>(
+         m_table[componentRecord.template getIndex<T_Components>()])
+         ->get()
+         .push_back(std::get<T_Components>(components)),
+     ...);
+  }
+
+  [[nodiscard]] constexpr auto
+  qualifiedChildren(const T_Signature &signature) const noexcept
       -> std::list<T_GroupPtr> {
     std::list<T_GroupPtr> qualified;
+
     for (auto &child : m_childrenGroups) {
       if ((child->signature() & signature) == signature) {
         qualified.push_back(child);
       }
     }
+
     return qualified;
   }
 
+  // * Might require checking the number of template component types
   template <IsComponent... T_Components>
-  constexpr auto transfer(const ComponentRecord<T_Config> &componentRecord,
-                          const EntityManager<T_Config> &entityManager,
-                          const T_Signature &signature) noexcept
+  [[nodiscard]] constexpr auto
+  transfer(const ComponentRecord<T_Config> &componentRecord,
+           const EntityManager<T_Config> &entityManager,
+           const T_Signature &signature) noexcept
       -> std::pair<T_EntityIDContainer, T_ComponentTable> {
     std::pair<T_EntityIDContainer, T_ComponentTable> transferredData{};
 
@@ -70,35 +87,34 @@ public:
 
     (transferredData.second.add(
          componentRecord.template getIndex<T_Components>(),
-         std::make_shared<VectorWrapperBase>(
-             m_transfer(componentRecord.template getIndex<T_Components>(),
-                        transferredData.first))),
+         std::make_shared<VectorWrapperBase>(m_transfer<T_Components>(
+             componentRecord.template getIndex<T_Components>(),
+             transferredData.first))),
      ...);
 
     return transferredData;
   }
 
 private:
+  Group() = default;
+
   template <IsComponent T_Component>
-  constexpr auto m_transfer(const ComponentRecordID &componentID,
-                            const std::vector<u64> &indices) noexcept
+  [[nodiscard]] constexpr auto
+  m_transfer(const ComponentRecordID &componentID,
+             const std::vector<u64> &indices) noexcept
       -> VectorWrapper<T_Component> {
     VectorWrapper<T_Component> transferredComponents{};
     transferredComponents.get().reserve(indices.size());
 
-    VectorWrapper<T_Component> &pComponents =
-        *std::static_pointer_cast<VectorWrapper<T_Component>>(
-            m_table[componentID]);
-
     for (const auto &index : indices) {
       transferredComponents.get().push_back(
-          std::move(pComponents.remove(index)));
+          std::move(std::static_pointer_cast<VectorWrapper<T_Component>>(
+                        m_table[componentID])
+                        ->remove(index)));
     }
 
     return transferredComponents;
   }
-
-  Group() = default;
 
 private:
   T_EntityIDContainer m_entityIDs;
