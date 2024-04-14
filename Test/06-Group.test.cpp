@@ -39,6 +39,7 @@ TEST_CASE("Case #01: Group", "[require]") {
   auto factory = ushi::GroupFactory<CustomConfig>{record};
 
   auto group1 = factory.create<Motion, Texture, Animation>();
+  group1.qualifiedChildren(CustomConfig::SignatureType{0x982});
   // REQUIRE_NOTHROW(group1)
 }
 

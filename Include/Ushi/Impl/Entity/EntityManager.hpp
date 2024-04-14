@@ -46,6 +46,11 @@ public:
 
   constexpr auto nEntities() const noexcept -> u64 { return m_entities.size(); }
 
+  constexpr auto getSignature(EntityID entityID) const noexcept
+      -> const T_Config::SignatureType & {
+    return m_entities[entityID].signature();
+  }
+
   constexpr auto setSignature(const EntityID &entityID,
                               T_EntitySignature<T_Entity> signature) -> void {
     m_entityFactory.setSignature(m_entities[entityID], std::move(signature));

@@ -7,10 +7,14 @@
 #include <atomic>
 #include <bitset>
 #include <cstdint>
+#include <functional>
+#include <list>
 #include <memory>
+#include <ranges>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace ushi {
