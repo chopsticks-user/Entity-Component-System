@@ -30,7 +30,10 @@ public:
 
   template <IsComponent T_Component> //
   constexpr auto regster() -> void {
-    m_record.regster();
+    m_record.template regster<T_Component>();
+    m_table.resize(T_Record::maxComponents);
+    m_table[m_record.template getIndex<T_Component>()] =
+        std::make_shared<T_ComponentRow<T_Component>>();
   }
 
   template <IsComponent T_Component> //
@@ -83,40 +86,55 @@ public:
         });
   }
 
-  template <IsComponent T_Component> //
-  [[nodiscard]] constexpr auto componentsOf(const EntityID &eid)
-      -> T_Component & {
-    return m_componentRowPtr<T_Component>()->at(eid);
-  }
-
   template <IsComponent... T_Components> //
   [[nodiscard]] constexpr auto componentsOf(const EntityID &eid)
       -> std::tuple<T_Components &...> {
-    return std::forward_as_tuple((componentsOf<T_Components>(), ...));
+    return std::forward_as_tuple(m_componentsOf<T_Components>(eid)...);
   }
 
-  template <IsComponent T_Component> //
-  [[nodiscard]] constexpr auto allEntitiesWith() -> std::vector<EntityID> {
-    if (!m_record.template contains<T_Component>()) {
-      throw std::runtime_error("Unregistered component cannot be accessed");
-    }
+  template <IsComponent... T_Components> //
+  [[nodiscard]] constexpr auto componentsOf(const EntityID &eid,
+                                            const std::tuple<T_Components...> &)
+      -> std::tuple<T_Components &...> {
+    return componentsOf<T_Components...>(eid);
+  }
 
-    T_ComponentRowPtr<T_Component> componentRowPtr =
-        m_componentRowPtr<T_Component>();
-    return std::vector<EntityID>{componentRowPtr->begin(),
-                                 componentRowPtr->end()};
+  template <IsComponent T_FirstComponent> //
+  [[nodiscard]] constexpr auto allEntitiesWith() const
+      -> std::vector<EntityID> {
+    return allEntitiesWith<T_FirstComponent>();
   }
 
   template <IsComponent T_FirstComponent, IsComponent... T_Components> //
-  [[nodiscard]] constexpr auto allEntitiesWith() -> std::vector<EntityID> {
-    auto entityIDs = allEntitiesWith<T_FirstComponent>();
+  [[nodiscard]] constexpr auto allEntitiesWith() const
+      -> std::vector<EntityID> {
+    auto entityIDs = m_allEntitiesWith<T_FirstComponent>();
     (m_filterEntitiesWith<T_Components>(entityIDs), ...);
     return entityIDs;
   }
 
 private:
   template <IsComponent T_Component> //
-  [[nodiscard]] constexpr auto m_hasComponent(const EntityID &eid) {
+  [[nodiscard]] constexpr auto m_componentsOf(const EntityID &eid)
+      -> T_Component & {
+    return m_componentRowPtr<T_Component>()->at(eid);
+  }
+
+  template <IsComponent T_Component> //
+  [[nodiscard]] constexpr auto m_allEntitiesWith() const
+      -> std::vector<EntityID> {
+    if (!m_record.template contains<T_Component>()) {
+      throw std::runtime_error("Unregistered component cannot be accessed");
+    }
+
+    T_ComponentRowPtr<T_Component> componentRowPtr =
+        m_componentRowPtr<T_Component>();
+    return componentRowPtr->getKeys();
+  }
+
+  template <IsComponent T_Component> //
+  [[nodiscard]] constexpr auto
+  m_hasComponent(const EntityID &eid) const noexcept {
     if (!m_record.template contains<T_Component>()) {
       throw std::runtime_error("Unregistered component cannot be accessed");
     }
@@ -125,7 +143,7 @@ private:
   }
 
   template <IsComponent T_Component> //
-  constexpr auto m_filterEntitiesWith(std::vector<EntityID> &entitiyIDs)
+  constexpr auto m_filterEntitiesWith(std::vector<EntityID> &entitiyIDs) const
       -> void {
     T_ComponentRowPtr<T_Component> componentRowPtr =
         m_componentRowPtr<T_Component>();
@@ -141,7 +159,14 @@ private:
   template <IsComponent T_Component> //
   [[nodiscard]] constexpr auto m_componentRowPtr()
       -> T_ComponentRowPtr<T_Component> {
-    return std::static_pointer_cast<T_ComponentRowPtr<T_Component>>(
+    return std::static_pointer_cast<UnorderedDenseMap<EntityID, T_Component>>(
+        m_table[m_record.template getIndex<T_Component>()]);
+  }
+
+  template <IsComponent T_Component> //
+  [[nodiscard]] constexpr auto m_componentRowPtr() const
+      -> T_ComponentRowPtr<T_Component> {
+    return std::static_pointer_cast<UnorderedDenseMap<EntityID, T_Component>>(
         m_table[m_record.template getIndex<T_Component>()]);
   }
 

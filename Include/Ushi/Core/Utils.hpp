@@ -34,14 +34,19 @@ struct First2ArgTypes<FuncType(Arg1Type, Arg2Type, Args...)> {
   using type2 = Arg2Type;
 };
 
+template <typename> struct ArgumentTuple;
+
+template <typename T_Function, typename... T_Args>
+struct ArgumentTuple<T_Function(T_Args...)> {
+  using Type = std::tuple<std::remove_cvref_t<T_Args>...>;
+};
+
 template <typename T> struct FirstTemplateArg;
 
 template <template <typename> class V, typename T>
 struct FirstTemplateArg<V<T>> {
   using Type = T;
 };
-
-// template <typename> struct FirstTemplateArg;
 
 template <template <auto> class C, auto V> struct FirstTemplateArg<C<V>> {
   static constexpr auto value = V;

@@ -51,6 +51,15 @@ public:
     return (*this)[id];
   }
 
+  constexpr auto getKeys() const noexcept -> std::vector<T_Key> {
+    std::vector<T_Key> keys{};
+    keys.reserve(size());
+    for (const auto &p : m_keyToIndex) {
+      keys.push_back(p.first);
+    }
+    return keys;
+  }
+
   constexpr auto add(const T_Key &id, T_Value value) -> void {
     if (!contains(id)) {
       m_storage.emplace_back(value);
