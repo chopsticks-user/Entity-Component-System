@@ -13,7 +13,9 @@ template <IsConfig T_Config> //
 class SystemManager final {
   using T_Signature = T_Config::SignatureType;
   using T_SystemTable = std::unordered_map<std::type_index, T_Signature>;
-  using T_Archetype = std::unordered_map<T_Signature, std::vector<EntityID>>;
+  // TODO: DenseSet & UnorderedDenseSet
+  using T_Archetype =
+      std::unordered_map<T_Signature, std::unordered_set<EntityID>>;
 
 public:
   template <typename T_System, IsComponent... T_Components> //
@@ -30,8 +32,12 @@ public:
     if (m_archetype.contains(systemSignature)) {
       return;
     }
-    m_archetype[systemSignature] =
+    auto compatibleEntityIDs =
         componentTable.template allEntitiesWith<T_Components...>();
+
+    for (const auto &eid : compatibleEntityIDs) {
+      m_archetype[systemSignature].insert(eid);
+    }
   }
 
   template <typename T_System> //
@@ -43,6 +49,15 @@ public:
          m_archetype.at(m_systemTable.at(typeid(T_System)))) {
       auto args = componentTable.template componentsOf(entityID, sampleTuple);
       std::apply(T_System::function, args);
+    }
+  }
+
+  constexpr auto removeEntity(const EntityID &eid,
+                              const T_Signature &entitySignature) noexcept {
+    for (auto &[archSignature, entityIDs] : m_archetype) {
+      if ((entitySignature & archSignature) == archSignature) {
+        entityIDs.erase(eid);
+      }
     }
   }
 

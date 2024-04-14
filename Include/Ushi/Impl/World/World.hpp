@@ -7,39 +7,24 @@
 
 namespace ushi {
 
-/**
- * @brief
- *
- * @tparam T_Config
- */
 template <IsConfig T_Config = DefaultConfig> //
 class World final {
+  using T_EntityManager = EntityManager<T_Config>;
+  using T_ComponentTable = ComponentTable<T_Config>;
+  using T_SystemManager = SystemManager<T_Config>;
+
 public:
   static auto instance() -> std::shared_ptr<World>;
 
-  constexpr ~World() noexcept = default;
-
-  constexpr World(const World &) noexcept = delete;
-
-  constexpr World(World &&) noexcept = default;
-
-  constexpr auto operator=(const World &) noexcept -> World & = delete;
-
-  constexpr auto operator=(World &&) noexcept -> World & = default;
-
-public:
 private:
-  constexpr World() noexcept = default;
+  constexpr World() = default;
 
 private:
+  T_EntityManager m_entityManager = {};
+  T_ComponentTable m_componentTable = {};
+  T_SystemManager m_systemManager = {};
 };
 
-/**
- * @brief
- *
- * @tparam T_Config
- * @return std::shared_ptr<World>
- */
 template <IsConfig T_Config>
 auto World<T_Config>::instance() -> std::shared_ptr<World> {
   static std::atomic<std::shared_ptr<World>> worldInstance = nullptr;

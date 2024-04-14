@@ -41,6 +41,8 @@ TEST_CASE("Case #01:", "[require]") {
   T_SystemManager systemManager{};
   systemManager.regster<Renderable, Animation, Texture>(componentTable);
   systemManager.execute<Renderable>(componentTable);
+
+  std::cout << sizeof(ushi::World<CustomConfig>) << std::endl;
 }
 
 TEST_CASE("Case #02: ComponentRecord<T>::maxComponents", "[require]") {}
