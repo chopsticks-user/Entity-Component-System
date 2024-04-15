@@ -17,6 +17,7 @@ class World final {
   using T_SystemManager = SystemManager<T_Config>;
 
   using T_Signature = T_Config::SignatureType;
+  using T_Entity = Entity<T_Config>;
 
 public:
   static auto instance() -> std::shared_ptr<World>;
@@ -27,18 +28,75 @@ private:
 public:
   //===============================Entity======================================
 
-  template <IsComponent... T_Components> //
-  [[nodiscard]] constexpr auto create(T_Components... components) -> EntityID {
-    auto entityID =
-        m_entityManager.template create(signatureOf<T_Components...>());
-    m_componentTable.template addEntityWith<T_Components...>(
-        entityID, std::move(components)...);
-    return entityID;
+  [[nodiscard]] constexpr auto create() -> T_Entity {
+    return m_entityManager.template create();
   }
 
   template <IsComponent... T_Components> //
-  constexpr auto addComponentsToEntity(const EntityID &entityID,
-                                       T_Components... components) -> void {
+  [[nodiscard]] constexpr auto create(T_Components... components) -> T_Entity {
+    T_Entity entity =
+        m_entityManager.template create(signatureOf<T_Components...>());
+    m_componentTable.template addEntityWith<T_Components...>(
+        entity, std::move(components)...);
+    return entity;
+  }
+
+  template <IsComponent... T_Components> //
+  [[nodiscard]] constexpr auto
+  create(std::tuple<T_Components...> componentTuple = {}) -> T_Entity {
+    T_Entity entity =
+        m_entityManager.template create(signatureOf<T_Components...>());
+
+    std::apply(
+        [&](auto &&...args) {
+          m_componentTable.template addEntityWith<T_Components...>(entity.id(),
+                                                                   args...);
+        },
+        componentTuple);
+    return entity;
+  }
+
+  [[nodiscard]] constexpr auto create(u64 nEntities) -> std::vector<T_Entity> {
+    std::vector<T_Entity> entities{};
+    entities.reserve(nEntities);
+
+    for (u64 i = 0; i < nEntities; ++i) {
+      entities.push_back(m_entityManager.template create());
+    }
+
+    return entities;
+  }
+
+  template <IsComponent... T_Components> //
+  [[nodiscard]] constexpr auto
+  create(u64 nEntities, std::tuple<T_Components...> componentTuple = {})
+      -> std::vector<T_Entity> {
+    std::vector<T_Entity> entities{};
+    entities.reserve(nEntities);
+
+    for (u64 i = 0; i < nEntities; ++i) {
+      entities.push_back(
+          m_entityManager.template create(signatureOf<T_Components...>()));
+      std::apply(
+          [&](auto &&...args) {
+            m_componentTable.template addEntityWith<T_Components...>(
+                entities[i].id(), args...);
+          },
+          componentTuple);
+    }
+
+    return entities;
+  }
+
+  template <IsComponent... T_Components> //
+  [[nodiscard]] constexpr auto create(u64 nEntities, T_Components... components)
+      -> std::vector<T_Entity> {
+    return create(nEntities, std::make_tuple(components...));
+  }
+
+  template <IsComponent... T_Components> //
+  constexpr auto addComponents(const EntityID &entityID,
+                               T_Components... components) -> void {
     if (!m_entityManager.contains(entityID)) {
       throw std::runtime_error("Entity not existed");
     }
@@ -49,11 +107,55 @@ public:
         entityID, std::move(components)...);
   }
 
+  // TODO: adding in batches efficiently
   template <IsComponent... T_Components> //
-  [[nodiscard]] constexpr auto hasComponents(const EntityID &entityID) -> bool {
+  constexpr auto addComponents(const std::vector<T_Entity> &entities,
+                               T_Components... components) -> void {
+    for (const auto &entity : entities) {
+      addComponents<T_Components...>(entity, components...);
+    }
+  }
+
+  template <IsComponent... T_Components> //
+  constexpr auto addComponents(const std::vector<T_Entity> &entities,
+                               std::tuple<T_Components...> componentTuple = {})
+      -> void {
+    std::apply(
+        [&](auto &&...args) {
+          addComponents<T_Components...>(entities, args...);
+        },
+        componentTuple);
+  }
+
+  // template <IsComponent... T_Components> //
+  // constexpr auto removeComponentsOf(const EntityID &entityID,
+  //                                   T_Components... components) -> void {
+  //   if (!m_entityManager.contains(entityID)) {
+  //     throw std::runtime_error("Entity not existed");
+  //   }
+
+  //   m_entityManager.setSignature(entityID, signatureOf(entityID) |
+  //                                              signatureOf<T_Components...>());
+  //   m_componentTable.template addEntityWith<T_Components...>(
+  //       entityID, std::move(components)...);
+  // }
+
+  template <IsComponent... T_Components> //
+  [[nodiscard]] constexpr auto
+  hasComponents(const EntityID &entityID) const noexcept -> bool {
     auto componentPackSignature = signatureOf<T_Components...>();
     return (m_entityManager.template getSignature(entityID) &
             componentPackSignature) == componentPackSignature;
+  }
+
+  template <IsComponent... T_Components> //
+  [[nodiscard]] constexpr auto
+  hasComponents(const std::vector<T_Entity> &entities) const noexcept -> bool {
+    bool result = false;
+    for (const auto &entity : entities) {
+      result |= hasComponents<T_Components...>(entity);
+    }
+    return result;
   }
 
   [[nodiscard]] constexpr auto

@@ -24,9 +24,11 @@ class ComponentTable final {
   using T_ComponentRowPtr = std::shared_ptr<T_ComponentRow<T_Component>>;
 
 public:
-  constexpr auto componentTypeCount() -> u64 { return m_record.size(); }
+  constexpr auto componentTypeCount() const noexcept -> u64 {
+    return m_record.size();
+  }
 
-  constexpr auto recordFull() -> bool { return m_record.full(); }
+  constexpr auto recordFull() const noexcept -> bool { return m_record.full(); }
 
   template <IsComponent T_Component> //
   constexpr auto regster() -> void {
@@ -68,6 +70,15 @@ public:
       -> void {
     (addEntityWith<T_Components>(eid, std::move(components)), ...);
   }
+
+  // template <IsComponent... T_Components> //
+  // constexpr auto addEntityWith(const EntityID &eid,
+  //                              std::tuple<T_Components...> componentTpl = {})
+  //     -> void {
+
+  //   // iterateTuple<0>(componentTpl, addEntityWith<T_Components>)
+  //   // std::apply
+  // }
 
   template <IsComponent T_Component> //
   constexpr auto removeComponentsOf(const EntityID &eid) noexcept -> void {
