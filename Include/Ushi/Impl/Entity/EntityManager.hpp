@@ -46,7 +46,7 @@ public:
 
   constexpr auto nEntities() const noexcept -> u64 { return m_entities.size(); }
 
-  constexpr auto getSignature(EntityID entityID) const noexcept
+  constexpr auto getSignature(const EntityID &entityID) const noexcept
       -> const T_Config::SignatureType & {
     return m_entities[entityID].signature();
   }

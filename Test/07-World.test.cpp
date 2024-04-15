@@ -27,10 +27,13 @@ TEST_CASE("Case #02: Entity-Component behaviors", "[require]") {
   auto entity1 = world->create();
 
   REQUIRE_FALSE(world->hasComponents<Motion>(entity1));
-  world->addComponentsToEntity<Motion>(entity1, {});
+  world->addComponentsToEntity(entity1, Motion{});
   REQUIRE(world->hasComponents<Motion>(entity1));
 
   REQUIRE_FALSE(world->hasComponents<Motion, Texture>(entity1));
-  world->addComponentsToEntity<Texture>(entity1, {});
+  world->addComponentsToEntity(entity1, Texture{});
   REQUIRE(world->hasComponents<Motion, Texture>(entity1));
+
+  auto entity2 = world->create(Motion{}, Texture{});
+  REQUIRE(world->hasComponents<Motion, Texture>(entity2));
 }

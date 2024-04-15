@@ -36,11 +36,6 @@ public:
     return entityID;
   }
 
-  // template <IsComponent... T_Components> //
-  // [[nodiscard]] constexpr auto create() -> EntityID {
-  //   return create<T_Components...>(T_Components{}, ...);
-  // }
-
   template <IsComponent... T_Components> //
   constexpr auto addComponentsToEntity(const EntityID &entityID,
                                        T_Components... components) -> void {
@@ -48,7 +43,8 @@ public:
       throw std::runtime_error("Entity not existed");
     }
 
-    m_entityManager.setSignature(entityID, signatureOf<T_Components...>());
+    m_entityManager.setSignature(entityID, signatureOf(entityID) |
+                                               signatureOf<T_Components...>());
     m_componentTable.template addEntityWith<T_Components...>(
         entityID, std::move(components)...);
   }
@@ -58,6 +54,11 @@ public:
     auto componentPackSignature = signatureOf<T_Components...>();
     return (m_entityManager.template getSignature(entityID) &
             componentPackSignature) == componentPackSignature;
+  }
+
+  [[nodiscard]] constexpr auto
+  signatureOf(const EntityID &entityID) const noexcept -> T_Signature {
+    return m_entityManager.template getSignature(entityID);
   }
 
   //===============================Component===================================
