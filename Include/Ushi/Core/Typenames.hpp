@@ -18,12 +18,17 @@
 #include <vector>
 
 namespace ushi {
+namespace internal {
+namespace core {
 
 constexpr bool cppAtLeast14 = __cplusplus >= 201402L;
 constexpr bool cppAtLeast17 = __cplusplus >= 201703L;
 constexpr bool cppAtLeast20 = __cplusplus >= 202002L;
 constexpr bool cpp14 = cppAtLeast14 && !cppAtLeast17;
 constexpr bool cpp17 = cppAtLeast17 && !cppAtLeast20;
+
+} // namespace core
+} // namespace internal
 
 typedef int8_t i8;
 typedef int16_t i16;

@@ -1,0 +1,6 @@
+#ifndef USHI_INCLUDE_USHI_FORWARD_HPP
+#define USHI_INCLUDE_USHI_FORWARD_HPP
+
+#include "Interface/Forward.hpp"
+
+#endif // USHI_INCLUDE_USHI_FORWARD_HPP

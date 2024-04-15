@@ -4,6 +4,8 @@
 #include "Core/Core.hpp"
 
 namespace ushi {
+namespace internal {
+namespace container {
 
 template <typename T_Key> //
 struct UnorderedDenseMapBase {
@@ -110,6 +112,8 @@ private:
   T_ValueStorage m_storage = {};
 };
 
+} // namespace container
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_CONTAINER_UNORDERED_DENSE_MAP_HPP

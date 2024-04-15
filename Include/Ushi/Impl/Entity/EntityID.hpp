@@ -4,11 +4,13 @@
 #include "Core/Core.hpp"
 
 namespace ushi {
+namespace internal {
+namespace impl {
 
 using EntityID = u64;
 
 template <typename T_EID>
-concept IsEID = IsHashable<T_EID>; // compareable, etc
+concept IsEID = core::IsHashable<T_EID>; // compareable, etc
 
 /**
  * @brief
@@ -27,12 +29,15 @@ private:
 
 template <class T_EIDGenerator>
 concept IsEIDGenerator =
-    IsEID<typename FirstTemplateArg<T_EIDGenerator>::Type> && requires {
+    IsEID<typename core::FirstTemplateArg<T_EIDGenerator>::Type> && requires {
       {
         T_EIDGenerator{}()
-      } -> std::convertible_to<typename FirstTemplateArg<T_EIDGenerator>::Type>;
+      } -> std::convertible_to<
+          typename core::FirstTemplateArg<T_EIDGenerator>::Type>;
     };
 
+} // namespace impl
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_IMPL_ENTITY_ID_HPP

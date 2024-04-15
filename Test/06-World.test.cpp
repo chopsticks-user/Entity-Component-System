@@ -8,18 +8,18 @@ constexpr auto comparePtr(std::shared_ptr<T1> p1, std::shared_ptr<T2> p2)
 }
 
 TEST_CASE("Case #01: World is singleton", "[require]") {
-  auto world1 = ushi::World<ushi::DefaultConfig>::instance();
-  auto world2 = ushi::World<ushi::DefaultConfig>::instance();
+  auto world1 = T_World::instance();
+  auto world2 = T_World::instance();
   REQUIRE(world1 != nullptr);
   REQUIRE(comparePtr(world1, world2));
 
-  auto world3 = ushi::World<CustomConfig>::instance();
+  auto world3 = T_CustomWorld::instance();
   REQUIRE(world3 != nullptr);
   REQUIRE_FALSE(comparePtr(world3, world1));
 }
 
 TEST_CASE("Case #02: Create 1 entity", "[require]") {
-  auto world = ushi::World<ushi::DefaultConfig>::instance();
+  auto world = T_World::instance();
 
   world->record<Motion>();
   world->record<Assets, Animation, Texture, Audio>();
@@ -47,7 +47,7 @@ TEST_CASE("Case #02: Create 1 entity", "[require]") {
 }
 
 TEST_CASE("Case #02: Create multiple entities", "[require]") {
-  auto world = ushi::World<ushi::DefaultConfig>::instance();
+  auto world = T_World::instance();
 
   world->record<Motion>();
   world->record<Assets, Animation, Texture, Audio>();

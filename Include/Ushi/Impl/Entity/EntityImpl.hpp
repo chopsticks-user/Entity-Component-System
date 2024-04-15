@@ -7,6 +7,8 @@
 #include "EntityID.hpp"
 
 namespace ushi {
+namespace internal {
+namespace impl {
 
 template <IsEIDGenerator> class EntityFactory;
 
@@ -19,7 +21,8 @@ template <IsConfig T_Config> //
 class Entity final {
   friend class EntityFactory<typename T_Config::EIDGeneratorType>;
 
-  using T_ID = FirstTemplateArg<typename T_Config::EIDGeneratorType>::Type;
+  using T_ID =
+      core::FirstTemplateArg<typename T_Config::EIDGeneratorType>::Type;
   using T_Signature = T_Config::SignatureType;
 
 public:
@@ -60,8 +63,10 @@ private:
 };
 
 template <class T_Entity>
-concept IsEntity = IsConfig<typename FirstTemplateArg<T_Entity>::Type>;
+concept IsEntity = IsConfig<typename core::FirstTemplateArg<T_Entity>::Type>;
 
+} // namespace impl
+} // namespace internal
 } // namespace ushi
 
 // template <ushi::IsEntity T_Entity> struct std::hash<T_Entity> {

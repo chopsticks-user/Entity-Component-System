@@ -1,56 +1,40 @@
-#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_ENABLE_BENCHMARKING
-#include <catch2/catch.hpp>
-
-#include <Ushi/Ushi.hpp>
-
-using Entity = ushi::Entity<ushi::DefaultConfig>;
-using Bitset = ushi::DefaultConfig::SignatureType;
-
-struct CustomConfig {
-  using SignatureType = std::bitset<128>;
-  using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
-};
-
-struct NotAConfig {
-  using Signature = ushi::u64;
-};
+#include "TestUtils.hpp"
 
 TEST_CASE("Case #01: Concepts", "[require]") {
-  REQUIRE(ushi::IsConfig<ushi::DefaultConfig>);
-  REQUIRE(ushi::IsConfig<CustomConfig>);
-  REQUIRE(ushi::IsEntity<Entity>);
-  REQUIRE(ushi::IsEntity<ushi::Entity<CustomConfig>>);
-  REQUIRE_FALSE(ushi::IsConfig<NotAConfig>);
+  REQUIRE(ushi::internal::impl::IsConfig<T_Config>);
+  REQUIRE(ushi::internal::impl::IsConfig<CustomConfig>);
+  REQUIRE(ushi::internal::impl::IsEntity<T_Entity>);
+  REQUIRE(ushi::internal::impl::IsEntity<T_CustomEntity>);
+  REQUIRE_FALSE(ushi::internal::impl::IsConfig<NotAConfig>);
 }
 
 TEST_CASE("Case #01: EntityIDGenerator", "[require]") {
-  ushi::EntityIDGenerator<ushi::u64> idGenerator;
+  T_EIDGen idGenerator;
   REQUIRE(idGenerator() == 0);
   REQUIRE(idGenerator() == 1);
   REQUIRE(idGenerator() == 2);
 }
 
 TEST_CASE("Case #02: EntityFactory", "[require]") {
-  REQUIRE(ushi::IsEntity<Entity>);
-  REQUIRE(ushi::IsEntity<ushi::Entity<CustomConfig>>);
+  REQUIRE(ushi::internal::impl::IsEntity<T_Entity>);
+  REQUIRE(ushi::internal::impl::IsEntity<T_CustomEntity>);
 
-  ushi::EntityFactory<ushi::EntityIDGenerator<ushi::u64>> factory;
+  T_EntityFactory factory;
 
   // Implicitly convertible to ushi::EntityID
-  REQUIRE(factory.create<Entity>() == 0ul);
+  REQUIRE(factory.create<T_Entity>() == 0ul);
 
-  auto player1 = factory.create<Entity>();
+  auto player1 = factory.create<T_Entity>();
   REQUIRE(player1.id() == 1ul);
 
-  static constexpr Bitset bitset = 0xf1a0;
+  static constexpr T_Signature bitset = 0xf1a0;
 
   // Clone
-  auto player2 = factory.create<Entity>(bitset);
+  auto player2 = factory.create<T_Entity>(bitset);
   REQUIRE(player2.id() == 2ul);
   REQUIRE(player2.signature() == bitset);
 
-  auto player3 = factory.clone<Entity>(player2);
+  auto player3 = factory.clone<T_Entity>(player2);
   REQUIRE(player3.id() == 3ul);
   REQUIRE(player3.signature() == bitset);
 
@@ -61,12 +45,12 @@ TEST_CASE("Case #02: EntityFactory", "[require]") {
 }
 
 TEST_CASE("Case #03: EntityManager", "[require]") {
-  ushi::EntityManager<ushi::DefaultConfig> manager{};
+  T_EntityManager manager{};
 
   auto entity1 = manager.create();
   REQUIRE(manager.contains(entity1));
 
-  static Bitset bitset1 = 0xfa342;
+  static T_Signature bitset1 = 0xfa342;
 
   auto entity2 = manager.create(0xfa342);
   REQUIRE(manager.contains(entity2));
@@ -81,7 +65,7 @@ TEST_CASE("Case #03: EntityManager", "[require]") {
   REQUIRE_THROWS(manager.get(entity1));
   REQUIRE_THROWS(manager.clone(entity1.id()));
 
-  static Bitset bitset2 = 0xffbff;
+  static T_Signature bitset2 = 0xffbff;
   manager.setSignature(entity2, bitset2);
 
   // update

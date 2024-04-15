@@ -8,6 +8,8 @@
 #include "Entity/Entity.hpp"
 
 namespace ushi {
+namespace internal {
+namespace impl {
 
 template <IsConfig T_Config> //
 class SystemManager final {
@@ -43,7 +45,8 @@ public:
   template <typename T_System> //
   constexpr auto execute(ComponentTable<T_Config> &componentTable) const
       -> void {
-    typename ArgumentTuple<decltype(T_System::function)>::Type sampleTuple{};
+    typename core::ArgumentTuple<decltype(T_System::function)>::Type
+        sampleTuple{};
 
     for (const auto &entityID :
          m_archetype.at(m_systemTable.at(typeid(T_System)))) {
@@ -66,6 +69,8 @@ private:
   T_Archetype m_archetype;
 };
 
+} // namespace impl
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_IMPL_SYSTEM_MANAGER_HPP

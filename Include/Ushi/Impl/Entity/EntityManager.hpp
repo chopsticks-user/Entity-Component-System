@@ -7,6 +7,8 @@
 #include "EntityFactory.hpp"
 
 namespace ushi {
+namespace internal {
+namespace impl {
 
 template <IsConfig T_Config> //
 class EntityManager final {
@@ -63,9 +65,11 @@ public:
 
 private:
   EntityFactory<T_EIDGenerator> m_entityFactory = {};
-  UnorderedDenseMap<EntityID, T_Entity> m_entities;
+  container::UnorderedDenseMap<EntityID, T_Entity> m_entities = {};
 };
 
+} // namespace impl
+} // namespace internal
 } // namespace ushi
 
 #endif // __USHI_INCLUDE_USHI_IMPL_ENTITY_MANAGER_HPP

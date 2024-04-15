@@ -9,6 +9,8 @@
 #include "System/System.hpp"
 
 namespace ushi {
+namespace internal {
+namespace impl {
 
 template <IsConfig T_Config = DefaultConfig> //
 class World final {
@@ -205,6 +207,8 @@ auto World<T_Config>::instance() -> std::shared_ptr<World> {
   return worldInstance.load();
 }
 
+} // namespace impl
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_IMPL_WORLD_HPP

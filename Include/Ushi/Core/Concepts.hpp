@@ -9,6 +9,8 @@
 #include <typeindex>
 
 namespace ushi {
+namespace internal {
+namespace core {
 
 // https://en.cppreference.com/w/cpp/language/constraints
 template <typename T>
@@ -27,6 +29,8 @@ concept IsChildOf =
 //     std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
 //                    const UniqueIDContainer &>;
 
+} // namespace core
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_CORE_CONCEPTS_HPP

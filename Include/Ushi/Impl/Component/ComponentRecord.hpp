@@ -7,6 +7,8 @@
 #include "Container/UnorderedDenseMap.hpp"
 
 namespace ushi {
+namespace internal {
+namespace impl {
 
 using ComponentRecordID = u64;
 
@@ -14,7 +16,7 @@ template <IsConfig T_Config> //
 class ComponentRecord final {
 public:
   static constexpr u64 maxComponents =
-      FirstTemplateArg<typename T_Config::SignatureType>::value;
+      core::FirstTemplateArg<typename T_Config::SignatureType>::value;
 
 public:
   constexpr ComponentRecord() noexcept = default;
@@ -84,6 +86,8 @@ private:
   std::unordered_map<std::type_index, ComponentRecordID> m_record = {};
 };
 
+} // namespace impl
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_IMPL_COMPONENT_RECORD_HPP

@@ -1,46 +1,29 @@
-#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_ENABLE_BENCHMARKING
-#include <catch2/catch.hpp>
+#include "TestUtils.hpp"
 
-#include <Ushi/Ushi.hpp>
-
-struct CustomConfig {
+struct CustomConfig3 {
   using SignatureType = std::bitset<3>;
-  using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
+  using EIDGeneratorType = T_EIDGen;
 };
 
-using T_Record = ushi::ComponentRecord<ushi::DefaultConfig>;
-using T_CustomRecord = ushi::ComponentRecord<CustomConfig>;
-using T_CustomTable = ushi::ComponentTable<CustomConfig>;
-
-struct Motion : public ushi::Component {};
-
-struct Assets : public ushi::Component {};
-
-struct Animation : public Assets {};
-
-struct Texture : public Assets {};
-
-struct Audio : public Assets {};
+using T_CustomRecord3 = ushi::internal::impl::ComponentRecord<CustomConfig3>;
 
 TEST_CASE("Case #01: IsComponent", "[require]") {
-  REQUIRE_FALSE(ushi::IsComponent<ushi::Component>);
-  REQUIRE(ushi::IsComponent<Motion>);
-  REQUIRE(ushi::IsComponent<Assets>);
-  REQUIRE(ushi::IsComponent<Animation>);
-  REQUIRE(ushi::IsComponent<Texture>);
-  REQUIRE(ushi::IsComponent<Audio>);
+  REQUIRE_FALSE(ushi::internal::impl::IsComponent<T_Component>);
+  REQUIRE(ushi::internal::impl::IsComponent<Motion>);
+  REQUIRE(ushi::internal::impl::IsComponent<Assets>);
+  REQUIRE(ushi::internal::impl::IsComponent<Animation>);
+  REQUIRE(ushi::internal::impl::IsComponent<Texture>);
+  REQUIRE(ushi::internal::impl::IsComponent<Audio>);
 }
 
 TEST_CASE("Case #02: ComponentRecord<T>::maxComponents", "[require]") {
-  REQUIRE(T_Record::maxComponents ==
-          ushi::DefaultConfig::SignatureType{}.size());
-  REQUIRE(T_CustomRecord::maxComponents ==
-          CustomConfig::SignatureType{}.size());
+  REQUIRE(T_Record::maxComponents == T_Signature{}.size());
+  REQUIRE(T_CustomRecord3::maxComponents ==
+          CustomConfig3::SignatureType{}.size());
 }
 
 TEST_CASE("Case #03: ComponentRecord", "[require]") {
-  auto record = T_CustomRecord{};
+  auto record = T_CustomRecord3{};
   REQUIRE(record.size() == 0);
 
   record.regster<Motion>();
@@ -59,7 +42,7 @@ TEST_CASE("Case #03: ComponentRecord", "[require]") {
 
   record.regster<Audio>();
   REQUIRE(record.size() == 3);
-  REQUIRE(record.getIndex<Audio>() == T_CustomRecord::maxComponents);
+  REQUIRE(record.getIndex<Audio>() == T_CustomRecord3::maxComponents);
 }
 
 TEST_CASE("Case #03: ComponentTable", "[require]") {

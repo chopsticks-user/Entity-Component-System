@@ -6,6 +6,8 @@
 #include <tuple>
 
 namespace ushi {
+namespace internal {
+namespace core {
 
 template <u64 Index, typename... Args> //
 void iterateTuple(std::tuple<Args...> &&tp, auto &&func) {
@@ -52,6 +54,8 @@ template <template <auto> class C, auto V> struct FirstTemplateArg<C<V>> {
   static constexpr auto value = V;
 };
 
+} // namespace core
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_CORE_UTILS_HPP

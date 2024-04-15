@@ -8,9 +8,11 @@
 #include "EntityImpl.hpp"
 
 namespace ushi {
+namespace internal {
+namespace impl {
 
 template <IsEntity T_Entity>
-using T_EntitySignature = FirstTemplateArg<T_Entity>::Type::SignatureType;
+using T_EntitySignature = core::FirstTemplateArg<T_Entity>::Type::SignatureType;
 
 template <IsEIDGenerator T_EIDGenerator> //
 class EntityFactory {
@@ -50,6 +52,8 @@ private:
   T_EIDGenerator m_idGenerator = {};
 };
 
+} // namespace impl
+} // namespace internal
 } // namespace ushi
 
 #endif // USHI_INCLUDE_USHI_IMPL_ENTITY_FACTORY_HPP
