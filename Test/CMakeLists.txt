@@ -2,7 +2,7 @@
 
 
 cmake_minimum_required(VERSION 3.15)
-project(Tora_Test VERSION 1.0.0 LANGUAGES CXX)
+project(Ushi_Test VERSION 1.0.0 LANGUAGES CXX)
 
 if(${CMAKE_CXX_STANDARD} LESS 20)
     return()
@@ -31,7 +31,7 @@ foreach (TestPath ${TestPaths})
       PRIVATE -fsanitize=undefined
     )
     target_link_libraries(${TestFileName}
-        PRIVATE Tora
+        PRIVATE Ushi
         PRIVATE Catch2::Catch2WithMain
     )
     add_test(${TestFileName} ${TestFileName})

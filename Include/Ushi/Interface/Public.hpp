@@ -19,6 +19,7 @@ namespace memory {} // namespace memory
 
 //================================Concepts=====================================
 
+using internal::impl::IsComponent;
 using internal::impl::IsConfig;
 using internal::impl::IsEID;
 using internal::impl::IsEIDGenerator;
