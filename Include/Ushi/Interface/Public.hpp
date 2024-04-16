@@ -1,13 +1,15 @@
 #ifndef USHI_INCLUDE_USHI_INTERFACE_PUBLIC_HPP
 #define USHI_INCLUDE_USHI_INTERFACE_PUBLIC_HPP
 
-#include "Ushi/Container/UnorderedDenseMap.hpp"
+#include "Core/Core.hpp"
 
-#include "Ushi/Impl/Component/Component.hpp"
-#include "Ushi/Impl/Config/Config.hpp"
-#include "Ushi/Impl/Entity/Entity.hpp"
-#include "Ushi/Impl/System/System.hpp"
-#include "Ushi/Impl/World/World.hpp"
+#include "Container/UnorderedDenseMap.hpp"
+
+#include "Impl/Component/Component.hpp"
+#include "Impl/Config/Config.hpp"
+#include "Impl/Entity/Entity.hpp"
+#include "Impl/System/System.hpp"
+#include "Impl/World/World.hpp"
 
 namespace ushi {
 

@@ -19,6 +19,9 @@ class SystemManager final {
   using T_Archetype =
       std::unordered_map<T_Signature, std::unordered_set<EntityID>>;
 
+  using T_EntityManager = EntityManager<T_Config>;
+  using T_Entity = Entity<T_Config>;
+
 public:
   template <typename T_System, IsComponent... T_Components> //
   constexpr auto regster(const ComponentTable<T_Config> &componentTable)
@@ -43,6 +46,14 @@ public:
   }
 
   template <typename T_System> //
+  constexpr auto deregster() noexcept {
+    m_systemTable.erase(std::type_index{typeid(T_System)});
+  }
+
+  // TODO:
+  constexpr auto cleanUnusedArchetypes() noexcept {}
+
+  template <typename T_System> //
   constexpr auto execute(ComponentTable<T_Config> &componentTable) const
       -> void {
     typename core::ArgumentTuple<decltype(T_System::function)>::Type
@@ -55,12 +66,33 @@ public:
     }
   }
 
-  constexpr auto removeEntity(const EntityID &eid,
-                              const T_Signature &entitySignature) noexcept {
+  constexpr auto update(const EntityID &eid, const T_Signature &entitySignature)
+      -> void {
     for (auto &[archSignature, entityIDs] : m_archetype) {
       if ((entitySignature & archSignature) == archSignature) {
+        entityIDs.insert(eid);
+      } else {
         entityIDs.erase(eid);
       }
+    }
+  }
+
+  constexpr auto update(const std::vector<T_Entity> &entities,
+                        const T_Signature &entitySignature) -> void {
+    for (const auto &entity : entities) {
+      update(entity, entitySignature);
+    }
+  }
+
+  constexpr auto forceRemove(const EntityID &eid) -> void {
+    for (auto &[archSignature, entityIDs] : m_archetype) {
+      entityIDs.erase(eid);
+    }
+  }
+
+  constexpr auto forceRemove(const std::vector<T_Entity> &entities) -> void {
+    for (const auto &entity : entities) {
+      forceRemove(entity);
     }
   }
 

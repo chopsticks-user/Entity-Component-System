@@ -22,13 +22,6 @@ template <typename T_Derived, typename T_Base>
 concept IsChildOf =
     !std::same_as<T_Derived, T_Base> && std::derived_from<T_Derived, T_Base>;
 
-//
-// template <typename FunctionType>
-// concept CValidSystemFunction =
-//     std::is_same_v<typename First2ArgTypes<FunctionType>::type1, World &> &&
-//     std::is_same_v<typename First2ArgTypes<FunctionType>::type2,
-//                    const UniqueIDContainer &>;
-
 } // namespace core
 } // namespace internal
 } // namespace ushi
