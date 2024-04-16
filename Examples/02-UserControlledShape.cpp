@@ -1,8 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <Ushi/Ushi.hpp>
 
-#include <iostream>
-
 using ushi::u64;
 
 static constexpr u64 nVertices = 4;
@@ -85,7 +83,7 @@ struct CustomConfig {
 };
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
-  sf::RenderWindow window(sf::VideoMode(1024, 768), "User-controlled Shape");
+  sf::RenderWindow window(sf::VideoMode(1024, 768), "User-controlled shape");
 
   auto pWorld = ushi::World<CustomConfig>::instance();
 

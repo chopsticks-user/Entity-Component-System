@@ -1,158 +1,150 @@
-// #include <Ushi/Ushi.hpp>
+#include <SFML/Graphics.hpp>
+#include <Ushi/Ushi.hpp>
 
-// #include <SFML/Graphics.hpp>
-// #include <iostream>
+#include <iostream>
+#include <random>
 
-// static constexpr tora::u64 nVertices = 4;
+using ushi::f32;
+using ushi::f64;
+using ushi::u64;
 
-// struct CMotion : public tora::Component {
-//   sf::Vector2f velocity;
-// };
+static constexpr ushi::u64 nVertices = 4;
 
-// template <tora::u64 nVerts> //
-// struct CMesh : public tora::Component {
-//   sf::Vector2f position[nVerts];
-//   sf::Color color[nVerts];
-//   sf::Vector2f texCoords[nVerts];
-// };
+struct CMotion : public ushi::Component {
+  sf::Vector2f velocity;
+};
 
-// TORA_SIMPLE_ENTITY_CLASS(ERect);
+template <ushi::u64 nVerts> //
+struct CMesh : public ushi::Component {
+  sf::Vector2f position[nVerts];
+  sf::Color color[nVerts];
+  sf::Vector2f texCoords[nVerts];
+};
 
-// struct SReappear : public tora::System {
-//   static void function(tora::World &world,
-//                        const tora::SparseVector<tora::u64> &entityIDs,
-//                        float screenHeight) {
-//     for (auto entityID : entityIDs) {
-//       auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
+struct SReappear {
+  static f32 screenHeight;
+  static void function(CMesh<nVertices> &mesh) {
+    if (mesh.position[nVertices - 1].y > screenHeight) {
+      for (ushi::u64 i = 0; i < nVertices; ++i) {
+        mesh.position[i].y -= screenHeight;
+      }
+    }
+  }
+};
+f32 SReappear::screenHeight = 0.0f;
 
-//       if (mesh.position[nVertices - 1].y > screenHeight) {
-//         for (tora::u64 i = 0; i < nVertices; ++i) {
-//           mesh.position[i].y -= screenHeight;
-//         }
-//       }
-//     }
-//   }
-// };
+struct SFallDown {
+  static f32 downwardAccel;
+  static void function(CMotion &motion, CMesh<nVertices> &mesh) {
+    motion.velocity.y += downwardAccel;
 
-// struct SFallDown : public tora::System {
-//   static void function(tora::World &world,
-//                        const tora::SparseVector<tora::u64> &entityIDs,
-//                        float downwardAccel) {
-//     for (auto entityID : entityIDs) {
-//       auto &motion = world.getComponent<CMotion>(entityID);
-//       auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
+    for (ushi::u64 i = 0; i < nVertices; ++i) {
+      mesh.position[i] += motion.velocity;
+    }
+  }
+};
+f32 SFallDown::downwardAccel = 0.0f;
 
-//       motion.velocity.y += downwardAccel;
+struct SRender {
+  static sf::RenderWindow *pRenderer;
+  static void function(CMesh<nVertices> &mesh) {
+    sf::VertexArray shape(sf::TriangleStrip, nVertices);
 
-//       for (tora::u64 i = 0; i < nVertices; ++i) {
-//         mesh.position[i] += motion.velocity;
-//       }
-//     }
-//   }
-// };
+    for (ushi::u64 i = 0; i < nVertices; ++i) {
+      shape[i].position = mesh.position[i];
+      shape[i].color = mesh.color[i];
+      shape[i].texCoords = mesh.texCoords[i];
+    }
 
-// struct SRender : public tora::System {
-//   static void function(tora::World &world,
-//                        const tora::SparseVector<tora::u64> &entityIDs,
-//                        sf::RenderWindow &renderer) {
-//     for (auto entityID : entityIDs) {
-//       auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
-//       sf::VertexArray shape(sf::TriangleStrip, nVertices);
+    pRenderer->draw(shape);
+  }
+};
+sf::RenderWindow *SRender::pRenderer = nullptr;
 
-//       for (tora::u64 i = 0; i < nVertices; ++i) {
-//         shape[i].position = mesh.position[i];
-//         shape[i].color = mesh.color[i];
-//         shape[i].texCoords = mesh.texCoords[i];
-//       }
+struct CustomConfig {
+  using SignatureType = std::bitset<2>; // 2 components at most
+  using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
+};
 
-//       renderer.draw(shape);
-//     }
-//   }
-// };
+sf::Color getRandomColor() {
+  const static sf::Color colorArray[] = {
+      sf::Color::Red,   sf::Color::Green,  sf::Color::Blue,
+      sf::Color::White, sf::Color::Yellow,
+  };
+  static std::mt19937 gen(std::random_device{}());
+  static std::uniform_int_distribution<> colorValue(0, 4);
 
-// void mainLoop(tora::u64 nObjects, tora::f32 downwardAccel) {
-//   const float screenWidth = 1024.0f;
-//   const float screenHeight = 768.0f;
-//   const float rectSize = 10.0f;
+  return colorArray[colorValue(gen)];
+}
 
-//   sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight),
-//                           "Falling down shapes");
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
+  ushi::u64 nObjects = 1000;
+  ushi::f32 downwardAccel = 1e-6f;
+  if (argc > 1) {
+    nObjects = std::stoi(argv[1]);
+  }
+  if (argc > 2) {
+    downwardAccel = std::stof(argv[2]);
+  }
 
-//   tora::World scence;
+  const f32 screenWidth = 1024.0;
+  const f32 screenHeight = 768.0;
+  const f32 rectSize = 10.0;
 
-//   scence.registerComponent<CMotion>();
-//   scence.registerComponent<CMesh<nVertices>>();
+  sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight),
+                          "Falling-down shapes");
 
-//   scence.registerSystem<SFallDown, CMotion, CMesh<nVertices>>();
-//   scence.registerSystem<SRender, CMesh<nVertices>>();
-//   scence.registerSystem<SReappear, CMesh<nVertices>>();
+  auto pWorld = ushi::World<CustomConfig>::instance();
 
-//   std::vector<tora::u64> entityIDs(nObjects);
+  pWorld->record<CMotion, CMesh<nVertices>>();
 
-//   std::srand(static_cast<tora::u32>(std::time(nullptr)));
-//   for (auto &entityID : entityIDs) {
-//     auto entity = scence.addEntity<ERect>();
-//     entityID = entity.getID();
+  pWorld->regster<SFallDown, CMotion, CMesh<nVertices>>();
+  pWorld->regster<SRender, CMesh<nVertices>>();
+  pWorld->regster<SReappear, CMesh<nVertices>>();
 
-//     float randX =
-//         10.0f + float(std::rand() / ((RAND_MAX + 1u) / (int)screenWidth -
-//         60));
+  SFallDown::downwardAccel = downwardAccel;
+  SRender::pRenderer = &window;
+  SReappear::screenHeight = screenHeight;
 
-//     float randY =
-//         10.0f + float(std::rand() / ((RAND_MAX + 1u) / (int)screenHeight -
-//         60));
+  auto entities = pWorld->create(nObjects);
 
-//     scence.addComponents<CMotion, CMesh<nVertices>>(
-//         entity,
-//         CMotion{
-//             .velocity = sf::Vector2f{0.0f, 0.0f},
-//         },
-//         CMesh<nVertices>{
-//             .position =
-//                 {
-//                     sf::Vector2f(randX + rectSize, randY + rectSize),
-//                     sf::Vector2f(randX, randY + rectSize),
-//                     sf::Vector2f(randX + rectSize, randY),
-//                     sf::Vector2f(randX, randY),
-//                 },
-//             .color =
-//                 {
-//                     sf::Color::Red,
-//                     sf::Color::Blue,
-//                     sf::Color::Green,
-//                     sf::Color::Yellow,
-//                 },
-//             .texCoords = {},
-//         });
-//   }
+  pWorld->addComponents<CMotion>(entities);
 
-//   while (window.isOpen()) {
-//     sf::Event event;
-//     while (window.pollEvent(event)) {
-//       if (event.type == sf::Event::Closed)
-//         window.close();
-//     }
-//     window.clear();
+  std::srand(static_cast<ushi::u32>(std::time(nullptr)));
+  for (auto &entity : entities) {
+    f32 randX =
+        10.0f + f32(std::rand() / ((RAND_MAX + 1u) / (int)screenWidth - 60));
+    f32 randY =
+        10.0f + f32(std::rand() / ((RAND_MAX + 1u) / (int)screenHeight - 60));
 
-//     scence.execute<SFallDown>(downwardAccel);
-//     scence.execute<SRender>(window);
-//     scence.execute<SReappear>(screenHeight);
+    CMesh<nVertices> mesh{};
+    mesh.position[0] = sf::Vector2f(randX + rectSize, randY + rectSize);
+    mesh.position[1] = sf::Vector2f(randX, randY + rectSize);
+    mesh.position[2] = sf::Vector2f(randX + rectSize, randY);
+    mesh.position[3] = sf::Vector2f(randX, randY);
 
-//     window.display();
-//   }
-// }
+    auto color = getRandomColor();
+    mesh.color[0] = color;
+    mesh.color[1] = color;
+    mesh.color[2] = color;
+    mesh.color[3] = color;
 
-// int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
-//   tora::u64 nObjects = 1000;
-//   tora::f32 downwardAccel = 1e-5f;
-//   if (argc > 1) {
-//     nObjects = std::stoi(argv[1]);
-//   }
-//   if (argc > 2) {
-//     downwardAccel = std::stof(argv[2]);
-//   }
-//   mainLoop(nObjects, downwardAccel);
-//   return 0;
-// }
+    pWorld->addComponents(entity, std::move(mesh));
+  }
 
-int main() {}
+  while (window.isOpen()) {
+    sf::Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == sf::Event::Closed)
+        window.close();
+    }
+    window.clear();
+
+    pWorld->execute<SFallDown>();
+    pWorld->execute<SRender>();
+    pWorld->execute<SReappear>();
+
+    window.display();
+  }
+  return 0;
+}
