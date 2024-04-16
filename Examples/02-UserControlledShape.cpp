@@ -37,9 +37,6 @@ struct SGetInput {
 
 struct SMove {
   static void function(CMotion &motion, CMesh<nVertices> &mesh, CInput &input) {
-
-    // motion.velocity += motion.acceleration;
-
     if (!input.arrowDown && !input.arrowUp) {
       motion.velocity.y = {};
     } else if (input.arrowUp) {

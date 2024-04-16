@@ -5,9 +5,9 @@ is incomplete and will be updated.
 ## Features
 
 &#9989; Compact data to improve cache locality when writing or accessing <br>
-&#9989; Simple interface <br>
 &#9989; Compile-time configurations <br>
 &#9989; Type safety and better compiler error messages with C++20 <code>concept</code><br>
+&#9989; Simple interface <br>
 
 #### Under-development features
 
