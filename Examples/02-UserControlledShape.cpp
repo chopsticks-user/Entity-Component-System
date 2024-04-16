@@ -1,136 +1,121 @@
-#include <Tora/Tora.hpp>
-
 #include <SFML/Graphics.hpp>
+#include <Ushi/Ushi.hpp>
 
 #include <iostream>
 
-static constexpr tora::u64 nVertices = 4;
+using ushi::u64;
 
-struct CInput : public tora::Component {
+static constexpr u64 nVertices = 4;
+
+struct CInput : public ushi::Component {
   bool arrowLeft = false;
   bool arrowRight = false;
   bool arrowUp = false;
   bool arrowDown = false;
 };
 
-struct CMotion : public tora::Component {
+struct CMotion : public ushi::Component {
   sf::Vector2f velocity;
   sf::Vector2f acceleration;
 };
 
-template <tora::u64 nVerts> //
-struct CMesh : public tora::Component {
+template <u64 nVerts> //
+struct CMesh : public ushi::Component {
   sf::Vector2f position[nVerts];
   sf::Color color[nVerts];
   sf::Vector2f texCoords[nVerts];
 };
 
-TORA_SIMPLE_ENTITY_CLASS(ERect);
+struct SGetInput {
+  static void function(CInput &input) {
+    input.arrowUp = sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
+    input.arrowDown = sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
+    input.arrowRight = sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
+    input.arrowLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
+  }
+};
 
-struct SGetInput : public tora::System {
-  static void function(tora::World &world,
-                       const tora::SparseVector<tora::u64> &entityIDs) {
-    for (auto entityID : entityIDs) {
-      auto &input = world.getComponent<CInput>(entityID);
-      input.arrowUp = sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
-      input.arrowDown = sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
-      input.arrowRight = sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
-      input.arrowLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
+struct SMove {
+  static void function(CMotion &motion, CMesh<nVertices> &mesh, CInput &input) {
+
+    // motion.velocity += motion.acceleration;
+
+    if (!input.arrowDown && !input.arrowUp) {
+      motion.velocity.y = {};
+    } else if (input.arrowUp) {
+      motion.velocity.y -= 1e-5f;
+    } else {
+      motion.velocity.y += 1e-5f;
+    }
+
+    if (!input.arrowRight && !input.arrowLeft) {
+      motion.velocity.x = {};
+    } else if (input.arrowLeft) {
+      motion.velocity.x -= 1e-5f;
+    } else {
+      motion.velocity.x += 1e-5f;
+    }
+
+    for (u64 i = 0; i < nVertices; ++i) {
+      mesh.position[i] += motion.velocity;
     }
   }
 };
 
-struct SFallDown : public tora::System {
-  static void function(tora::World &world,
-                       const tora::SparseVector<tora::u64> &entityIDs) {
-    for (auto entityID : entityIDs) {
-      auto &motion = world.getComponent<CMotion>(entityID);
-      auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
-      auto &input = world.getComponent<CInput>(entityID);
-
-      // motion.velocity += motion.acceleration;
-
-      if (!input.arrowDown && !input.arrowUp) {
-        motion.velocity.y = {};
-      } else if (input.arrowUp) {
-        motion.velocity.y -= 1e-5f;
-      } else {
-        motion.velocity.y += 1e-5f;
-      }
-
-      if (!input.arrowRight && !input.arrowLeft) {
-        motion.velocity.x = {};
-      } else if (input.arrowLeft) {
-        motion.velocity.x -= 1e-5f;
-      } else {
-        motion.velocity.x += 1e-5f;
-      }
-
-      for (tora::u64 i = 0; i < nVertices; ++i) {
-        mesh.position[i] += motion.velocity;
-      }
+struct SRender {
+  static sf::RenderWindow *pRenderer;
+  static void function(CMesh<nVertices> &mesh) {
+    if (pRenderer == nullptr) {
+      return;
     }
+
+    sf::VertexArray shape(sf::TriangleStrip, nVertices);
+
+    for (u64 i = 0; i < nVertices; ++i) {
+      shape[i].position = mesh.position[i];
+      shape[i].color = mesh.color[i];
+      shape[i].texCoords = mesh.texCoords[i];
+    }
+
+    pRenderer->draw(shape);
   }
 };
+sf::RenderWindow *SRender::pRenderer = nullptr;
 
-struct SRender : public tora::System {
-  static void function(tora::World &world,
-                       const tora::SparseVector<tora::u64> &entityIDs,
-                       sf::RenderWindow &renderer) {
-    for (auto entityID : entityIDs) {
-      auto &mesh = world.getComponent<CMesh<nVertices>>(entityID);
-      sf::VertexArray shape(sf::TriangleStrip, nVertices);
-
-      for (tora::u64 i = 0; i < nVertices; ++i) {
-        shape[i].position = mesh.position[i];
-        shape[i].color = mesh.color[i];
-        shape[i].texCoords = mesh.texCoords[i];
-      }
-
-      renderer.draw(shape);
-    }
-  }
+struct CustomConfig {
+  using SignatureType = std::bitset<3>; // 3 components at most
+  using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
 };
 
-void mainLoop() {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
   sf::RenderWindow window(sf::VideoMode(1024, 768), "User-controlled Shape");
 
-  tora::World scence;
+  auto pWorld = ushi::World<CustomConfig>::instance();
 
-  scence.registerComponent<CMotion>();
-  scence.registerComponent<CMesh<nVertices>>();
-  scence.registerComponent<CInput>();
+  pWorld->record<CMotion, CMesh<nVertices>, CInput>();
 
-  scence.registerSystem<SGetInput, CInput>();
-  scence.registerSystem<SFallDown, CMotion, CMesh<nVertices>, CInput>();
-  scence.registerSystem<SRender, CMesh<nVertices>>();
+  pWorld->regster<SGetInput, CInput>();
+  pWorld->regster<SMove, CMotion, CMesh<nVertices>, CInput>();
+  pWorld->regster<SRender, CMesh<nVertices>>();
 
-  ERect myTriangle = scence.addEntity<ERect>();
-  scence.addComponents<CMotion, CMesh<nVertices>, CInput>(
-      myTriangle,
-      CMotion{
-          .velocity = {0.0f, 0.0f},
-          .acceleration = {0.0f, 0.0f},
-      },
-      CMesh<nVertices>{
-          .position =
-              {
-                  sf::Vector2f(50.f, 50.f),
-                  sf::Vector2f(10.f, 50.f),
-                  sf::Vector2f(50.f, 10.f),
-                  sf::Vector2f(10.f, 10.f),
-              },
-          .color =
-              {
-                  sf::Color::Red,
-                  sf::Color::Blue,
-                  sf::Color::Green,
-                  sf::Color::Yellow,
-              },
-          .texCoords = {},
-      },
-      {});
+  CMotion initialMotion{};
+  initialMotion.velocity = {0.0f, 0.0f};
+  initialMotion.acceleration = {0.0f, 0.0f};
 
+  CMesh<nVertices> mesh{};
+  mesh.position[0] = sf::Vector2f(50.f, 50.f);
+  mesh.position[1] = sf::Vector2f(10.f, 50.f);
+  mesh.position[2] = sf::Vector2f(50.f, 10.f);
+  mesh.position[3] = sf::Vector2f(10.f, 10.f);
+  mesh.color[0] = sf::Color::Green;
+  mesh.color[1] = sf::Color::Green;
+  mesh.color[2] = sf::Color::Green;
+  mesh.color[3] = sf::Color::Green;
+
+  auto eTriangle = pWorld->create<CMotion, CMesh<nVertices>, CInput>(
+      initialMotion, mesh, {});
+
+  SRender::pRenderer = &window;
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -139,16 +124,12 @@ void mainLoop() {
     }
     window.clear();
 
-    scence.execute<SGetInput>();
-    scence.execute<SFallDown>();
-    scence.execute<SRender>(window);
+    pWorld->execute<SGetInput>();
+    pWorld->execute<SMove>();
+    pWorld->execute<SRender>();
 
     window.display();
   }
-}
-
-int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
-  mainLoop();
 
   return 0;
 }

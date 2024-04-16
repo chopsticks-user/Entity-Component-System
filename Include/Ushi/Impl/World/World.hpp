@@ -246,7 +246,7 @@ public:
   }
 
   template <typename T_System> //
-  constexpr auto execute() const -> void {
+  constexpr auto execute() -> void {
     m_systemManager.template execute<T_System>(m_componentTable);
   }
 
@@ -257,7 +257,7 @@ private:
 };
 
 template <IsConfig T_Config>
-auto World<T_Config>::instance() -> std::shared_ptr<World> {
+[[nodiscard]] auto World<T_Config>::instance() -> std::shared_ptr<World> {
   static std::atomic<std::shared_ptr<World>> worldInstance = nullptr;
   if (worldInstance.load() == nullptr) {
     worldInstance.store(std::shared_ptr<World>(new World{}));

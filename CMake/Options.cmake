@@ -3,7 +3,7 @@
 
 include(GNUInstallDirs)
 
-option(Ushi_BUILD_EXAMPLES "Build code examples" OFF)
+option(Ushi_BUILD_EXAMPLES "Build code examples" ON)
 option(Ushi_BUILD_TESTS "Build tests" ON)
 
 set(Ushi_AS_SUBPROJECT OFF)

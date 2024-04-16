@@ -112,11 +112,11 @@ public:
     return componentsOf<T_Components...>(eid);
   }
 
-  template <IsComponent T_FirstComponent> //
-  [[nodiscard]] constexpr auto allEntitiesWith() const
-      -> std::vector<EntityID> {
-    return allEntitiesWith<T_FirstComponent>();
-  }
+  // template <IsComponent T_FirstComponent> //
+  // [[nodiscard]] constexpr auto allEntitiesWithA() const
+  //     -> std::vector<EntityID> {
+  //   return allEntitiesWith<T_FirstComponent>();
+  // }
 
   template <IsComponent T_FirstComponent, IsComponent... T_Components> //
   [[nodiscard]] constexpr auto allEntitiesWith() const

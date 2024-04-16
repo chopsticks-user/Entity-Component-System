@@ -40,6 +40,7 @@ public:
     auto compatibleEntityIDs =
         componentTable.template allEntitiesWith<T_Components...>();
 
+    m_archetype[systemSignature] = {};
     for (const auto &eid : compatibleEntityIDs) {
       m_archetype[systemSignature].insert(eid);
     }
