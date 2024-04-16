@@ -1,12 +1,13 @@
  
 Ushi is an Enity-Component-System implementation using C++20. The implementation 
-is incomplete and will be updated regularly.
+is incomplete and will be updated.
 
 ## Features
 
 &#9989; Compact data to improve cache locality when writing or accessing <br>
 &#9989; Simple interface <br>
 &#9989; Compile-time configurations <br>
+&#9989; Type safety and better compiler error messages with C++20 <code>concept</code><br>
 
 #### Under-development features
 
@@ -28,28 +29,27 @@ The build is CMake-based.
 ## Project layout
 
 ```
-├── Benchmarks
-│   └── Data
-├── CMake
-├── Examples
-├── Include
-│   └── Ushi
-│       ├── Container
-│       ├── Core
-│       ├── Impl
-│       │   ├── Component
-│       │   ├── Concurrency
-│       │   ├── Config
-│       │   ├── Entity
-│       │   ├── Group
-│       │   ├── Signal
-│       │   ├── System
-│       │   └── World
-│       ├── Interface
-│       └── Memory
-│           ├── Allocator
-│           └── Cache
-└── Test
+├── Benchmarks                  cache and performance benchmarks
+│   └── Data                    benchmarking results
+├── CMake                       cmake utilities
+├── Examples                    basic usage examples
+├── Include/Ushi                source code      
+│       ├── Container           dense map, dense set, graph, etc
+│       ├── Core                base layer
+│       ├── Impl                core modules
+│       │   ├── Component       component module
+│       │   ├── Concurrency     concurrency handler
+│       │   ├── Config          compile-time configurations
+│       │   ├── Entity          entity module
+│       │   ├── Group           group (archetype)   
+│       │   ├── Signal          defer, update, etc (lazy evaluation related)
+│       │   ├── System          system module
+│       │   └── World           highest-level abstraction of the implementation
+│       ├── Interface           public interface (includes a forward header)
+│       └── Memory              memory-related modules
+│           ├── Allocator       custom allocators
+│           └── Cache           look-up cache
+└── Test                        contains mostly integration tests
 ```
 
 ## How Ushi works
