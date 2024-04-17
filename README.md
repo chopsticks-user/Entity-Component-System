@@ -11,14 +11,9 @@ is incomplete and will be updated.
 
 #### Under-development features
 
-* Replacing some STL containers with more compact data structures, i.e. dense set, graph, dense map, etc <br>
-* Separated archetype implementation (group) <br>
 * Concurrency <br>
-* Ranges and views for certain groups of data <br>
-* Lazy evaluation and cache <br>
-* Signals <br>
+* Lazy evaluation <br>
 * Custom allocators support through compile-time configurations <br>
-* Lua scripting (if necessary)
 
 ## Projects
 
@@ -40,15 +35,10 @@ The build is CMake-based.
 │       │   ├── Component       component module
 │       │   ├── Concurrency     concurrency handler
 │       │   ├── Config          compile-time configurations
-│       │   ├── Entity          entity module
-│       │   ├── Group           group (archetype)   
-│       │   ├── Signal          defer, update, etc (lazy evaluation related)
+│       │   ├── Entity          entity module 
 │       │   ├── System          system module
 │       │   └── World           highest-level abstraction of the implementation
-│       ├── Interface           public interface (includes a forward header)
-│       └── Memory              memory-related modules
-│           ├── Allocator       custom allocators
-│           └── Cache           look-up cache
+│       └── Interface           public interface (includes a forward header)
 └── Test                        contains mostly integration tests
 ```
 
