@@ -1,3 +1,5 @@
 #include "TestUtils.hpp"
 
-TEST_CASE("", "[require]") {}
+using ushi::internal::impl::Group;
+
+TEST_CASE("Case #01 : Add and Remove", "[require]") {}

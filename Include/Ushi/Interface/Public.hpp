@@ -8,6 +8,7 @@
 #include "Impl/Component/Component.hpp"
 #include "Impl/Config/Config.hpp"
 #include "Impl/Entity/Entity.hpp"
+#include "Impl/Group/Group.hpp"
 #include "Impl/System/System.hpp"
 #include "Impl/World/World.hpp"
 

@@ -10,6 +10,8 @@ namespace container {
 struct VectorWrapperBase {
   virtual ~VectorWrapperBase() = default;
 
+  virtual auto size() const noexcept -> u64 = 0;
+
   virtual auto remove(u64 index) noexcept -> void = 0;
 
   virtual auto clear() noexcept -> void = 0;
@@ -19,6 +21,15 @@ template <typename TValue> //
 class VectorWrapper : public VectorWrapperBase {
 public:
   constexpr auto get() noexcept -> std::vector<TValue> & { return m_vector; }
+
+  constexpr auto pop(u64 index) noexcept -> TValue {
+    std::swap(m_vector[index], m_vector.back());
+    TValue value = std::move(m_vector.back());
+    m_vector.pop_back();
+    return value;
+  }
+
+  virtual auto size() const noexcept -> u64 { return m_vector.size(); }
 
   virtual auto remove(u64 index) noexcept -> void override {
     std::swap(m_vector[index], m_vector.back());
@@ -113,6 +124,43 @@ public:
                           [=](auto &p) { p.second->remove(removedIndex); });
   }
 
+  template <typename... TValues> //
+  auto pop(const TKey &key) -> std::tuple<TValues...> {
+    // TODO: Handle the case when the number of types in TValues... is less than
+    // nTypes()
+    auto it = m_keyToIndex.find(key);
+    if (it == m_keyToIndex.end()) {
+      throw std::runtime_error("Key not found");
+    }
+
+    u64 removedIndex = it->second;
+    auto poppedValues = std::make_tuple(m_popAtIndex<TValues>(removedIndex)...);
+    if (std::tuple_size_v<decltype(poppedValues)> < nTypes()) {
+      for (auto p : m_typeTable) {
+        if (p.second->size() == size()) {
+          p.second->remove(removedIndex);
+        }
+      }
+    }
+
+    std::swap(m_keyContainer[removedIndex], m_keyContainer.back());
+    m_keyToIndex.at(m_keyContainer[removedIndex]) = removedIndex;
+    m_keyContainer.pop_back();
+    m_keyToIndex.erase(it);
+
+    return poppedValues;
+  }
+
+  // For testing purposes only
+  constexpr auto validate() -> bool {
+    for (auto p : m_typeTable) {
+      if (p.second->size() != size()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   constexpr auto clear() noexcept -> void {
     m_keyContainer.clear();
     m_keyToIndex.clear();
@@ -136,6 +184,15 @@ private:
     std::static_pointer_cast<VectorWrapper<TValue>>(
         m_typeTable.at(typeid(TValue)))
         ->get()[index] = std::move(value);
+  }
+
+  template <typename TValue> //
+  constexpr auto m_popAtIndex(u64 index) -> TValue {
+    return m_typeTable.find(typeid(TValue)) == m_typeTable.end()
+               ? TValue{}
+               : std::static_pointer_cast<VectorWrapper<TValue>>(
+                     m_typeTable.at(typeid(TValue)))
+                     ->pop(index);
   }
 
 private:
