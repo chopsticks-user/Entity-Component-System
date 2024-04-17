@@ -1,5 +1,5 @@
-#ifndef USHI_INCLUDE_USHI_CONTAINER_UNORDERED_DENSE_MAP_HPP
-#define USHI_INCLUDE_USHI_CONTAINER_UNORDERED_DENSE_MAP_HPP
+#ifndef USHI_INCLUDE_USHI_CONTAINER_UDENSE_MAP_HPP
+#define USHI_INCLUDE_USHI_CONTAINER_UDENSE_MAP_HPP
 
 #include "Core/Core.hpp"
 
@@ -8,15 +8,15 @@ namespace internal {
 namespace container {
 
 template <typename T_Key> //
-struct UnorderedDenseMapBase {
-  virtual ~UnorderedDenseMapBase() = default;
+struct UDenseMapBase {
+  virtual ~UDenseMapBase() = default;
   virtual auto size() const noexcept -> u64 = 0;
   virtual auto remove(const T_Key &id) noexcept -> void = 0;
   virtual auto clear() noexcept -> void = 0;
 };
 
 template <typename T_Key, typename T_Value> //
-class UnorderedDenseMap : public UnorderedDenseMapBase<T_Key> {
+class UDenseMap : public UDenseMapBase<T_Key> {
   using T_KeyToIndexMap = std::unordered_map<T_Key, u64>;
   using T_IndexToKeyMap = std::unordered_map<u64, T_Key>;
   using T_ValueStorage = std::vector<T_Value>;
@@ -116,4 +116,4 @@ private:
 } // namespace internal
 } // namespace ushi
 
-#endif // USHI_INCLUDE_USHI_CONTAINER_UNORDERED_DENSE_MAP_HPP
+#endif // USHI_INCLUDE_USHI_CONTAINER_UDENSE_MAP_HPP

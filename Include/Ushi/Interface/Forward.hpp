@@ -24,8 +24,8 @@ typedef uint32_t b32;
 typedef const char *cString;
 
 namespace container {
-template <typename T_Key> struct UnorderedDenseMapBase;
-template <typename T_Key, typename T_Value> class UnorderedDenseMap;
+template <typename T_Key> struct UDenseMapBase;
+template <typename T_Key, typename T_Value> class UDenseMap;
 } // namespace container
 
 struct DefaultConfig;

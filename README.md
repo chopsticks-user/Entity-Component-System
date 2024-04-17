@@ -24,8 +24,6 @@ The build is CMake-based.
 ## Project layout
 
 ```
-├── Benchmarks                  cache and performance benchmarks
-│   └── Data                    benchmarking results
 ├── CMake                       cmake utilities
 ├── Examples                    basic usage examples
 ├── Include/Ushi                source code      

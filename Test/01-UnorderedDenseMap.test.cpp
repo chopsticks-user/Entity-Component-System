@@ -6,7 +6,7 @@
 
 using ushi::u64;
 
-ushi::internal::container::UnorderedDenseMap<u64, u64> v{};
+ushi::internal::container::UDenseMap<u64, u64> v{};
 u64 sizeCounter = 0;
 
 void verifyAdd(u64 id, u64 value, u64 increment) {

@@ -6,7 +6,7 @@
 #include "Component.hpp"
 #include "ComponentRecord.hpp"
 #include "Config/Config.hpp"
-#include "Container/UnorderedDenseMap.hpp"
+#include "Container/UDenseMap.hpp"
 
 namespace ushi {
 namespace internal {
@@ -16,11 +16,11 @@ template <IsConfig T_Config> //
 class ComponentTable final {
   using T_Record = ComponentRecord<T_Config>;
   using T_ComponentRowBasePtr =
-      std::shared_ptr<container::UnorderedDenseMapBase<EntityID>>;
+      std::shared_ptr<container::UDenseMapBase<EntityID>>;
   using T_Table = std::vector<T_ComponentRowBasePtr>;
 
   template <IsComponent T_Component>
-  using T_ComponentRow = container::UnorderedDenseMap<EntityID, T_Component>;
+  using T_ComponentRow = container::UDenseMap<EntityID, T_Component>;
 
   template <IsComponent T_Component>
   using T_ComponentRowPtr = std::shared_ptr<T_ComponentRow<T_Component>>;
@@ -173,7 +173,7 @@ private:
   [[nodiscard]] constexpr auto m_componentRowPtr()
       -> T_ComponentRowPtr<T_Component> {
     return std::static_pointer_cast<
-        container::UnorderedDenseMap<EntityID, T_Component>>(
+        container::UDenseMap<EntityID, T_Component>>(
         m_table[m_record.template getIndex<T_Component>()]);
   }
 
@@ -181,7 +181,7 @@ private:
   [[nodiscard]] constexpr auto m_componentRowPtr() const
       -> T_ComponentRowPtr<T_Component> {
     return std::static_pointer_cast<
-        container::UnorderedDenseMap<EntityID, T_Component>>(
+        container::UDenseMap<EntityID, T_Component>>(
         m_table[m_record.template getIndex<T_Component>()]);
   }
 

@@ -3,7 +3,7 @@
 
 #include "Ushi/Core/Core.hpp"
 
-#include "Container/UnorderedDenseMap.hpp"
+#include "Container/UDenseMap.hpp"
 #include "EntityFactory.hpp"
 
 namespace ushi {
@@ -65,7 +65,7 @@ public:
 
 private:
   EntityFactory<T_EIDGenerator> m_entityFactory = {};
-  container::UnorderedDenseMap<EntityID, T_Entity> m_entities = {};
+  container::UDenseMap<EntityID, T_Entity> m_entities = {};
 };
 
 } // namespace impl
