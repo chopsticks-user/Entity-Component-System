@@ -1,15 +1,37 @@
 #include "TestUtils.hpp"
 
-#include "Container/UDenseTypeTable.hpp"
+// #include "Container/PolyTypeTable.hpp"
 
-using ushi::internal::container::UDenseTypeTable;
+using ushi::internal::container::PolyTypeTable;
+using ushi::internal::container::VectorWrapper;
+using ushi::internal::container::VectorWrapperBase;
+
+using TTable =
+    std::unordered_map<std::type_index,
+                       std::shared_ptr<VectorWrapperBase<ushi::Component>>>;
 
 TEST_CASE("Case #01: Guaranteed behavirors", "[require]") {
-  auto table1 = UDenseTypeTable<ushi::u64, ushi::Component>{};
-  auto table2 = UDenseTypeTable<ushi::u64, ushi::Component>{};
-  table1.init<Motion, Animation, Texture>();
-  table2.init<Motion, Animation, Texture, Audio>();
+  TTable t1{};
+  t1[typeid(Motion)] =
+      std::make_shared<VectorWrapper<Motion, ushi::Component>>();
+  t1[typeid(Animation)] =
+      std::make_shared<VectorWrapper<Animation, ushi::Component>>();
+  t1[typeid(Texture)] =
+      std::make_shared<VectorWrapper<Texture, ushi::Component>>();
+
+  auto table1 = PolyTypeTable<ushi::u64, ushi::Component>{t1};
   REQUIRE(table1.nTypes() == 3);
+
+  TTable t2{};
+  t2[typeid(Motion)] =
+      std::make_shared<VectorWrapper<Motion, ushi::Component>>();
+  t2[typeid(Animation)] =
+      std::make_shared<VectorWrapper<Animation, ushi::Component>>();
+  t2[typeid(Texture)] =
+      std::make_shared<VectorWrapper<Texture, ushi::Component>>();
+  t2[typeid(Audio)] = std::make_shared<VectorWrapper<Audio, ushi::Component>>();
+
+  auto table2 = PolyTypeTable<ushi::u64, ushi::Component>{t2};
   REQUIRE(table2.nTypes() == 4);
 
   table1.addWithTypes<Motion, Animation, Texture>(5, {10}, {15}, {20});

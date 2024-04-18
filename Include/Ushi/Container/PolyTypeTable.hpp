@@ -64,7 +64,7 @@ private:
 };
 
 template <typename TKey, typename TValueBase> //
-class UDenseTypeTable {
+class PolyTypeTable {
   using TKeyToIndex = std::unordered_map<TKey, u64>;
   using TKeyContainer = std::vector<TKey>;
   using TTable =
@@ -76,13 +76,21 @@ class UDenseTypeTable {
   // TODO: implement an iterator
 
 public:
-  template <typename... TValue> //
-  constexpr auto init() -> void {
-    if (!m_typeTable.empty()) {
-      return;
-    }
-    (m_initializeType<TValue>(), ...);
-    m_nTypes = m_typeTable.size(); // * For testing purposes
+  // template <typename... TValue> //
+  // constexpr auto init() -> void {
+  //   if (!m_typeTable.empty()) {
+  //     return;
+  //   }
+  //   (m_initializeType<TValue>(), ...);
+  //   m_nTypes = m_typeTable.size(); // * For testing purposes
+  // }
+
+  constexpr PolyTypeTable(const TTable &table) noexcept
+      : m_keyToIndex{}, m_keyContainer{}, m_typeTable{table} {
+    // for (const auto &pair : table) {
+    //   m_typeTable[pair.first] = pair.second;
+    // }
+    m_nTypes = m_typeTable.size();
   }
 
 public:
@@ -112,7 +120,7 @@ public:
     return m_keyContainer;
   }
 
-  template <typename... TValues> //
+  template <core::IsChildOf<TValueBase>... TValues> //
   constexpr auto addWithTypes(const TKey &key, TValues... values) -> void {
     auto it = m_keyToIndex.find(key);
     if (it != m_keyToIndex.end()) {
@@ -134,7 +142,7 @@ public:
      ...);
   }
 
-  template <typename... TValues> //
+  template <core::IsChildOf<TValueBase>... TValues> //
   constexpr auto addWithTypes(const TKey &key,
                               std::tuple<TValues...> values = {}) -> void {
     std::apply([&](auto &&...args) { addWithTypes(key, args...); },
@@ -186,7 +194,7 @@ public:
     return m_popAtIndex(removedIndex);
   }
 
-  // For testing purposes only
+  // * For testing purposes only
   [[nodiscard]] constexpr auto validate() -> bool {
     if (m_nTypes != m_typeTable.size()) {
       return false;
