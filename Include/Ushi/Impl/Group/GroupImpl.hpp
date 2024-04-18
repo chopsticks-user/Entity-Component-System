@@ -14,43 +14,48 @@ namespace impl {
 
 template <IsConfig TConfig> //
 class Group {
-  using TArchetype = container::UDenseTypeTable<EntityID>;
+  using TArchetype = container::UDenseTypeTable<EntityID, Component>;
   using TAdjList = // TODO: weak_ptr instead
       std::unordered_map<std::type_index, std::shared_ptr<TArchetype>>;
 
+  using TComponentPackage =
+      std::unordered_map<std::type_index, std::unique_ptr<Component>>;
+
 public:
+  // TODO: number of components < maxComponents
   template <IsComponent... TComponents> //
   constexpr auto init() -> void {
     m_archetype.init<TComponents...>();
   }
 
 public:
-  template <IsComponent... TComponents> //
-  constexpr auto addEntity(const EntityID &entityID, TComponents... components)
-      -> void {
-    m_archetype.add<TComponents...>(entityID, std::move(components)...);
+  [[nodiscard]] constexpr auto level() const noexcept -> u64 {
+    return m_archetype.nTypes();
+  }
+
+  [[nodiscard]] constexpr auto size() const noexcept -> u64 {
+    return m_archetype.size();
   }
 
   //   template <IsComponent... TComponents> //
-  //   constexpr auto yield(const EntityID &entityID) ->
-  //   std::tuple<TComponents...> {
-  //     std::tuple<TComponents...> components =
-  //         std::make_tuple(m_archetype.at<TComponents>(entityID)...);
+  //   constexpr auto addEntity(const EntityID &entityID, TComponents...
+  //   components)
+  //       -> void {
+  //     m_archetype.add<TComponents...>(entityID, std::move(components)...);
   //   }
 
-  //   template <IsComponent TComponent> //
-  //   constexpr auto moveEntityForward(const EntityID &entityID)
-  //       -> std::vector<std::any> {
-  //     std::tuple<TComponents...> components =
-  //         std::make_tuple(m_archetype.at<TComponents>(entityID)...);
-  //   }
+  // template <IsComponent... TComponents> //
+  constexpr auto receive(const EntityID &entityID,
+                         TComponentPackage &components) -> void {
+    m_archetype.addWithPackage(entityID, components);
+  }
 
-  //   template <IsComponent TComponent> //
-  //   constexpr auto moveEntityBackward(const EntityID &entityID)
-  //       -> std::vector<std::any> {
-  //     std::tuple<TComponents...> components =
-  //         std::make_tuple(m_archetype.at<TComponents>(entityID)...);
-  //   }
+  template <IsComponent... TComponents> //
+  [[nodiscard]] constexpr auto transfer(const EntityID &entityID)
+      -> std::tuple<TComponents...> {
+    // return m_archetype.pop<TComponents...>(entityID);
+    return {};
+  }
 
 private:
   TArchetype m_archetype;

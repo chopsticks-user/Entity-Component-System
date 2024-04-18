@@ -34,10 +34,30 @@ using T_CustomTable = ushi::internal::impl::ComponentTable<CustomConfig>;
 using T_CustomSystemManager = ushi::internal::impl::SystemManager<CustomConfig>;
 using T_CustomWorld = ushi::internal::impl::World<CustomConfig>;
 
-struct Motion : public ushi::internal::impl::Component {};
+struct Motion : public ushi::internal::impl::Component {
+  int value = 0;
+  constexpr Motion() = default;
+  constexpr Motion(int v) noexcept : value{v} {}
+};
+
 struct Assets : public ushi::internal::impl::Component {};
-struct Animation : public Assets {};
-struct Texture : public Assets {};
-struct Audio : public Assets {};
+
+struct Animation : public Assets {
+  int value = 0;
+  constexpr Animation() = default;
+  constexpr Animation(int v) noexcept : value{v} {}
+};
+
+struct Texture : public Assets {
+  int value = 0;
+  constexpr Texture() = default;
+  constexpr Texture(int v) noexcept : value{v} {}
+};
+
+struct Audio : public Assets {
+  int value = 0;
+  constexpr Audio() = default;
+  constexpr Audio(int v) noexcept : value{v} {}
+};
 
 #endif // USHI_TEST_TEST_UTILS_HPP
