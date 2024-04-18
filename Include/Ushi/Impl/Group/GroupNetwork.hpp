@@ -84,6 +84,7 @@ public:
 
     auto componentPackage =
         m_archetypeMap.at(currentSignature).transfer(entityID);
+    (componentPackage.erase(typeid(TRemoveComponents)), ...);
     m_archetypeMap[newSignature].receive(componentPackage);
   }
 

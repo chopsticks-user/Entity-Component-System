@@ -77,8 +77,6 @@ public:
 
 private:
   TArchetype m_archetype = {};
-  // TAdjList m_forward = {};
-  // TAdjList m_backward = {};
 };
 
 } // namespace impl
