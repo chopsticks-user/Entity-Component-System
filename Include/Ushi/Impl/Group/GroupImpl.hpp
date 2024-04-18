@@ -15,18 +15,18 @@ namespace impl {
 template <IsConfig TConfig> //
 class Group {
   using TArchetype = container::PolyTypeTable<EntityID, Component>;
-  using TAdjList = // TODO: weak_ptr instead
-      std::unordered_map<std::type_index, std::shared_ptr<TArchetype>>;
+  // using TAdjList = // TODO: weak_ptr instead
+  //     std::unordered_map<std::type_index, std::shared_ptr<TArchetype>>;
 
   using TComponentPackage =
       std::unordered_map<std::type_index, std::unique_ptr<Component>>;
-  using TComponentTable = std::unordered_map<
+  using TArchetypeInfo = std::unordered_map<
       std::type_index,
       std::shared_ptr<container::VectorWrapperBase<Component>>>;
 
 public:
   // TODO: number of components < maxComponents
-  constexpr Group(const TComponentTable &table) : m_archetype{table} {}
+  constexpr Group(const TArchetypeInfo &table) : m_archetype{table} {}
 
 public:
   [[nodiscard]] constexpr auto level() const noexcept -> u64 {
@@ -37,9 +37,14 @@ public:
     return m_archetype.size();
   }
 
+  [[nodiscard]] constexpr auto archetypeInfo() const noexcept
+      -> TArchetypeInfo {
+    return m_archetype.types();
+  }
+
   template <IsComponent... TAddComponents> //
   [[nodiscard]] constexpr auto constructLargerTableWith() const noexcept
-      -> TComponentTable {
+      -> TArchetypeInfo {
     auto table = m_archetype.types();
     (table.try_emplace(typeid(TAddComponents)), ...);
     return table;
@@ -47,7 +52,7 @@ public:
 
   template <IsComponent... TRemoveComponents> //
   [[nodiscard]] constexpr auto constructSmallerTableWithout() const noexcept
-      -> TComponentTable {
+      -> TArchetypeInfo {
     auto table = m_archetype.types();
     (table.erase(typeid(TRemoveComponents)), ...);
     return table;
@@ -72,8 +77,8 @@ public:
 
 private:
   TArchetype m_archetype = {};
-  TAdjList m_forward = {};
-  TAdjList m_backward = {};
+  // TAdjList m_forward = {};
+  // TAdjList m_backward = {};
 };
 
 } // namespace impl

@@ -70,6 +70,17 @@ public:
     return signature;
   }
 
+  [[nodiscard]] constexpr auto getTypesFromSignature(
+      const T_Config::SignatureType &signature) const noexcept {
+    std::vector<std::type_index> types{};
+    for (const auto &pair : m_record) {
+      if (signature[pair.second]) {
+        types.push_back(pair.first);
+      }
+    }
+    return types;
+  }
+
 private:
   template <IsComponent T_Components> //
   constexpr auto m_setSignatureBit(T_Config::SignatureType &signature,

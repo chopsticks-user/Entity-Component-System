@@ -125,9 +125,22 @@ public:
     return m_rowPtr<TValue>()->get()[m_keyToIndex.at(key)];
   }
 
-  [[nodiscard]] constexpr auto getKeys() const noexcept
+  [[nodiscard]] constexpr auto keys() const noexcept
       -> const std::vector<TKey> & {
     return m_keyContainer;
+  }
+
+  template <core::IsChildOf<TValueBase>... TValues> //
+  [[nodiscard]] constexpr auto views() noexcept {
+    // * Internal exception
+    if (std::tuple_size_v<std::tuple<TValues...>> != nTypes()) {
+      throw std::runtime_error(
+          "std::tuple_size_v<std::tuple<TValues...>> != nTypes()");
+    }
+
+    for (auto &rowPtr : m_typeTable) {
+      // std::tuple<
+    }
   }
 
   template <core::IsChildOf<TValueBase>... TValues> //

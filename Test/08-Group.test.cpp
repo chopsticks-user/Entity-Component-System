@@ -18,7 +18,7 @@ using TTable =
     std::unordered_map<std::type_index,
                        std::shared_ptr<VectorWrapperBase<ushi::Component>>>;
 
-TEST_CASE("Case #01 : Group behaviors", "[require]") {
+TEST_CASE("Case #01 : Group", "[require]") {
   TTable table1{};
   table1[typeid(Motion)] =
       std::make_shared<VectorWrapper<Motion, ushi::Component>>();
@@ -30,7 +30,6 @@ TEST_CASE("Case #01 : Group behaviors", "[require]") {
   Group<CustomConfig> group1{table1};
 
   auto table2 = group1.constructLargerTableWith<Audio, Assets>();
-
   REQUIRE(table2.size() == 5);
   REQUIRE(table2.contains(typeid(Motion)));
   REQUIRE(table2.contains(typeid(Audio)));
@@ -44,3 +43,5 @@ TEST_CASE("Case #01 : Group behaviors", "[require]") {
   REQUIRE(table3.contains(typeid(Texture)));
   REQUIRE_FALSE(table3.contains(typeid(Animation)));
 }
+
+TEST_CASE("Case #02 : GroupNetwork", "[require]") {}
