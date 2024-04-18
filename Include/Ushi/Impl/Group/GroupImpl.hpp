@@ -20,13 +20,13 @@ class Group {
 
   using TComponentPackage =
       std::unordered_map<std::type_index, std::unique_ptr<Component>>;
+  using TComponentTable = std::unordered_map<
+      std::type_index,
+      std::shared_ptr<container::VectorWrapperBase<Component>>>;
 
 public:
   // TODO: number of components < maxComponents
-  // template <IsComponent... TComponents> //
-  // constexpr auto init() -> void {
-  //   m_archetype.init<TComponents...>();
-  // }
+  constexpr Group(const TComponentTable &table) : m_archetype{table} {}
 
 public:
   [[nodiscard]] constexpr auto level() const noexcept -> u64 {
@@ -35,6 +35,22 @@ public:
 
   [[nodiscard]] constexpr auto size() const noexcept -> u64 {
     return m_archetype.size();
+  }
+
+  template <IsComponent... TAddComponents> //
+  [[nodiscard]] constexpr auto constructLargerTableWith() const noexcept
+      -> TComponentTable {
+    auto table = m_archetype.types();
+    (table.try_emplace(typeid(TAddComponents)), ...);
+    return table;
+  }
+
+  template <IsComponent... TRemoveComponents> //
+  [[nodiscard]] constexpr auto constructSmallerTableWithout() const noexcept
+      -> TComponentTable {
+    auto table = m_archetype.types();
+    (table.erase(typeid(TRemoveComponents)), ...);
+    return table;
   }
 
   template <IsComponent... TComponents> //
@@ -55,9 +71,9 @@ public:
   }
 
 private:
-  TArchetype m_archetype;
-  TAdjList m_forward;
-  TAdjList m_backward;
+  TArchetype m_archetype = {};
+  TAdjList m_forward = {};
+  TAdjList m_backward = {};
 };
 
 } // namespace impl

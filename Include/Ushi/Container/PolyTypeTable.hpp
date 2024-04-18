@@ -85,7 +85,7 @@ public:
   //   m_nTypes = m_typeTable.size(); // * For testing purposes
   // }
 
-  constexpr PolyTypeTable(const TTable &table) noexcept
+  constexpr PolyTypeTable(const TTable &table)
       : m_keyToIndex{}, m_keyContainer{}, m_typeTable{table} {
     // for (const auto &pair : table) {
     //   m_typeTable[pair.first] = pair.second;
@@ -94,10 +94,20 @@ public:
   }
 
 public:
-  [[nodiscard]] auto nTypes() const noexcept -> u64 { return m_nTypes; }
+  [[nodiscard]] constexpr auto nTypes() const noexcept -> u64 {
+    return m_nTypes;
+  }
 
-  [[nodiscard]] auto size() const noexcept -> u64 {
+  [[nodiscard]] constexpr auto size() const noexcept -> u64 {
     return m_keyContainer.size();
+  }
+
+  [[nodiscard]] constexpr auto types() const noexcept -> TTable {
+    TTable types{};
+    for (const auto &pair : m_typeTable) {
+      types[pair.first] = nullptr;
+    }
+    return types;
   }
 
   [[nodiscard]] constexpr auto contains(const TKey &key) const noexcept
