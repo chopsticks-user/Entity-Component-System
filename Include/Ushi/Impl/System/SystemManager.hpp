@@ -6,100 +6,102 @@
 #include "Component/Component.hpp"
 #include "Config/Config.hpp"
 #include "Entity/Entity.hpp"
+#include "Group/Group.hpp"
 
 namespace ushi {
 namespace internal {
 namespace impl {
 
-template <IsConfig T_Config> //
+template <IsConfig TConfig> //
 class SystemManager final {
-  using T_Signature = T_Config::SignatureType;
-  using T_SystemTable = std::unordered_map<std::type_index, T_Signature>;
+  using TSignature = TConfig::SignatureType;
+  using TSystemTable = std::unordered_map<std::type_index, TSignature>;
   // TODO: DenseSet & UnorderedDenseSet
-  using T_Archetype =
-      std::unordered_map<T_Signature, std::unordered_set<EntityID>>;
+  // using TArchetype =
+  //     std::unordered_map<TSignature, std::unordered_set<EntityID>>;
 
-  using T_EntityManager = EntityManager<T_Config>;
-  using T_Entity = Entity<T_Config>;
+  using TGroupNetwork = GroupNetwork<TConfig>;
+  using TEntityManager = EntityManager<TConfig>;
+  using TEntity = Entity<TConfig>;
 
 public:
-  template <typename T_System, IsComponent... T_Components> //
-  constexpr auto regster(const ComponentTable<T_Config> &componentTable)
+  // TODO: IsComponent... TComponents is not needed
+  template <typename TSystem, IsComponent... TComponents> //
+  constexpr auto regster(const ComponentTable<TConfig> &componentTable)
       -> void {
-    auto tpIndex = std::type_index{typeid(T_System)};
+    // typename core::ArgumentTuple<decltype(TSystem::function)>::Type
+    //     sampleTuple{};
+
+    auto tpIndex = std::type_index{typeid(TSystem)};
     if (m_systemTable.contains(tpIndex)) {
       return;
     }
 
-    T_Signature systemSignature =
-        componentTable.template signature<T_Components...>();
-    m_systemTable[tpIndex] = systemSignature;
-    if (m_archetype.contains(systemSignature)) {
-      return;
-    }
-    auto compatibleEntityIDs =
-        componentTable.template allEntitiesWith<T_Components...>();
+    m_systemTable[tpIndex] =
+        componentTable.template signature<TComponents...>();
 
-    m_archetype[systemSignature] = {};
-    for (const auto &eid : compatibleEntityIDs) {
-      m_archetype[systemSignature].insert(eid);
-    }
+    // if (m_archetype.contains(systemSignature)) {
+    //   return;
+    // }
+    // auto compatibleEntityIDs =
+    //     componentTable.template allEntitiesWith<TComponents...>();
+
+    // m_archetype[systemSignature] = {};
+    // for (const auto &eid : compatibleEntityIDs) {
+    //   m_archetype[systemSignature].insert(eid);
+    // }
   }
 
-  template <typename T_System> //
+  template <typename TSystem> //
   constexpr auto deregster() noexcept {
-    m_systemTable.erase(std::type_index{typeid(T_System)});
+    m_systemTable.erase(std::type_index{typeid(TSystem)});
   }
 
-  // TODO:
-  constexpr auto cleanUnusedArchetypes() noexcept {}
-
-  template <typename T_System> //
-  constexpr auto execute(ComponentTable<T_Config> &componentTable) const
-      -> void {
-    typename core::ArgumentTuple<decltype(T_System::function)>::Type
+  template <typename TSystem> //
+  constexpr auto execute(const TGroupNetwork &groupNetwork) const -> void {
+    typename core::ArgumentTuple<decltype(TSystem::function)>::Type
         sampleTuple{};
 
-    for (const auto &entityID :
-         m_archetype.at(m_systemTable.at(typeid(T_System)))) {
-      auto args = componentTable.template componentsOf(entityID, sampleTuple);
-      std::apply(T_System::function, args);
-    }
+    auto entityView =
+        groupNetwork.entityView(m_systemTable.at(typeid(TSystem), sampleTuple));
+
+    // auto args = componentTable.template componentsOf(entityID,
+    // sampleTuple); std::apply(TSystem::function, args);
   }
 
-  constexpr auto update(const EntityID &eid, const T_Signature &entitySignature)
+  constexpr auto update(const EntityID &eid, const TSignature &entitySignature)
       -> void {
-    for (auto &[archSignature, entityIDs] : m_archetype) {
-      if ((entitySignature & archSignature) == archSignature) {
-        entityIDs.insert(eid);
-      } else {
-        entityIDs.erase(eid);
-      }
-    }
+    // for (auto &[archSignature, entityIDs] : m_archetype) {
+    //   if ((entitySignature & archSignature) == archSignature) {
+    //     entityIDs.insert(eid);
+    //   } else {
+    //     entityIDs.erase(eid);
+    //   }
+    // }
   }
 
-  constexpr auto update(const std::vector<T_Entity> &entities,
-                        const T_Signature &entitySignature) -> void {
-    for (const auto &entity : entities) {
-      update(entity, entitySignature);
-    }
+  constexpr auto update(const std::vector<TEntity> &entities,
+                        const TSignature &entitySignature) -> void {
+    // for (const auto &entity : entities) {
+    //   update(entity, entitySignature);
+    // }
   }
 
   constexpr auto forceRemove(const EntityID &eid) -> void {
-    for (auto &[archSignature, entityIDs] : m_archetype) {
-      entityIDs.erase(eid);
-    }
+    // for (auto &[archSignature, entityIDs] : m_archetype) {
+    //   entityIDs.erase(eid);
+    // }
   }
 
-  constexpr auto forceRemove(const std::vector<T_Entity> &entities) -> void {
-    for (const auto &entity : entities) {
-      forceRemove(entity);
-    }
+  constexpr auto forceRemove(const std::vector<TEntity> &entities) -> void {
+    // for (const auto &entity : entities) {
+    //   forceRemove(entity);
+    // }
   }
 
 private:
-  T_SystemTable m_systemTable;
-  T_Archetype m_archetype;
+  TSystemTable m_systemTable;
+  // TArchetype m_archetype;
 };
 
 } // namespace impl

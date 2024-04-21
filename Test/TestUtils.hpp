@@ -29,8 +29,11 @@ using T_SystemManager = ushi::internal::impl::SystemManager<T_Config>;
 using T_World = ushi::internal::impl::World<T_Config>;
 
 using T_CustomEntity = ushi::internal::impl::Entity<CustomConfig>;
+using T_CustomEntityManager = ushi::internal::impl::EntityManager<CustomConfig>;
 using T_CustomRecord = ushi::internal::impl::ComponentRecord<CustomConfig>;
 using T_CustomTable = ushi::internal::impl::ComponentTable<CustomConfig>;
+using T_CustomGroup = ushi::internal::impl::Group<CustomConfig>;
+using T_CustomGroupNetwork = ushi::internal::impl::GroupNetwork<CustomConfig>;
 using T_CustomSystemManager = ushi::internal::impl::SystemManager<CustomConfig>;
 using T_CustomWorld = ushi::internal::impl::World<CustomConfig>;
 

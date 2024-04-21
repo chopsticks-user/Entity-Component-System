@@ -22,9 +22,9 @@ target_link_libraries(${Ushi_TARGET_NAME}
     INTERFACE ${PROJECT_NAME}::CompilerFlags
 )
 
-if(${Ushi_BUILD_EXAMPLES})
-    add_subdirectory(Examples)
-endif()
+# if(${Ushi_BUILD_EXAMPLES})
+#     add_subdirectory(Examples)
+# endif()
 
 if(${Ushi_BUILD_TESTS})
     add_subdirectory(Test)

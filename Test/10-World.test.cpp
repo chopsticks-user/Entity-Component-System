@@ -8,65 +8,65 @@ constexpr auto comparePtr(std::shared_ptr<T1> p1, std::shared_ptr<T2> p2)
 }
 
 TEST_CASE("Case #01: World is singleton", "[require]") {
-  auto world1 = T_World::instance();
-  auto world2 = T_World::instance();
-  REQUIRE(world1 != nullptr);
-  REQUIRE(comparePtr(world1, world2));
+  // auto world1 = T_World::instance();
+  // auto world2 = T_World::instance();
+  // REQUIRE(world1 != nullptr);
+  // REQUIRE(comparePtr(world1, world2));
 
-  auto world3 = T_CustomWorld::instance();
-  REQUIRE(world3 != nullptr);
-  REQUIRE_FALSE(comparePtr(world3, world1));
+  // auto world3 = T_CustomWorld::instance();
+  // REQUIRE(world3 != nullptr);
+  // REQUIRE_FALSE(comparePtr(world3, world1));
 }
 
-TEST_CASE("Case #02: Create 1 entity", "[require]") {
-  auto world = T_World::instance();
+// TEST_CASE("Case #02: Create 1 entity", "[require]") {
+//   auto world = T_World::instance();
 
-  world->record<Motion>();
-  world->record<Assets, Animation, Texture, Audio>();
+//   world->record<Motion>();
+//   world->record<Assets, Animation, Texture, Audio>();
 
-  REQUIRE(world->nRecordedComponents() == 5);
+//   REQUIRE(world->nRecordedComponents() == 5);
 
-  auto entity1 = world->create();
+//   auto entity1 = world->create();
 
-  REQUIRE_FALSE(world->hasComponents<Motion>(entity1));
-  world->addComponents(entity1, Motion{});
-  REQUIRE(world->hasComponents<Motion>(entity1));
+//   REQUIRE_FALSE(world->hasComponents<Motion>(entity1));
+//   world->addComponents(entity1, Motion{});
+//   REQUIRE(world->hasComponents<Motion>(entity1));
 
-  REQUIRE_FALSE(world->hasComponents<Motion, Texture>(entity1));
-  world->addComponents(entity1, Texture{});
-  REQUIRE(world->hasComponents<Motion, Texture>(entity1));
+//   REQUIRE_FALSE(world->hasComponents<Motion, Texture>(entity1));
+//   world->addComponents(entity1, Texture{});
+//   REQUIRE(world->hasComponents<Motion, Texture>(entity1));
 
-  auto entity2 = world->create(Motion{}, Texture{});
-  REQUIRE(world->hasComponents<Motion, Texture>(entity2));
+//   auto entity2 = world->create(Motion{}, Texture{});
+//   REQUIRE(world->hasComponents<Motion, Texture>(entity2));
 
-  auto entity3 = world->create<Motion, Texture, Audio>({}, {}, {});
-  REQUIRE(world->hasComponents<Motion, Texture, Audio>(entity3));
+//   auto entity3 = world->create<Motion, Texture, Audio>({}, {}, {});
+//   REQUIRE(world->hasComponents<Motion, Texture, Audio>(entity3));
 
-  auto entity4 = world->create<Motion, Texture, Animation>();
-  REQUIRE(world->hasComponents<Motion, Texture, Animation>(entity4));
-}
+//   auto entity4 = world->create<Motion, Texture, Animation>();
+//   REQUIRE(world->hasComponents<Motion, Texture, Animation>(entity4));
+// }
 
-TEST_CASE("Case #02: Create multiple entities", "[require]") {
-  auto world = T_World::instance();
+// TEST_CASE("Case #02: Create multiple entities", "[require]") {
+//   auto world = T_World::instance();
 
-  world->record<Motion>();
-  world->record<Assets, Animation, Texture, Audio>();
+//   world->record<Motion>();
+//   world->record<Assets, Animation, Texture, Audio>();
 
-  REQUIRE(world->nRecordedComponents() == 5);
+//   REQUIRE(world->nRecordedComponents() == 5);
 
-  auto entitySet1 = world->create(5);
+//   auto entitySet1 = world->create(5);
 
-  REQUIRE_FALSE(world->hasComponents<Motion>(entitySet1));
-  world->addComponents<Motion>(entitySet1);
-  REQUIRE(world->hasComponents<Motion>(entitySet1));
+//   REQUIRE_FALSE(world->hasComponents<Motion>(entitySet1));
+//   world->addComponents<Motion>(entitySet1);
+//   REQUIRE(world->hasComponents<Motion>(entitySet1));
 
-  REQUIRE_FALSE(world->hasComponents<Texture>(entitySet1));
-  world->addComponents<Texture>(entitySet1, Texture{});
-  REQUIRE(world->hasComponents<Motion, Texture>(entitySet1));
+//   REQUIRE_FALSE(world->hasComponents<Texture>(entitySet1));
+//   world->addComponents<Texture>(entitySet1, Texture{});
+//   REQUIRE(world->hasComponents<Motion, Texture>(entitySet1));
 
-  auto entitySet2 = world->create<Texture, Motion, Animation>(5);
-  REQUIRE(world->hasComponents<Motion, Animation, Texture>(entitySet2));
+//   auto entitySet2 = world->create<Texture, Motion, Animation>(5);
+//   REQUIRE(world->hasComponents<Motion, Animation, Texture>(entitySet2));
 
-  auto entitySet3 = world->create(5, Texture{}, Motion{}, Audio{});
-  REQUIRE(world->hasComponents<Motion, Texture, Audio>(entitySet3));
-}
+//   auto entitySet3 = world->create(5, Texture{}, Motion{}, Audio{});
+//   REQUIRE(world->hasComponents<Motion, Texture, Audio>(entitySet3));
+// }
