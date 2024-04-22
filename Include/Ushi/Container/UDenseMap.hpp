@@ -53,6 +53,10 @@ public:
     return (*this)[id];
   }
 
+  constexpr auto indexOf(const T_Key &id) const noexcept -> u64 {
+    return m_keyToIndex.at(id);
+  }
+
   constexpr auto getKeys() const noexcept -> std::vector<T_Key> {
     std::vector<T_Key> keys{};
     keys.reserve(size());

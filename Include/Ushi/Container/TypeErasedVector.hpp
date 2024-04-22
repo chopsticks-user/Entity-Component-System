@@ -37,13 +37,30 @@ public:
     return *reinterpret_cast<T *>(m_vector.data() + index * m_elementSize);
   }
 
+  // TODO: ensure move semantics
   template <typename T> //
-  constexpr auto add(const T &value) -> void {
-    if (sizeof(T) != m_elementSize) {
+  constexpr auto add(T &&value) -> void {
+    m_throw_if_sizes_mismatch<T>();
+    auto *pBytes = reinterpret_cast<std::byte *>(&value);
+    m_vector.insert(m_vector.end(), pBytes, pBytes + m_elementSize);
+    // m_vector.emplace(m_vector.end(), pBytes, pBytes + m_elementSize);
+  }
+
+  // TODO: ensure move semantics
+  constexpr auto add(TypeErasedVector &&other) -> void {
+    if (other.m_elementSize != m_elementSize) {
       throw;
     }
-    const std::byte *pBytes = reinterpret_cast<const std::byte *>(&value);
-    m_vector.insert(m_vector.end(), pBytes, pBytes + m_elementSize);
+    m_vector.insert(m_vector.end(), other.m_vector.begin(),
+                    other.m_vector.end());
+  }
+
+  template <typename T> //
+  constexpr auto replace(size_t index, T &&newValue) -> void {
+    m_throw_if_sizes_mismatch<T>();
+    m_throw_if_out_of_bounds(index);
+    *reinterpret_cast<T *>(m_vector.data() + index * m_elementSize) =
+        std::forward(newValue);
   }
 
   template <typename T> //
