@@ -78,6 +78,17 @@ public:
      ...);
   }
 
+  // TODO: more efficient implementation
+  template <IsComponent... TComponents> //
+  constexpr auto modifyComponentsOf(const TComponentRecord &componentRecord,
+                                    const std::vector<EntityID> &entityIDs,
+                                    std::tuple<TComponents...> &&components)
+      -> void {
+    for (const auto &entityID : entityIDs) {
+      modifyComponentsOf(componentRecord, entityID, components);
+    }
+  }
+
   // TODO: ensure move semantics
   // * Expect all elements in entityIDs are not present in m_entityIDs and
   // both entityIDs and archetype are compatible
@@ -98,6 +109,12 @@ public:
     auto package = m_constructBackwardPackage<TRemoveComponents...>(
         componentRecord, entityIDs);
 
+    // * Entities do not contain the component types
+    if (package.second.size() == m_archetype.size()) {
+      package.first.clear();
+      return package;
+    }
+
     for (const auto &entityID : entityIDs) {
       m_entityIDs.remove(entityID);
       auto entityIndex = m_entityIDs.indexOf(entityID);
@@ -117,6 +134,13 @@ public:
       -> TPackage {
     auto package = m_constructForwardPackage<TAddComponents...>(componentRecord,
                                                                 entityIDs);
+
+    // * Entities already contain the component types
+    if (package.second.size() == m_archetype.size()) {
+      package.first.clear();
+      modifyComponentsOf(componentRecord, entityIDs, components);
+      return package;
+    }
 
     for (const auto &entityID : entityIDs) {
       m_entityIDs.remove(entityID);
