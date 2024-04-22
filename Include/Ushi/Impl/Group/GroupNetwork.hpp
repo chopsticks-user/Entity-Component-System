@@ -13,7 +13,10 @@ namespace internal {
 namespace impl {
 
 template <IsConfig TConfig> //
-class GroupNetwork {};
+class GroupNetwork {
+public:
+private:
+};
 
 } // namespace impl
 } // namespace internal

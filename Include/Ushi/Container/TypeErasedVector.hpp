@@ -47,20 +47,21 @@ public:
   }
 
   // TODO: ensure move semantics
-  constexpr auto add(TypeErasedVector &&other) -> void {
+  constexpr auto merge(TypeErasedVector other) -> void {
     if (other.m_elementSize != m_elementSize) {
       throw;
     }
-    m_vector.insert(m_vector.end(), other.m_vector.begin(),
-                    other.m_vector.end());
+    m_vector.insert(m_vector.end(),
+                    std::make_move_iterator(other.m_vector.begin()),
+                    std::make_move_iterator(other.m_vector.end()));
   }
 
   template <typename T> //
   constexpr auto replace(size_t index, T &&newValue) -> void {
     m_throw_if_sizes_mismatch<T>();
     m_throw_if_out_of_bounds(index);
-    *reinterpret_cast<T *>(m_vector.data() + index * m_elementSize) =
-        std::forward(newValue);
+    *reinterpret_cast<std::remove_cvref_t<T> *>(
+        m_vector.data() + index * m_elementSize) = std::forward<T>(newValue);
   }
 
   template <typename T> //
@@ -80,10 +81,12 @@ public:
     return rmValue;
   }
 
+  constexpr auto clear() noexcept -> void { m_vector.clear(); }
+
 private:
   template <typename T> //
   constexpr auto m_throw_if_sizes_mismatch() const -> void {
-    if (sizeof(T) != m_elementSize) {
+    if (sizeof(std::remove_cvref_t<T>) != m_elementSize) {
       throw std::runtime_error("m_throw_if_sizes_mismatch");
     }
   }
