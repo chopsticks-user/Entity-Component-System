@@ -39,10 +39,11 @@ public:
 
   // TODO: ensure move semantics
   template <typename T> //
-  constexpr auto add(T &&value) -> void {
+  constexpr auto add(T value) -> void {
     m_throw_if_sizes_mismatch<T>();
     auto *pBytes = reinterpret_cast<std::byte *>(&value);
-    m_vector.insert(m_vector.end(), pBytes, pBytes + m_elementSize);
+    m_vector.insert(m_vector.end(), std::make_move_iterator(pBytes),
+                    std::make_move_iterator(pBytes + m_elementSize));
     // m_vector.emplace(m_vector.end(), pBytes, pBytes + m_elementSize);
   }
 
@@ -57,11 +58,11 @@ public:
   }
 
   template <typename T> //
-  constexpr auto replace(size_t index, T &&newValue) -> void {
+  constexpr auto replace(size_t index, T newValue) -> void {
     m_throw_if_sizes_mismatch<T>();
     m_throw_if_out_of_bounds(index);
     *reinterpret_cast<std::remove_cvref_t<T> *>(
-        m_vector.data() + index * m_elementSize) = std::forward<T>(newValue);
+        m_vector.data() + index * m_elementSize) = std::move(newValue);
   }
 
   template <typename T> //

@@ -9,33 +9,7 @@ struct CustomConfig1 {
   using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
 };
 
-TEST_CASE("Case #01 : Group", "[require]") {
-  // TTable table1{};
-  // table1[typeid(Motion)] =
-  //     std::make_shared<VectorWrapper<Motion, ushi::Component>>();
-  // table1[typeid(Animation)] =
-  //     std::make_shared<VectorWrapper<Animation, ushi::Component>>();
-  // table1[typeid(Texture)] =
-  //     std::make_shared<VectorWrapper<Texture, ushi::Component>>();
-
-  // Group<CustomConfig> group1{table1};
-
-  // auto table2 = group1.constructLargerTableWith<Audio, Assets>();
-  // REQUIRE(table2.size() == 5);
-  // REQUIRE(table2.contains(typeid(Motion)));
-  // REQUIRE(table2.contains(typeid(Audio)));
-  // REQUIRE(table2.contains(typeid(Assets)));
-  // REQUIRE(table2.contains(typeid(Animation)));
-  // REQUIRE(table2.contains(typeid(Texture)));
-
-  // auto table3 = group1.constructSmallerTableWithout<Animation>();
-  // REQUIRE(table3.size() == 2);
-  // REQUIRE(table3.contains(typeid(Motion)));
-  // REQUIRE(table3.contains(typeid(Texture)));
-  // REQUIRE_FALSE(table3.contains(typeid(Animation)));
-}
-
-TEST_CASE("Case #02 : GroupNetwork", "[require]") {
+TEST_CASE("Case #01 : GroupNetwork", "[require]") {
   T_CustomRecord record{};
   record.regster<Motion>();
   record.regster<Assets>();

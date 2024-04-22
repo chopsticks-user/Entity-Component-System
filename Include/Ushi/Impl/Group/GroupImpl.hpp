@@ -6,7 +6,7 @@
 #include "Component/Component.hpp"
 #include "Config/Config.hpp"
 #include "Container/TypeErasedVector.hpp"
-#include "Container/UDenseMap.hpp"
+#include "Container/UnorderedDenseMap.hpp"
 #include "Entity/Entity.hpp"
 
 namespace ushi {
@@ -14,15 +14,16 @@ namespace internal {
 namespace impl {
 
 template <IsConfig TConfig> //
-class Group {
+class Group final {
   // TODO: UDenseSet
-  using TCompatibleEntityIDs = container::UDenseMap<EntityID, EntityID>;
+  using TCompatibleEntityIDs = container::UnorderedDenseMap<EntityID, EntityID>;
   using TArchetype =
       std::unordered_map<ComponentRecordID, container::TypeErasedVector>;
   using TArchetypeInfo = std::vector<std::pair<ComponentRecordID, u64>>;
   using TPackage = std::pair<TCompatibleEntityIDs, TArchetype>;
 
   using TComponentRecord = ComponentRecord<TConfig>;
+  using TEntity = Entity<TConfig>;
 
 public:
   constexpr Group() noexcept = default;
@@ -54,11 +55,10 @@ public:
   template <IsComponent... TComponents> //
   constexpr auto addEntityWith(const TComponentRecord &componentRecord,
                                const EntityID &entityID,
-                               std::tuple<TComponents...> &&components)
-      -> void {
+                               TComponents... components) -> void {
     // * For testing purposes
     if (m_entityIDs.contains(entityID)) {
-      modifyComponents(componentRecord, entityID, components);
+      modifyComponents(componentRecord, entityID, std::move(components)...);
       return;
     }
 
@@ -69,23 +69,31 @@ public:
   }
 
   template <IsComponent... TComponents> //
+  constexpr auto addEntityWith(const TComponentRecord &componentRecord,
+                               const std::vector<TEntity> &entities,
+                               TComponents... components) -> void {
+    for (const auto &entityID : entities) {
+      addEntityWith(componentRecord, entityID, components...);
+    }
+  }
+
+  template <IsComponent... TComponents> //
   constexpr auto modifyComponentsOf(const TComponentRecord &componentRecord,
                                     const EntityID &entityID,
-                                    std::tuple<TComponents...> &&components)
-      -> void {
-    (m_archetype[componentRecord.template getIndex<TComponents>()].replace(
-         m_entityIDs.indexOf(entityID), std::get<TComponents>(components)),
+                                    TComponents... components) -> void {
+    // TODO:
+    (m_archetype.at(componentRecord.template getIndex<TComponents>())
+         .replace(m_entityIDs.indexOf(entityID), std::move(components)),
      ...);
   }
 
   // TODO: more efficient implementation
   template <IsComponent... TComponents> //
   constexpr auto modifyComponentsOf(const TComponentRecord &componentRecord,
-                                    const std::vector<EntityID> &entityIDs,
-                                    std::tuple<TComponents...> &&components)
-      -> void {
-    for (const auto &entityID : entityIDs) {
-      modifyComponentsOf(componentRecord, entityID, components);
+                                    const std::vector<TEntity> &entities,
+                                    TComponents... components) -> void {
+    for (const auto &entityID : entities) {
+      modifyComponentsOf(componentRecord, entityID, std::move(components)...);
     }
   }
 
@@ -104,10 +112,10 @@ public:
   // TODO:
   template <IsComponent... TRemoveComponents> //
   constexpr auto shrinkThenTransfer(const TComponentRecord &componentRecord,
-                                    const std::vector<EntityID> &entityIDs)
+                                    const std::vector<TEntity> &entities)
       -> TPackage {
     auto package = m_constructBackwardPackage<TRemoveComponents...>(
-        componentRecord, entityIDs);
+        componentRecord, entities);
 
     // * Entities do not contain the component types
     if (package.second.size() == m_archetype.size()) {
@@ -115,7 +123,7 @@ public:
       return package;
     }
 
-    for (const auto &entityID : entityIDs) {
+    for (const auto &entityID : entities) {
       m_entityIDs.remove(entityID);
       auto entityIndex = m_entityIDs.indexOf(entityID);
 
@@ -129,20 +137,20 @@ public:
   // TODO:
   template <IsComponent... TAddComponents> //
   constexpr auto appendThenTransfer(const TComponentRecord &componentRecord,
-                                    const std::vector<EntityID> &entityIDs,
+                                    const std::vector<TEntity> &entities,
                                     std::tuple<TAddComponents...> &&components)
       -> TPackage {
-    auto package = m_constructForwardPackage<TAddComponents...>(componentRecord,
-                                                                entityIDs);
+    auto package =
+        m_constructForwardPackage<TAddComponents...>(componentRecord, entities);
 
     // * Entities already contain the component types
     if (package.second.size() == m_archetype.size()) {
       package.first.clear();
-      modifyComponentsOf(componentRecord, entityIDs, components);
+      modifyComponentsOf(componentRecord, entities, components);
       return package;
     }
 
-    for (const auto &entityID : entityIDs) {
+    for (const auto &entityID : entities) {
       m_entityIDs.remove(entityID);
       auto entityIndex = m_entityIDs.indexOf(entityID);
 
@@ -162,11 +170,10 @@ private:
   template <IsComponent... TRemoveComponents> //
   constexpr auto
   m_constructBackwardPackage(const TComponentRecord &componentRecord,
-                             const std::vector<EntityID> &entityIDs)
-      -> TPackage {
+                             const std::vector<TEntity> &entities) -> TPackage {
     TPackage package{};
 
-    for (const auto &entityID : entityIDs) {
+    for (const auto &entityID : entities) {
       package.first.add(entityID, entityID);
     }
 
@@ -186,11 +193,10 @@ private:
   template <IsComponent... TAddComponents> //
   constexpr auto
   m_constructForwardPackage(const TComponentRecord &componentRecord,
-                            const std::vector<EntityID> &entityIDs)
-      -> TPackage {
+                            const std::vector<TEntity> &entities) -> TPackage {
     TPackage package{};
 
-    for (const auto &entityID : entityIDs) {
+    for (const auto &entityID : entities) {
       package.first.add(entityID, entityID);
     }
 

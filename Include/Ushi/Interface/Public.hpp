@@ -3,7 +3,7 @@
 
 #include "Core/Core.hpp"
 
-#include "Container/UDenseMap.hpp"
+#include "Container/UnorderedDenseMap.hpp"
 
 #include "Impl/Component/Component.hpp"
 #include "Impl/Config/Config.hpp"
@@ -15,7 +15,7 @@
 namespace ushi {
 
 namespace container {
-using internal::container::UDenseMap;
+using internal::container::UnorderedDenseMap;
 } // namespace container
 
 namespace memory {} // namespace memory
