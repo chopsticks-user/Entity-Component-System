@@ -1,6 +1,7 @@
 #include "TestUtils.hpp"
 
 #include <iostream>
+#include <span>
 
 using ushi::internal::impl::Group;
 
@@ -8,6 +9,16 @@ struct CustomConfig1 {
   using SignatureType = std::bitset<5>;
   using EIDGeneratorType = ushi::DefaultConfig::EIDGeneratorType;
 };
+
+void test([[maybe_unused]] const std::span<ushi::u64> &sp) {}
+
+template <ushi::IsComponent... TComponents> //
+void getArray(const T_CustomRecord &record) {
+  auto arr =
+      std::array<ushi::u64, std::tuple_size_v<std::tuple<TComponents...>>>{
+          record.getIndex<TComponents>()...};
+  test(arr);
+}
 
 TEST_CASE("Case #01 : GroupNetwork", "[require]") {
   T_CustomRecord record{};
@@ -17,12 +28,16 @@ TEST_CASE("Case #01 : GroupNetwork", "[require]") {
   record.regster<Texture>();
   record.regster<Audio>();
 
-  T_CustomEntityManager manager{};
-  auto e1 = manager.create(record.signature<Motion, Texture>());
-  auto e2 = manager.create(record.signature<Motion, Texture>());
-  auto e3 = manager.create(record.signature<Motion, Texture>());
+  getArray<Motion, Animation, Texture>(record);
 
-  T_CustomGroupNetwork network{};
+  //   T_CustomEntityManager manager{};
+  //   auto e1 = manager.create(record.signature<Motion, Texture>());
+  //   auto e2 = manager.create(record.signature<Motion, Texture>());
+  //   auto e3 = manager.create(record.signature<Motion, Texture>());
+
+  //   T_CustomGroupNetwork network{};
+  // ============================================================
+
   // network.addEntityWith(record, e1, Motion{1}, Texture{2});
   // network.addEntityWith(record, e2, Motion{2}, Texture{4});
   // network.addEntityWith(record, e3, Motion{3}, Texture{6});
